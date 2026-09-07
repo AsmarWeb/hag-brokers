@@ -1,0 +1,15 @@
+lib/
+  main.dart
+  app.dart
+  core/api/api_client.dart
+  core/storage/secure_storage.dart
+  core/errors/api_exception.dart
+  features/auth/
+  features/dashboard/
+  features/shipments/
+  features/quotations/
+  features/documents/
+  features/notifications/
+  features/profile/
+  shared/theme/
+  shared/widgets/

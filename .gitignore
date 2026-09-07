@@ -1,0 +1,36 @@
+src/.env
+src/vendor/
+src/node_modules/
+src/storage/*.key
+src/storage/logs/*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Laravel
+/vendor/
+/node_modules/
+/storage/*.key
+/storage/app/*
+/storage/framework/*
+/storage/logs/*
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Docker
+docker-data/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key
+*.crt
