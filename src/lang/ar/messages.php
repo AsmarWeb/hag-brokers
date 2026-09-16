@@ -29,5 +29,6 @@ return [
     'network' => 'الشبكة',
     'secure' => 'آمن',
     'platform' => 'المنصة',
+    'language' => 'اللغة',
 
 ];

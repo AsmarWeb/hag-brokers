@@ -29,5 +29,6 @@ return [
     'network' => 'Network',
     'secure' => 'Secure',
     'platform' => 'Platform',
+    'language' => 'Language',
 
 ];
