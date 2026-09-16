@@ -1523,155 +1523,324 @@
     class="bg-[#FDFDFC] dark:bg-[#0a0a0a] text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
     <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
         @if (Route::has('login'))
-            <nav class="flex items-center justify-end gap-4">
+            <nav class="flex items-center justify-end gap-3">
+
                 @auth
                     <a href="{{ url('/dashboard') }}"
-                        class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                        Dashboard
+                        class="inline-block px-5 py-2 rounded-xl bg-slate-950 text-white font-semibold transition hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400">
+                        {{ __('messages.dashboard') }}
                     </a>
                 @else
                     <a href="{{ route('login') }}"
-                        class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] text-[#1b1b18] border border-transparent hover:border-[#19140035] dark:hover:border-[#3E3E3A] rounded-sm text-sm leading-normal">
-                        Log in
+                        class="inline-block px-5 py-2 rounded-xl text-slate-700 border border-transparent transition hover:border-slate-300 dark:text-slate-200 dark:hover:border-slate-700">
+                        {{ __('messages.login') }}
                     </a>
 
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
-                            Register
+                            class="inline-block px-5 py-2 rounded-xl border border-slate-300 text-slate-700 font-medium transition hover:border-cyan-500 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-cyan-400 dark:hover:text-cyan-400">
+                            {{ __('messages.register') }}
                         </a>
                     @endif
                 @endauth
+
+
+                {{-- Language Switcher - Desktop Only --}}
+                <div class="relative ml-2 hidden lg:block">
+
+                    <button type="button" onclick="document.getElementById('language-menu').classList.toggle('hidden')"
+                        class="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                        <span>🌐</span>
+
+                        @if (app()->getLocale() === 'ar')
+                            العربية
+                        @else
+                            English
+                        @endif
+
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    <div id="language-menu"
+                        class="absolute right-0 z-50 mt-2 hidden w-40 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                        <a href="{{ route('language.switch', 'en') }}"
+                            class="block px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                            🇬🇧 English
+                        </a>
+
+                        <a href="{{ route('language.switch', 'ar') }}"
+                            class="block px-4 py-3 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+                            🇦🇪 العربية
+                        </a>
+                    </div>
+
+                </div>
+
             </nav>
         @endif
     </header>
-    <div
-        class="flex items-center justify-center w-full transition-opacity opacity-100 duration-750 lg:grow starting:opacity-0">
+    <div dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"
+        class="flex w-full items-center justify-center transition-opacity duration-700 lg:grow">
+
         <main
             class="w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+
             <div class="grid min-h-[520px] lg:grid-cols-2">
 
-                {{-- Brand / Welcome Section --}}
+                {{-- ========================================================= --}}
+                {{-- BRAND / WELCOME SECTION --}}
+                {{-- ========================================================= --}}
+
                 <section
                     class="relative flex flex-col justify-between overflow-hidden bg-slate-950 p-8 text-white sm:p-12">
 
                     {{-- Decorative ocean waves --}}
                     <div class="absolute -bottom-24 -left-16 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl"></div>
+
                     <div class="absolute -right-20 top-10 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl"></div>
 
+
                     <div class="relative z-10">
+
+                        {{-- Brand --}}
                         <div class="mb-10 flex items-center gap-3">
+
                             <div
-                                class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500 font-bold text-xl">
-                                TM
+                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-xl font-bold text-slate-950">
+                                HAG
                             </div>
 
-                            <div>
+                            <div class="min-w-0">
+
                                 <div class="text-lg font-semibold tracking-wide">
-                                    Trans Marine
+                                    HAG Brokers
                                 </div>
+
                                 <div class="text-xs text-slate-400">
-                                    Sea Freight Solutions
+                                    {{ __('messages.sea_freight_solutions') }}
                                 </div>
+
                             </div>
+
                         </div>
 
-                        <div class="max-w-md">
+
+                        {{-- Hero --}}
+                        <div class="max-w-md text-start">
+
                             <p class="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-cyan-400">
-                                Global Sea Freight
+                                {{ __('messages.global_sea_freight') }}
                             </p>
+
 
                             <h1 class="text-4xl font-bold leading-tight sm:text-5xl">
-                                Moving your cargo
-                                <span class="text-cyan-400">across the world.</span>
+                                {{ __('messages.moving_your_cargo') }}
+
+                                <span class="text-cyan-400">
+                                    {{ __('messages.across_the_world') }}
+                                </span>
                             </h1>
 
+
                             <p class="mt-6 text-base leading-7 text-slate-300">
-                                Reliable sea freight solutions connecting businesses,
-                                ports and destinations worldwide.
+                                {{ __('messages.reliable_sea_freight') }}
                             </p>
+
                         </div>
+
                     </div>
 
+
+                    {{-- Features --}}
                     <div class="relative z-10 mt-12">
+
                         <div class="flex flex-wrap gap-3 text-xs text-slate-400">
+
                             <span class="rounded-full border border-slate-700 px-4 py-2">
-                                Global Coverage
+                                {{ __('messages.global_coverage') }}
                             </span>
 
                             <span class="rounded-full border border-slate-700 px-4 py-2">
-                                Reliable Logistics
+                                {{ __('messages.reliable_logistics') }}
                             </span>
 
                             <span class="rounded-full border border-slate-700 px-4 py-2">
-                                End-to-End Service
+                                {{ __('messages.end_to_end_service') }}
                             </span>
+
                         </div>
+
                     </div>
+
                 </section>
 
-                {{-- Login / Register Section --}}
+
+                {{-- ========================================================= --}}
+                {{-- LOGIN / REGISTER SECTION --}}
+                {{-- ========================================================= --}}
+
                 <section class="flex items-center justify-center bg-slate-50 p-8 dark:bg-slate-900 sm:p-12">
+
                     <div class="w-full max-w-sm">
 
-                        <div class="mb-8">
+                        {{-- Heading --}}
+                        <div class="mb-8 text-start">
+
                             <h2 class="text-2xl font-semibold text-slate-900 dark:text-white">
-                                Welcome to Trans Marine
+                                {{ __('messages.welcome_to_trans_marine') }}
                             </h2>
 
                             <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                Access your account or create a new account to manage
-                                your sea freight services.
+                                {{ __('messages.access_your_account') }}
                             </p>
+
                         </div>
 
-                        <div class="space-y-3">
-                            @if (Route::has('login'))
-                                <a href="{{ route('login') }}"
-                                    class="flex w-full items-center justify-center rounded-xl bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400">
-                                    Log in
-                                </a>
-                            @endif
 
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}"
-                                    class="flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-cyan-500 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-cyan-400 dark:hover:text-cyan-400">
-                                    Create an account
-                                </a>
-                            @endif
-                        </div>
+                        {{-- Authentication --}}
+                        @if (Route::has('login'))
 
+                            <div class="space-y-3">
+
+                                @auth
+
+                                    {{-- Dashboard --}}
+                                    <a href="{{ url('/dashboard') }}"
+                                        class="flex w-full items-center justify-center rounded-xl bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400">
+                                        {{ __('messages.dashboard') }}
+                                    </a>
+                                @else
+                                    {{-- Login --}}
+                                    <a href="{{ route('login') }}"
+                                        class="flex w-full items-center justify-center rounded-xl bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-cyan-500 dark:text-slate-950 dark:hover:bg-cyan-400">
+                                        {{ __('messages.login') }}
+                                    </a>
+
+
+                                    {{-- Register --}}
+                                    @if (Route::has('register'))
+                                        <a href="{{ route('register') }}"
+                                            class="flex w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-cyan-500 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-cyan-400 dark:hover:text-cyan-400">
+                                            {{ __('messages.register') }}
+                                        </a>
+                                    @endif
+
+                                @endauth
+
+                            </div>
+
+                        @endif
+
+
+                        {{-- Divider --}}
                         <div class="my-8 flex items-center gap-4">
+
                             <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
-                            <span class="text-xs text-slate-400">TRANS MARINE</span>
+
+                            <span class="shrink-0 text-xs text-slate-400">
+                                HAG Brokers
+                            </span>
+
                             <div class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></div>
+
                         </div>
+
+
+                        {{-- ================================================= --}}
+                        {{-- FEATURES --}}
+                        {{-- ================================================= --}}
 
                         <div class="grid grid-cols-3 gap-3 text-center">
+
+                            {{-- Support --}}
                             <div
                                 class="rounded-xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
-                                <div class="text-lg font-bold text-slate-900 dark:text-white">24/7</div>
-                                <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Support</div>
+
+                                <div class="text-lg font-bold text-slate-900 dark:text-white">
+                                    24/7
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                    {{ __('messages.support') }}
+                                </div>
+
                             </div>
 
+
+                            {{-- Network --}}
                             <div
                                 class="rounded-xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
-                                <div class="text-lg font-bold text-slate-900 dark:text-white">Global</div>
-                                <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Network</div>
+
+                                <div class="text-lg font-bold text-slate-900 dark:text-white">
+                                    {{ __('messages.global') }}
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                    {{ __('messages.network') }}
+                                </div>
+
                             </div>
 
+
+                            {{-- Platform --}}
                             <div
                                 class="rounded-xl bg-white p-3 ring-1 ring-slate-200 dark:bg-slate-800 dark:ring-slate-700">
-                                <div class="text-lg font-bold text-slate-900 dark:text-white">Secure</div>
-                                <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Platform</div>
+
+                                <div class="text-lg font-bold text-slate-900 dark:text-white">
+                                    {{ __('messages.secure') }}
+                                </div>
+
+                                <div class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                    {{ __('messages.platform') }}
+                                </div>
+
                             </div>
+
+                        </div>
+
+
+                        {{-- ================================================= --}}
+                        {{-- LANGUAGE SWITCHER --}}
+                        {{-- ================================================= --}}
+
+                        <div class="mt-8 flex justify-center">
+
+                            <div
+                                class="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+
+                                {{-- English --}}
+                                <a href="{{ route('language.switch', 'en') }}"
+                                    class="rounded-lg px-3 py-2 text-xs font-medium transition
+                                {{ app()->getLocale() === 'en'
+                                    ? 'bg-slate-900 text-white dark:bg-cyan-500 dark:text-slate-950'
+                                    : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                                    🇬🇧 English
+                                </a>
+
+
+                                {{-- Arabic --}}
+                                <a href="{{ route('language.switch', 'ar') }}"
+                                    class="rounded-lg px-3 py-2 text-xs font-medium transition
+                                {{ app()->getLocale() === 'ar'
+                                    ? 'bg-slate-900 text-white dark:bg-cyan-500 dark:text-slate-950'
+                                    : 'text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700' }}">
+                                    🇦🇪 العربية
+                                </a>
+
+                            </div>
+
                         </div>
 
                     </div>
+
                 </section>
 
             </div>
+
         </main>
+
     </div>
 
     @if (Route::has('login'))
