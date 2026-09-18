@@ -112,4 +112,10 @@ return [
     'no_activity_yet' => 'No Activity Yet',
     'no_activity_description' => 'Your shipment activity and tracking events will appear here once you start using the platform.',
 
+    'cancelled' => 'Cancelled',
+
+    'view_details' => 'View Details',
+
+    'view_all_shipments' => 'View All Shipments',
+
 ];

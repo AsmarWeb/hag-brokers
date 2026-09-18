@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminShipmentController;
 use App\Http\Controllers\Admin\AdminQuotationController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\DashboardController;
@@ -41,6 +42,8 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::post('/register', [AuthController::class, 'register'])
+    ->name('register');
 
 /*
 |--------------------------------------------------------------------------
@@ -136,13 +139,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/notifications', [
         NotificationController::class,
-        'index',
+        'index'
     ])->name('notifications.index');
 
-    Route::post('/notifications/{notification}/read', [
+    Route::get('/notifications/{notification}', [
         NotificationController::class,
-        'markRead',
-    ])->name('notifications.read');
+        'show'
+    ])->name('notifications.show');
+
+    Route::patch('/notifications/{notification}/read', [
+        NotificationController::class,
+        'markRead'
+    ])->name('notifications.markRead');
+
+    Route::patch('/notifications/read-all', [
+        NotificationController::class,
+        'markAllRead'
+    ])->name('notifications.markAllRead');
+
+    Route::delete('/notifications/{notification}', [
+        NotificationController::class,
+        'destroy'
+    ])->name('notifications.destroy');
 
 
     /*

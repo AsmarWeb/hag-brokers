@@ -112,4 +112,9 @@ return [
     'no_activity_yet' => 'لا توجد نشاطات حتى الآن',
     'no_activity_description' => 'ستظهر هنا أنشطة الشحن وأحداث التتبع الخاصة بك بعد بدء استخدام المنصة.',
 
+    'cancelled' => 'ملغاة',
+
+    'view_details' => 'عرض التفاصيل',
+
+    'view_all_shipments' => 'عرض جميع الشحنات',
 ];

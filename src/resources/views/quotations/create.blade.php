@@ -119,10 +119,15 @@
                                     Select origin port
                                 </option>
 
-                                {{-- 
-                                    Ports will be added here when passed
-                                    from the controller.
-                                --}}
+                                @foreach ($ports as $port)
+                                    <option value="{{ $port->id }}" @selected(old('origin_port_id') == $port->id)>
+                                        {{ $port->name }}
+                                        — {{ $port->country }}
+                                        @if ($port->unlocode)
+                                            ({{ $port->unlocode }})
+                                        @endif
+                                    </option>
+                                @endforeach
 
                             </select>
 
@@ -148,6 +153,16 @@
                                 <option value="">
                                     Select destination port
                                 </option>
+
+                                @foreach ($ports as $port)
+                                    <option value="{{ $port->id }}" @selected(old('destination_port_id') == $port->id)>
+                                        {{ $port->name }}
+                                        — {{ $port->country }}
+                                        @if ($port->unlocode)
+                                            ({{ $port->unlocode }})
+                                        @endif
+                                    </option>
+                                @endforeach
 
                             </select>
 

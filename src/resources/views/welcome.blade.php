@@ -4,22 +4,25 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ $locale }}" dir="{{ $isAr ? 'rtl' : 'ltr' }}" class="scroll-smooth">
+<html lang="{{ $isAr ? 'ar' : 'en' }}" dir="{{ $isAr ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>
-        {{ $isAr ? 'HAG Brokers | وسيطك للشحن البحري' : 'HAG Brokers | Your Sea Freight Brokerage Partner' }}
+        {{ $isAr ? 'HAG Brokers | وسيطك للشحن البحري في الخليج' : 'HAG Brokers | Gulf Sea Freight Brokerage Network' }}
     </title>
 
     <meta name="description"
         content="{{ $isAr
-            ? 'HAG Brokers يربط المستوردين والمصدرين بشركات النقل البحري والشركاء اللوجستيين وينسق عروض الشحن والحجز والمتابعة.'
-            : 'HAG Brokers connects importers and exporters with shipping lines and logistics partners for freight quotes, booking coordination and shipment visibility.' }}">
+            ? 'HAG Brokers منصة وساطة وتنسيق للشحن البحري تربط المستوردين والمصدرين بخيارات الناقلين والشركاء اللوجستيين في الخليج.'
+            : 'HAG Brokers is a Gulf-focused sea freight brokerage and coordination platform connecting importers and exporters with available carriers and logistics partners.' }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Leaflet --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
         html {
@@ -27,97 +30,171 @@
         }
 
         body {
-            background: #07111f;
+            background: #050d18;
         }
 
         .glass {
-            background: rgba(15, 31, 52, 0.68);
+            background: rgba(12, 28, 47, .72);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, .08);
         }
 
         .glass-light {
-            background: rgba(255, 255, 255, 0.045);
+            background: rgba(255, 255, 255, .035);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, .07);
         }
 
         .hero-grid {
             background-image:
-                linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+                linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px);
             background-size: 55px 55px;
         }
 
-        .glow {
-            box-shadow:
-                0 0 80px rgba(34, 211, 238, 0.10),
-                0 0 140px rgba(14, 165, 233, 0.07);
-        }
-
-        .cyan-glow {
-            box-shadow: 0 0 35px rgba(34, 211, 238, 0.18);
-        }
-
         .gradient-text {
-            background: linear-gradient(90deg,
-                    #67e8f9,
-                    #22d3ee,
-                    #38bdf8);
+            background: linear-gradient(90deg, #67e8f9, #22d3ee, #38bdf8);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
 
+        .cyan-glow {
+            box-shadow: 0 0 40px rgba(34, 211, 238, .18);
+        }
+
         .network-line {
-            background: linear-gradient(90deg,
-                    transparent,
-                    rgba(34, 211, 238, .55),
-                    transparent);
+            background: linear-gradient(90deg, transparent, rgba(34, 211, 238, .65), transparent);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMPORTANT: Leaflet map sizing
+        |--------------------------------------------------------------------------
+        */
+        #gulf-map {
+            width: 100%;
+            height: 450px;
+            min-height: 450px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (min-width: 640px) {
+            #gulf-map {
+                height: 550px;
+                min-height: 550px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #gulf-map {
+                height: 600px;
+                min-height: 600px;
+            }
+        }
+
+        #gulf-map .leaflet-container {
+            width: 100%;
+            height: 100%;
+            background: #07111f;
+            font-family: inherit;
+        }
+
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background: #0b1b2e;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        #gulf-map .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .30) !important;
+        }
+
+        #gulf-map .leaflet-control-zoom a {
+            width: 38px;
+            height: 38px;
+            line-height: 38px;
+            border: none !important;
+            background: rgba(7, 17, 31, .95) !important;
+            color: #fff !important;
+        }
+
+        #gulf-map .leaflet-control-zoom a:hover {
+            background: #22d3ee !important;
+            color: #06101d !important;
+        }
+
+        #gulf-map .leaflet-control-attribution {
+            font-size: 10px;
+            background: rgba(7, 17, 31, .85);
+            color: #94a3b8;
+            padding: 3px 7px;
+        }
+
+        #gulf-map .leaflet-control-attribution a {
+            color: #67e8f9;
+        }
+
+        .port-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #22d3ee;
+            border: 3px solid rgba(255, 255, 255, .90);
+            box-shadow: 0 0 20px rgba(34, 211, 238, .9);
+        }
+
+        .vessel-marker {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(34, 211, 238, .15);
+            border: 1px solid rgba(34, 211, 238, .45);
+            box-shadow: 0 0 30px rgba(34, 211, 238, .35);
+            font-size: 18px;
+        }
+
+        .pulse-dot {
+            animation: pulseDot 2s infinite;
+        }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, .5);
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
         }
 
         [dir="rtl"] .ltr-number {
             direction: ltr;
             unicode-bidi: isolate;
         }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        .float-animation {
-            animation: float 5s ease-in-out infinite;
-        }
     </style>
 </head>
 
-<body class="min-h-screen overflow-x-hidden bg-[#07111f] text-white">
+<body class="min-h-screen overflow-x-hidden bg-[#050d18] text-white">
 
-    <!-- ========================================================= -->
-    <!-- NAVBAR -->
-    <!-- ========================================================= -->
+    <header id="navbar" class="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#07111f]/85 backdrop-blur-xl">
 
-    <header id="navbar" class="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#07111f]/80 backdrop-blur-xl">
         <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
 
-            <!-- Logo -->
             <a href="{{ url('/') }}" class="flex items-center gap-3">
-
                 <div
                     class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 ring-1 ring-cyan-300/20">
-                    <span class="text-lg font-black text-cyan-300">
-                        HAG
-                    </span>
+                    <span class="text-lg font-black text-cyan-300">HAG</span>
                 </div>
 
                 <div>
@@ -125,52 +202,37 @@
                         HAG <span class="text-cyan-300">BROKERS</span>
                     </div>
 
-                    <div class="text-[10px] uppercase tracking-[0.25em] text-slate-500">
-                        Sea Freight Brokerage
+                    <div class="text-[9px] uppercase tracking-[.24em] text-slate-500">
+                        {{ $isAr ? 'وساطة الشحن البحري' : 'Sea Freight Brokerage' }}
                     </div>
                 </div>
-
             </a>
 
-            <!-- Desktop Navigation -->
-            <nav class="hidden items-center gap-8 lg:flex">
-
-                <a href="#how-it-works" class="text-sm text-slate-300 transition hover:text-cyan-300">
-                    {{ $isAr ? 'كيف نعمل' : 'How It Works' }}
+            <nav class="hidden items-center gap-7 lg:flex">
+                <a href="#network" class="text-sm text-slate-300 transition hover:text-cyan-300">
+                    {{ $isAr ? 'الخريطة البحرية' : 'Maritime Map' }}
                 </a>
-
+                <a href="#tracking" class="text-sm text-slate-300 transition hover:text-cyan-300">
+                    {{ $isAr ? 'تتبع الشحنات' : 'Tracking' }}
+                </a>
                 <a href="#services" class="text-sm text-slate-300 transition hover:text-cyan-300">
                     {{ $isAr ? 'الخدمات' : 'Services' }}
                 </a>
-
-                <a href="#why-hag" class="text-sm text-slate-300 transition hover:text-cyan-300">
-                    {{ $isAr ? 'لماذا HAG' : 'Why HAG' }}
+                <a href="#ports" class="text-sm text-slate-300 transition hover:text-cyan-300">
+                    {{ $isAr ? 'الموانئ' : 'Ports' }}
                 </a>
-
                 <a href="#partners" class="text-sm text-slate-300 transition hover:text-cyan-300">
-                    {{ $isAr ? 'للشركاء' : 'For Partners' }}
+                    {{ $isAr ? 'الشركاء' : 'Partners' }}
                 </a>
-
-                <a href="#contact" class="text-sm text-slate-300 transition hover:text-cyan-300">
-                    {{ $isAr ? 'تواصل معنا' : 'Contact' }}
-                </a>
-
             </nav>
 
-            <!-- Desktop Actions -->
             <div class="hidden items-center gap-3 lg:flex">
 
-                <!-- Language -->
                 <div class="relative" id="language-menu">
-
                     <button type="button" onclick="toggleLanguageMenu()"
                         class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-slate-200 transition hover:bg-white/10">
                         <span>🌐</span>
-
-                        <span>
-                            {{ $isAr ? 'العربية' : 'English' }}
-                        </span>
-
+                        <span>{{ $isAr ? 'العربية' : 'English' }}</span>
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -180,47 +242,41 @@
                         class="absolute {{ $isAr ? 'left-0' : 'right-0' }} mt-2 hidden w-40 overflow-hidden rounded-2xl border border-white/10 bg-[#0b1b2e] shadow-2xl">
 
                         <a href="{{ route('language.switch', 'en') }}"
-                            class="flex items-center gap-3 px-4 py-3 text-sm text-slate-200 transition hover:bg-white/10">
-                            🇬🇧
-                            <span>English</span>
+                            class="flex items-center gap-3 px-4 py-3 text-sm text-slate-200 hover:bg-white/10">
+                            🇬🇧 <span>English</span>
                         </a>
 
                         <a href="{{ route('language.switch', 'ar') }}"
-                            class="flex items-center gap-3 px-4 py-3 text-sm text-slate-200 transition hover:bg-white/10">
-                            🇦🇪
-                            <span>العربية</span>
+                            class="flex items-center gap-3 px-4 py-3 text-sm text-slate-200 hover:bg-white/10">
+                            🇦🇪 <span>العربية</span>
                         </a>
-
                     </div>
                 </div>
 
                 @auth
-
                     <a href="{{ url('/dashboard') }}"
-                        class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/5">
+                        class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/5">
                         {{ $isAr ? 'لوحة التحكم' : 'Dashboard' }}
                     </a>
                 @else
                     <a href="{{ route('login') }}"
-                        class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/5">
+                        class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/5">
                         {{ $isAr ? 'تسجيل الدخول' : 'Login' }}
                     </a>
 
                     @if (Route::has('register'))
                         <a href="{{ route('register') }}"
-                            class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-300">
+                            class="rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300">
                             {{ $isAr ? 'إنشاء حساب' : 'Create Account' }}
                         </a>
                     @endif
-
                 @endauth
 
             </div>
 
-            <!-- Mobile Button -->
             <button id="mobile-menu-button" type="button"
                 class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 lg:hidden"
-                aria-label="Open menu">
+                aria-label="{{ $isAr ? 'فتح القائمة' : 'Open menu' }}">
 
                 <svg id="menu-open-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -230,41 +286,35 @@
                     viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-
             </button>
-
         </div>
 
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden border-t border-white/5 bg-[#07111f]">
-
             <div class="mx-auto max-w-7xl space-y-2 px-5 py-6">
 
-                <a href="#how-it-works" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
-                    {{ $isAr ? 'كيف نعمل' : 'How It Works' }}
+                <a href="#network" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
+                    {{ $isAr ? 'الخريطة البحرية' : 'Maritime Map' }}
+                </a>
+
+                <a href="#tracking" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
+                    {{ $isAr ? 'تتبع الشحنات' : 'Tracking' }}
                 </a>
 
                 <a href="#services" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
                     {{ $isAr ? 'الخدمات' : 'Services' }}
                 </a>
 
-                <a href="#why-hag" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
-                    {{ $isAr ? 'لماذا HAG' : 'Why HAG' }}
+                <a href="#ports" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
+                    {{ $isAr ? 'الموانئ' : 'Ports' }}
                 </a>
 
                 <a href="#partners" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
-                    {{ $isAr ? 'للشركاء' : 'For Partners' }}
-                </a>
-
-                <a href="#contact" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
-                    {{ $isAr ? 'تواصل معنا' : 'Contact' }}
+                    {{ $isAr ? 'الشركاء' : 'Partners' }}
                 </a>
 
                 <div class="my-4 h-px bg-white/10"></div>
 
-                <!-- Mobile Language -->
                 <div class="grid grid-cols-2 gap-2">
-
                     <a href="{{ route('language.switch', 'en') }}"
                         class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-slate-200">
                         🇬🇧 English
@@ -274,13 +324,10 @@
                         class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-slate-200">
                         🇦🇪 العربية
                     </a>
-
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 pt-2">
-
                     @auth
-
                         <a href="{{ url('/dashboard') }}"
                             class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-white">
                             {{ $isAr ? 'لوحة التحكم' : 'Dashboard' }}
@@ -297,23 +344,16 @@
                                 {{ $isAr ? 'حساب جديد' : 'Register' }}
                             </a>
                         @endif
-
                     @endauth
-
                 </div>
 
             </div>
-
         </div>
     </header>
 
-
-    <!-- ========================================================= -->
-    <!-- HERO -->
-    <!-- ========================================================= -->
-
     <main>
 
+        {{-- HERO --}}
         <section class="relative overflow-hidden pt-32 lg:pt-40">
 
             <div class="hero-grid absolute inset-0 opacity-70"></div>
@@ -323,82 +363,84 @@
 
             <div class="relative mx-auto max-w-7xl px-5 pb-20 lg:px-8 lg:pb-28">
 
-                <div class="grid items-center gap-14 lg:grid-cols-2">
+                <div class="grid items-center gap-14 lg:grid-cols-[.9fr_1.1fr]">
 
-                    <!-- Hero Text -->
                     <div class="{{ $isAr ? 'lg:text-right' : 'lg:text-left' }}">
 
                         <div
                             class="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/5 px-4 py-2 text-xs font-semibold tracking-wider text-cyan-300">
-
                             <span class="h-2 w-2 rounded-full bg-cyan-300"></span>
-
-                            SEA FREIGHT BROKERAGE
-
+                            {{ $isAr ? 'شبكة الشحن البحري الخليجية' : 'GULF MARITIME FREIGHT NETWORK' }}
                         </div>
 
                         <h1 class="max-w-4xl text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+                            {{ $isAr ? 'وسيطك للشحن البحري في الخليج' : 'Your Sea Freight Brokerage Partner in the Gulf' }}
 
-                            {{ $isAr ? 'وسيطك للشحن البحري' : 'Your Sea Freight Brokerage Partner' }}
-
-                            <span class="mt-2 block gradient-text">
-
-                                {{ $isAr ? 'نربط شحنتك بالناقل المناسب' : 'Connecting Your Cargo With the Right Carrier' }}
-
+                            <span class="mt-3 block gradient-text">
+                                {{ $isAr ? 'نربط شحنتك بالخيارات والناقل المناسب' : 'Connecting Your Cargo With the Right Carrier' }}
                             </span>
-
                         </h1>
 
                         <p class="mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-
                             {{ $isAr
-                                ? 'أرسل تفاصيل شحنتك، ونحن ننسّق لك خيارات الشحن مع شركات النقل البحري والشركاء اللوجستيين، من طلب عرض السعر وحتى متابعة الشحنة.'
-                                : 'Share your shipment details and we coordinate freight options with shipping lines and logistics partners — from quotation to shipment visibility.' }}
-
+                                ? 'أرسل تفاصيل شحنتك، وننسق لك خيارات الشحن والعروض والحجز والمتابعة مع شركات النقل البحري والشركاء اللوجستيين المتاحين.'
+                                : 'Share your shipment details and we coordinate freight options, quotations, booking steps and shipment visibility with available carriers and logistics partners.' }}
                         </p>
 
                         <div
                             class="mt-9 flex flex-col gap-3 sm:flex-row {{ $isAr ? 'sm:flex-row-reverse lg:justify-end' : '' }}">
 
+                            <a href="#tracking"
+                                class="cyan-glow inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 hover:bg-cyan-300">
+                                {{ $isAr ? 'تتبع شحنة' : 'Track Shipment' }}
+                                <span>{{ $isAr ? '←' : '→' }}</span>
+                            </a>
+
                             <a href="#contact"
-                                class="cyan-glow inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-cyan-300">
-                                {{ $isAr ? 'اطلب عرض شحن' : 'Request a Freight Quote' }}
-
-                                <span>
-                                    {{ $isAr ? '←' : '→' }}
-                                </span>
+                                class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-7 py-4 font-semibold text-white hover:bg-white/10">
+                                {{ $isAr ? 'اطلب عرض شحن' : 'Request Freight Quote' }}
                             </a>
-
-                            <a href="#how-it-works"
-                                class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-7 py-4 font-semibold text-white transition hover:bg-white/10">
-                                {{ $isAr ? 'كيف تعمل الوساطة؟' : 'How Brokerage Works' }}
-                            </a>
-
                         </div>
 
-                        <div class="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-400">
+                        <div class="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4">
 
-                            <span>✓ {{ $isAr ? 'ربط بالناقلين' : 'Carrier Matching' }}</span>
+                            <div class="glass-light rounded-2xl p-4">
+                                <p class="text-2xl font-black ltr-number">138</p>
+                                <p class="mt-1 text-[10px] text-slate-500">
+                                    {{ $isAr ? 'شحنة نشطة' : 'Active Shipments' }}
+                                </p>
+                            </div>
 
-                            <span>✓ {{ $isAr ? 'مقارنة الخيارات' : 'Offer Comparison' }}</span>
+                            <div class="glass-light rounded-2xl p-4">
+                                <p class="text-2xl font-black ltr-number">24</p>
+                                <p class="mt-1 text-[10px] text-slate-500">
+                                    {{ $isAr ? 'سفينة' : 'Vessels' }}
+                                </p>
+                            </div>
 
-                            <span>✓ {{ $isAr ? 'تنسيق الحجز' : 'Booking Coordination' }}</span>
+                            <div class="glass-light rounded-2xl p-4">
+                                <p class="text-2xl font-black ltr-number">18</p>
+                                <p class="mt-1 text-[10px] text-slate-500">
+                                    {{ $isAr ? 'ميناء' : 'Ports' }}
+                                </p>
+                            </div>
 
-                            <span>✓ {{ $isAr ? 'متابعة الشحنة' : 'Shipment Visibility' }}</span>
+                            <div class="glass-light rounded-2xl p-4">
+                                <p class="text-2xl font-black ltr-number">67</p>
+                                <p class="mt-1 text-[10px] text-slate-500">
+                                    {{ $isAr ? 'عرض شحن' : 'Freight Offers' }}
+                                </p>
+                            </div>
 
                         </div>
-
                     </div>
 
-
-                    <!-- Hero Brokerage Visualization -->
                     <div class="relative">
 
                         <div class="absolute -inset-8 rounded-[3rem] bg-cyan-400/5 blur-3xl"></div>
 
-                        <div class="glass glow relative rounded-[2rem] p-5 sm:p-7">
+                        <div class="glass relative rounded-[2rem] p-5 sm:p-7">
 
-                            <!-- Top -->
                             <div class="flex items-center justify-between">
 
                                 <div>
@@ -407,35 +449,101 @@
                                     </p>
 
                                     <h2 class="mt-1 text-lg font-bold">
-                                        {{ $isAr ? 'رحلة الوساطة' : 'Brokerage Journey' }}
+                                        {{ $isAr ? 'مركز العمليات البحرية' : 'Maritime Operations Center' }}
                                     </h2>
                                 </div>
 
-                                <div
-                                    class="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-300">
-                                    {{ $isAr ? 'نشط' : 'Active' }}
+                                <span
+                                    class="flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-300">
+                                    <span class="pulse-dot h-2 w-2 rounded-full bg-emerald-400"></span>
+                                    {{ $isAr ? 'الشبكة نشطة' : 'Network Active' }}
+                                </span>
+
+                            </div>
+
+                            <div class="mt-7 rounded-2xl border border-white/10 bg-black/20 p-4">
+
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-500">
+                                        {{ $isAr ? 'رحلة نموذجية' : 'Sample Route' }}
+                                    </span>
+
+                                    <span class="text-cyan-300">
+                                        {{ $isAr ? 'الخليج' : 'Gulf' }}
+                                    </span>
+                                </div>
+
+                                <div class="mt-5 flex items-center justify-between gap-2">
+
+                                    <div>
+                                        <div class="text-2xl">🇦🇪</div>
+                                        <p class="mt-2 text-sm font-bold">
+                                            {{ $isAr ? 'جبل علي' : 'Jebel Ali' }}
+                                        </p>
+                                        <p class="text-[10px] text-slate-500">
+                                            {{ $isAr ? 'الإمارات' : 'UAE' }}
+                                        </p>
+                                    </div>
+
+                                    <div class="relative flex-1 px-3">
+                                        <div class="h-px network-line"></div>
+                                        <div
+                                            class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-slate-900 px-3 py-1 text-lg">
+                                            🚢
+                                        </div>
+                                    </div>
+
+                                    <div class="{{ $isAr ? 'text-left' : 'text-right' }}">
+                                        <div class="text-2xl">🇸🇦</div>
+                                        <p class="mt-2 text-sm font-bold">
+                                            {{ $isAr ? 'جدة' : 'Jeddah' }}
+                                        </p>
+                                        <p class="text-[10px] text-slate-500">
+                                            {{ $isAr ? 'السعودية' : 'Saudi Arabia' }}
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="mt-4 grid grid-cols-2 gap-3">
+
+                                <div class="rounded-2xl border border-white/10 bg-white/[.03] p-4">
+                                    <p class="text-[10px] text-slate-500">
+                                        {{ $isAr ? 'آخر تحديث' : 'Last Update' }}
+                                    </p>
+                                    <p class="mt-2 text-sm font-bold">
+                                        {{ $isAr ? 'الآن' : 'Just now' }}
+                                    </p>
+                                </div>
+
+                                <div class="rounded-2xl border border-white/10 bg-white/[.03] p-4">
+                                    <p class="text-[10px] text-slate-500">
+                                        {{ $isAr ? 'الحالة' : 'Status' }}
+                                    </p>
+                                    <p class="mt-2 text-sm font-bold text-emerald-300">
+                                        {{ $isAr ? 'قيد النقل' : 'In Transit' }}
+                                    </p>
                                 </div>
 
                             </div>
 
+                            <div class="mt-4 rounded-2xl bg-cyan-400/10 p-4">
 
-                            <!-- Customer -->
-                            <div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.035] p-5">
-
-                                <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-3">
 
                                     <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-400/10 text-2xl">
-                                        📦
+                                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400 text-slate-950">
+                                        ✓
                                     </div>
 
                                     <div>
-                                        <p class="text-xs text-slate-500">
-                                            {{ $isAr ? 'العميل' : 'Customer' }}
+                                        <p class="text-sm font-bold">
+                                            {{ $isAr ? 'HAG كوسيط ومنسق' : 'HAG as Broker & Coordinator' }}
                                         </p>
 
-                                        <p class="font-bold">
-                                            {{ $isAr ? 'مستورد / مصدر' : 'Importer / Exporter' }}
+                                        <p class="mt-1 text-xs leading-5 text-slate-400">
+                                            {{ $isAr ? 'نربط العميل بخيارات الناقلين والشركاء المتاحة.' : 'Connecting customers with available carrier and partner options.' }}
                                         </p>
                                     </div>
 
@@ -443,112 +551,112 @@
 
                             </div>
 
+                        </div>
+                    </div>
 
-                            <!-- Connector -->
-                            <div class="relative flex h-14 items-center justify-center">
+                </div>
+            </div>
+        </section>
 
-                                <div class="absolute h-px w-3/4 network-line"></div>
+        {{-- NETWORK MAP --}}
+        <section id="network" class="scroll-mt-24 border-y border-white/5 bg-[#06101d] py-20 lg:py-28">
+
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+                <div class="mb-8 text-center">
+
+                    <div
+                        class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300 shadow-sm">
+                        ⚓
+                    </div>
+
+                    <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
+                        01 — {{ $isAr ? 'الخريطة البحرية' : 'MARITIME MAP' }}
+                    </span>
+
+                    <h2 class="mt-4 text-3xl font-black sm:text-4xl">
+                        {{ $isAr ? 'شبكة HAG البحرية في الخليج' : 'HAG Gulf Maritime Network' }}
+                    </h2>
+
+                    <p class="mx-auto mt-3 max-w-2xl text-slate-400">
+                        {{ $isAr ? 'استعرض الموانئ ومسارات الشحن ومواقع السفن ضمن شبكة الخليج.' : 'Explore ports, shipping routes and vessel positions across the Gulf network.' }}
+                    </p>
+
+                </div>
+
+                {{-- MAP CARD --}}
+                <div
+                    class="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#07111f] shadow-2xl shadow-black/30">
+
+                    {{-- The map MUST have an explicit height --}}
+                    <div id="gulf-map" class="h-[450px] w-full sm:h-[550px] lg:h-[600px]"></div>
+
+                    {{-- Top badge --}}
+                    <div
+                        class="pointer-events-none absolute left-4 top-4 z-[500] flex items-center gap-2 rounded-full border border-white/10 bg-[#07111f]/90 px-4 py-2 text-sm font-semibold text-white shadow-xl backdrop-blur">
+
+                        <span class="relative flex h-3 w-3">
+                            <span
+                                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75">
+                            </span>
+
+                            <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"></span>
+                        </span>
+
+                        {{ $isAr ? 'شبكة الخليج نشطة' : 'Gulf Network Active' }}
+
+                    </div>
+
+                    {{-- Bottom information --}}
+                    <div
+                        class="pointer-events-none absolute bottom-4 left-4 right-4 z-[500] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                        <div
+                            class="rounded-2xl border border-white/10 bg-[#07111f]/90 px-4 py-3 shadow-xl backdrop-blur">
+
+                            <div class="flex items-center gap-3">
 
                                 <div
-                                    class="relative z-10 flex h-9 w-9 items-center justify-center rounded-full bg-cyan-400 text-sm font-black text-slate-950">
-                                    HAG
+                                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
+                                    🚢
+                                </div>
+
+                                <div>
+                                    <p class="text-xs text-slate-500">
+                                        {{ $isAr ? 'السفن في الشبكة' : 'Vessels in network' }}
+                                    </p>
+
+                                    <p class="font-bold text-white">
+                                        24
+                                        <span class="text-xs font-normal text-emerald-300">
+                                            {{ $isAr ? 'للتتبع' : 'Trackable' }}
+                                        </span>
+                                    </p>
                                 </div>
 
                             </div>
 
+                        </div>
 
-                            <!-- HAG -->
-                            <div class="rounded-2xl border border-cyan-300/20 bg-cyan-300/5 p-5">
+                        <div
+                            class="rounded-2xl border border-white/10 bg-[#07111f]/90 px-4 py-3 shadow-xl backdrop-blur">
 
-                                <div class="flex items-center gap-4">
-
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-300 text-lg font-black text-slate-950">
-                                        HAG
-                                    </div>
-
-                                    <div>
-
-                                        <p class="text-xs text-cyan-300">
-                                            HAG BROKERS
-                                        </p>
-
-                                        <p class="font-bold">
-                                            {{ $isAr ? 'وساطة • مقارنة • تنسيق' : 'Brokerage • Sourcing • Coordination' }}
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- Connector -->
-                            <div class="relative flex h-14 items-center justify-center">
-
-                                <div class="absolute h-px w-3/4 network-line"></div>
+                            <div class="flex items-center gap-3">
 
                                 <div
-                                    class="relative z-10 rounded-full bg-slate-800 px-3 py-1 text-[10px] text-cyan-300">
-                                    MATCH
+                                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
+                                    ⚓
                                 </div>
 
-                            </div>
-
-
-                            <!-- Carriers -->
-                            <div class="grid grid-cols-2 gap-3">
-
-                                <div class="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-
-                                    <div class="mb-3 text-xl">
-                                        🚢
-                                    </div>
-
+                                <div>
                                     <p class="text-xs text-slate-500">
-                                        {{ $isAr ? 'شركات النقل' : 'Shipping Lines' }}
+                                        {{ $isAr ? 'موانئ الشبكة' : 'Network ports' }}
                                     </p>
 
-                                    <p class="mt-1 text-sm font-bold">
-                                        {{ $isAr ? 'خيارات الناقل' : 'Carrier Options' }}
+                                    <p class="font-bold text-white">
+                                        13
                                     </p>
-
                                 </div>
-
-                                <div class="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-
-                                    <div class="mb-3 text-xl">
-                                        🌐
-                                    </div>
-
-                                    <p class="text-xs text-slate-500">
-                                        {{ $isAr ? 'الشركاء' : 'Partners' }}
-                                    </p>
-
-                                    <p class="mt-1 text-sm font-bold">
-                                        {{ $isAr ? 'شركاء لوجستيون' : 'Logistics Partners' }}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- Status -->
-                            <div class="mt-5 flex items-center justify-between rounded-xl bg-black/20 px-4 py-3">
-
-                                <span class="text-xs text-slate-400">
-                                    {{ $isAr ? 'الحالة' : 'Status' }}
-                                </span>
-
-                                <span class="flex items-center gap-2 text-xs text-emerald-300">
-
-                                    <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-
-                                    {{ $isAr ? 'بانتظار اختيار العرض' : 'Awaiting offer selection' }}
-
-                                </span>
 
                             </div>
 
@@ -558,264 +666,192 @@
 
                 </div>
 
-            </div>
+                {{-- Map side information --}}
+                <div class="mt-6 grid gap-4 sm:grid-cols-3">
 
-        </section>
+                    <div class="glass rounded-3xl p-5">
+                        <p class="text-xs text-slate-500">
+                            {{ $isAr ? 'السفن في الشبكة' : 'VESSELS IN NETWORK' }}
+                        </p>
+                        <p class="mt-1 text-3xl font-black ltr-number">24</p>
+                        <p class="mt-2 text-xs text-emerald-300">
+                            {{ $isAr ? 'حسب مصادر التتبع المتاحة' : 'Based on available tracking sources' }}
+                        </p>
+                    </div>
 
+                    <div class="glass rounded-3xl p-5">
+                        <p class="text-xs text-slate-500">
+                            {{ $isAr ? 'الشحنات النشطة' : 'ACTIVE SHIPMENTS' }}
+                        </p>
+                        <p class="mt-1 text-3xl font-black ltr-number">138</p>
+                        <p class="mt-2 text-xs text-cyan-300">
+                            {{ $isAr ? 'قيد المتابعة' : 'Currently monitored' }}
+                        </p>
+                    </div>
 
-        <!-- ========================================================= -->
-        <!-- POSITIONING STRIP -->
-        <!-- ========================================================= -->
+                    <div class="glass rounded-3xl p-5">
+                        <p class="text-xs text-slate-500">
+                            {{ $isAr ? 'منطقة الخريطة' : 'MAP REGION' }}
+                        </p>
+                        <p class="mt-1 text-lg font-black">
+                            {{ $isAr ? 'الخليج العربي' : 'Arabian Gulf' }}
+                        </p>
+                        <p class="mt-2 text-xs text-slate-500">
+                            {{ $isAr ? 'الإمارات ودول الخليج والممرات البحرية المرتبطة.' : 'UAE, Gulf states and connected maritime corridors.' }}
+                        </p>
+                    </div>
 
-        <section class="border-y border-white/5 bg-white/[0.02]">
-
-            <div class="mx-auto grid max-w-7xl grid-cols-2 divide-x divide-white/5 px-5 lg:grid-cols-4 lg:px-8">
-
-                <div class="px-4 py-7 text-center">
-                    <p class="text-sm font-bold text-white">
-                        {{ $isAr ? 'طلب عرض' : 'Quote Request' }}
-                    </p>
-                    <p class="mt-1 text-xs text-slate-500">
-                        {{ $isAr ? 'أرسل متطلبات الشحنة' : 'Share shipment details' }}
-                    </p>
-                </div>
-
-                <div class="px-4 py-7 text-center">
-                    <p class="text-sm font-bold text-white">
-                        {{ $isAr ? 'مطابقة الناقل' : 'Carrier Matching' }}
-                    </p>
-                    <p class="mt-1 text-xs text-slate-500">
-                        {{ $isAr ? 'مصادر وخيارات متاحة' : 'Source available options' }}
-                    </p>
-                </div>
-
-                <div class="px-4 py-7 text-center">
-                    <p class="text-sm font-bold text-white">
-                        {{ $isAr ? 'مقارنة العروض' : 'Offer Comparison' }}
-                    </p>
-                    <p class="mt-1 text-xs text-slate-500">
-                        {{ $isAr ? 'قارن قبل الاختيار' : 'Compare before selecting' }}
-                    </p>
-                </div>
-
-                <div class="px-4 py-7 text-center">
-                    <p class="text-sm font-bold text-white">
-                        {{ $isAr ? 'التنسيق والمتابعة' : 'Coordinate & Track' }}
-                    </p>
-                    <p class="mt-1 text-xs text-slate-500">
-                        {{ $isAr ? 'نقطة اتصال واحدة' : 'One point of contact' }}
-                    </p>
                 </div>
 
             </div>
-
         </section>
 
-
-        <!-- ========================================================= -->
-        <!-- HOW IT WORKS -->
-        <!-- ========================================================= -->
-
-        <section id="how-it-works" class="scroll-mt-24 py-24 lg:py-32">
+        {{-- TRACKING --}}
+        <section id="tracking" class="scroll-mt-24 py-24 lg:py-32">
 
             <div class="mx-auto max-w-7xl px-5 lg:px-8">
 
-                <div class="max-w-3xl">
+                <div class="grid gap-12 lg:grid-cols-[.8fr_1.2fr]">
 
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
-                        01 — {{ $isAr ? 'كيف نعمل' : 'HOW IT WORKS' }}
-                    </span>
+                    <div>
 
-                    <h2 class="mt-4 text-3xl font-black sm:text-4xl">
-                        {{ $isAr ? 'وساطة شحن واضحة من البداية إلى الوصول' : 'A Clear Brokerage Process From Request to Arrival' }}
-                    </h2>
+                        <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
+                            02 — {{ $isAr ? 'تتبع الشحنات' : 'SHIPMENT TRACKING' }}
+                        </span>
 
-                    <p class="mt-5 leading-8 text-slate-400">
-                        {{ $isAr
-                            ? 'نحوّل طلب الشحن إلى عملية منظمة: نفهم متطلباتك، نبحث عن الخيارات المناسبة، نساعدك في المقارنة ثم ننسق الخطوات التالية مع الأطراف المعنية.'
-                            : 'We turn your freight request into an organized process: understand your requirements, source suitable options, help you compare them, and coordinate the next steps with the relevant parties.' }}
-                    </p>
+                        <h2 class="mt-4 text-3xl font-black sm:text-4xl">
+                            {{ $isAr ? 'تتبع الشحنة أو الحاوية' : 'Track a Shipment or Container' }}
+                        </h2>
 
-                </div>
+                        <p class="mt-5 leading-8 text-slate-400">
+                            {{ $isAr ? 'أدخل مرجع الشحنة أو الحاوية للوصول إلى آخر معلومات التتبع المتاحة.' : 'Enter a shipment or container reference to access the latest available tracking information.' }}
+                        </p>
 
+                        <form
+                            action="{{ Route::has('shipments.index') ? route('shipments.index') : url('/shipments') }}"
+                            method="GET" class="mt-8 flex flex-col gap-3 sm:flex-row">
 
-                <div class="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+                            <input type="text" name="tracking"
+                                placeholder="{{ $isAr ? 'رقم الشحنة أو الحاوية' : 'Shipment or container number' }}"
+                                class="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/40">
 
-                    @php
-                        $steps = $isAr
-                            ? [
-                                [
-                                    '01',
-                                    'أرسل التفاصيل',
-                                    'شارك ميناء الانطلاق والوصول، نوع الحمولة، الحجم والمعدات المطلوبة.',
-                                ],
-                                [
-                                    '02',
-                                    'نبحث عن الخيارات',
-                                    'ننسق مع شركات النقل البحري والشركاء المتاحين حسب متطلبات الشحنة.',
-                                ],
-                                [
-                                    '03',
-                                    'قارن واختر',
-                                    'نساعدك على مراجعة الخيارات والعروض المتاحة قبل اتخاذ قرار الحجز.',
-                                ],
-                                ['04', 'ننسق ونتابع', 'ننسق الخطوات التشغيلية ونوفر لك رؤية أفضل لحالة الشحنة.'],
-                            ]
-                            : [
-                                [
-                                    '01',
-                                    'Send Details',
-                                    'Share origin, destination, cargo type, volume and equipment requirements.',
-                                ],
-                                [
-                                    '02',
-                                    'Source Options',
-                                    'We coordinate with available shipping lines and logistics partners.',
-                                ],
-                                [
-                                    '03',
-                                    'Compare & Choose',
-                                    'Review available options and quotations before selecting a service.',
-                                ],
-                                [
-                                    '04',
-                                    'Coordinate & Track',
-                                    'We coordinate the next steps and provide shipment visibility.',
-                                ],
-                            ];
-                    @endphp
+                            <button type="submit"
+                                class="rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 hover:bg-cyan-300">
+                                {{ $isAr ? 'تتبع' : 'Track' }}
+                            </button>
 
-                    @foreach ($steps as $step)
-                        <div
-                            class="glass-light group rounded-3xl p-6 transition hover:-translate-y-1 hover:border-cyan-300/20">
+                        </form>
 
-                            <div class="flex items-center justify-between">
+                        <p class="mt-4 text-xs text-slate-600">
+                            {{ $isAr ? 'التحديثات تعتمد على البيانات المتاحة من مصادر التتبع وشركاء الشحن.' : 'Updates depend on available tracking data from maritime sources and shipping partners.' }}
+                        </p>
 
-                                <span class="text-4xl font-black text-white/10">
-                                    {{ $step[0] }}
-                                </span>
+                    </div>
 
-                                <div
-                                    class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
-                                    {{ $loop->iteration == 1 ? '📋' : ($loop->iteration == 2 ? '🔎' : ($loop->iteration == 3 ? '⚖️' : '📍')) }}
-                                </div>
+                    <div class="glass rounded-[2rem] p-6 sm:p-8">
 
+                        <div class="flex items-center justify-between">
+
+                            <div>
+                                <p class="text-xs text-slate-500">HAG-2026-001</p>
+                                <p class="mt-1 font-bold">
+                                    {{ $isAr ? 'جبل علي → جدة' : 'Jebel Ali → Jeddah' }}
+                                </p>
                             </div>
 
-                            <h3 class="mt-7 text-lg font-bold">
-                                {{ $step[1] }}
-                            </h3>
-
-                            <p class="mt-3 text-sm leading-7 text-slate-400">
-                                {{ $step[2] }}
-                            </p>
+                            <span class="rounded-full bg-emerald-400/10 px-3 py-1 text-xs text-emerald-300">
+                                {{ $isAr ? 'قيد النقل' : 'In Transit' }}
+                            </span>
 
                         </div>
-                    @endforeach
+
+                        <div class="mt-10 grid grid-cols-4 gap-2">
+
+                            @foreach ([[$isAr ? 'تم الطلب' : 'Requested', '✓'], [$isAr ? 'تم الحجز' : 'Booked', '✓'], [$isAr ? 'في البحر' : 'At Sea', '🚢'], [$isAr ? 'الوصول' : 'Arrival', '⚓']] as $trackingStep)
+                                <div class="text-center">
+
+                                    <div
+                                        class="mx-auto flex h-11 w-11 items-center justify-center rounded-full {{ $loop->index < 3 ? 'bg-cyan-400 text-slate-950' : 'bg-white/10 text-slate-500' }}">
+                                        {{ $trackingStep[1] }}
+                                    </div>
+
+                                    <p
+                                        class="mt-3 text-[10px] font-bold {{ $loop->index < 3 ? 'text-white' : 'text-slate-500' }}">
+                                        {{ $trackingStep[0] }}
+                                    </p>
+
+                                </div>
+                            @endforeach
+
+                        </div>
+
+                        <div class="mt-8 grid gap-3 sm:grid-cols-3">
+
+                            <div class="rounded-2xl border border-white/5 bg-white/[.03] p-4">
+                                <p class="text-[10px] text-slate-500">
+                                    {{ $isAr ? 'الناقل' : 'Carrier' }}
+                                </p>
+                                <p class="mt-2 text-sm font-bold">
+                                    {{ $isAr ? 'خيار متاح' : 'Available Option' }}
+                                </p>
+                            </div>
+
+                            <div class="rounded-2xl border border-white/5 bg-white/[.03] p-4">
+                                <p class="text-[10px] text-slate-500">
+                                    {{ $isAr ? 'الحاويات' : 'Containers' }}
+                                </p>
+                                <p class="mt-2 text-sm font-bold ltr-number">2 × 40HC</p>
+                            </div>
+
+                            <div class="rounded-2xl border border-white/5 bg-white/[.03] p-4">
+                                <p class="text-[10px] text-slate-500">
+                                    {{ $isAr ? 'آخر تحديث' : 'Last Update' }}
+                                </p>
+                                <p class="mt-2 text-sm font-bold">
+                                    {{ $isAr ? 'الآن' : 'Just now' }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- ========================================================= -->
-        <!-- SERVICES -->
-        <!-- ========================================================= -->
-
-        <section id="services" class="scroll-mt-24 border-y border-white/5 bg-white/[0.02] py-24 lg:py-32">
+        {{-- SERVICES --}}
+        <section id="services" class="scroll-mt-24 border-y border-white/5 bg-white/[.02] py-24 lg:py-32">
 
             <div class="mx-auto max-w-7xl px-5 lg:px-8">
 
                 <div class="text-center">
 
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
-                        02 — {{ $isAr ? 'الخدمات' : 'SERVICES' }}
+                    <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
+                        03 — {{ $isAr ? 'الخدمات' : 'SERVICES' }}
                     </span>
 
                     <h2 class="mt-4 text-3xl font-black sm:text-4xl">
-                        {{ $isAr ? 'خدمات مبنية حول دور الوسيط' : 'Services Built Around the Broker Role' }}
+                        {{ $isAr ? 'منصة مبنية حول الوساطة البحرية' : 'A Platform Built Around Maritime Brokerage' }}
                     </h2>
 
                     <p class="mx-auto mt-5 max-w-2xl leading-8 text-slate-400">
-                        {{ $isAr
-                            ? 'نركز على الربط والتنسيق وإدارة خيارات الشحن بدلاً من تقديم أنفسنا كناقل بحري.'
-                            : 'Our focus is connecting, coordinating and managing freight options — not presenting ourselves as a shipping line.' }}
+                        {{ $isAr ? 'نربط وننسق وننظم خيارات الشحن دون تقديم HAG كناقل بحري.' : 'We connect, coordinate and organize freight options without presenting HAG as a shipping line.' }}
                     </p>
 
                 </div>
 
-
                 <div class="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
-                    @php
-                        $services = $isAr
-                            ? [
-                                [
-                                    '💬',
-                                    'وساطة عروض الشحن',
-                                    'استقبال طلب الشحن وتنسيق الحصول على عروض مناسبة لمتطلباتك.',
-                                ],
-                                [
-                                    '🚢',
-                                    'مطابقة الناقلين',
-                                    'ربط الشحنة بخيارات من شركات النقل البحري والشركاء المتاحين.',
-                                ],
-                                [
-                                    '⚖️',
-                                    'مقارنة الخيارات',
-                                    'تنظيم المعلومات الأساسية لمساعدتك في مراجعة الخيارات المتاحة.',
-                                ],
-                                [
-                                    '📦',
-                                    'FCL و LCL',
-                                    'تنسيق احتياجات الشحن بالحاويات الكاملة أو الشحن الجزئي حسب الخدمة المتاحة.',
-                                ],
-                                ['📝', 'تنسيق الحجز', 'متابعة خطوات الحجز والتواصل بين العميل والطرف المقدم للخدمة.'],
-                                [
-                                    '📍',
-                                    'متابعة الشحنة',
-                                    'تجميع وتحديث معلومات الشحنة ومراحلها التشغيلية حسب البيانات المتاحة.',
-                                ],
-                            ]
-                            : [
-                                [
-                                    '💬',
-                                    'Freight Quote Brokerage',
-                                    'Receive shipment requests and coordinate suitable freight quotations.',
-                                ],
-                                [
-                                    '🚢',
-                                    'Carrier Matching',
-                                    'Connect cargo requirements with available shipping lines and logistics partners.',
-                                ],
-                                [
-                                    '⚖️',
-                                    'Offer Comparison',
-                                    'Organize key information to make available freight options easier to review.',
-                                ],
-                                [
-                                    '📦',
-                                    'FCL & LCL',
-                                    'Coordinate full-container and less-than-container shipment requirements where available.',
-                                ],
-                                [
-                                    '📝',
-                                    'Booking Coordination',
-                                    'Coordinate booking steps and communication between customers and service providers.',
-                                ],
-                                [
-                                    '📍',
-                                    'Shipment Visibility',
-                                    'Centralize shipment updates and milestones based on available tracking information.',
-                                ],
-                            ];
-                    @endphp
-
-                    @foreach ($services as $service)
-                        <div
-                            class="glass-light rounded-3xl p-7 transition duration-300 hover:-translate-y-1 hover:bg-white/[0.06]">
+                    @foreach ([
+        ['💬', $isAr ? 'وساطة عروض الشحن' : 'Freight Quote Brokerage', $isAr ? 'استقبال طلب الشحن وتنسيق الحصول على عروض مناسبة.' : 'Receive shipment requests and coordinate suitable freight quotations.'],
+        ['🚢', $isAr ? 'مطابقة الناقلين' : 'Carrier Matching', $isAr ? 'ربط متطلبات الشحنة بخيارات الناقلين المتاحة.' : 'Match shipment requirements with available carrier options.'],
+        ['⚖️', $isAr ? 'مقارنة العروض' : 'Offer Comparison', $isAr ? 'تنظيم المعلومات الأساسية لمراجعة خيارات الشحن.' : 'Organize key information to review available freight options.'],
+        ['📦', 'FCL & LCL', $isAr ? 'تنسيق احتياجات الحاويات الكاملة أو الجزئية حسب الخدمة المتاحة.' : 'Coordinate full-container and less-than-container requirements where available.'],
+        ['📝', $isAr ? 'تنسيق الحجز' : 'Booking Coordination', $isAr ? 'تنسيق خطوات الحجز والتواصل بين العميل ومقدم الخدمة.' : 'Coordinate booking steps between customers and service providers.'],
+        ['📍', $isAr ? 'رؤية الشحنة' : 'Shipment Visibility', $isAr ? 'تجميع تحديثات الشحنة ومراحلها التشغيلية حسب البيانات المتاحة.' : 'Centralize shipment updates and milestones based on available data.'],
+    ] as $service)
+                        <div class="glass-light rounded-3xl p-7 transition hover:-translate-y-1 hover:bg-white/[.06]">
 
                             <div
                                 class="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-2xl">
@@ -834,300 +870,207 @@
                     @endforeach
 
                 </div>
-
             </div>
-
         </section>
 
-
-        <!-- ========================================================= -->
-        <!-- WHY HAG -->
-        <!-- ========================================================= -->
-
-        <section id="why-hag" class="scroll-mt-24 py-24 lg:py-32">
-
-            <div class="mx-auto grid max-w-7xl items-center gap-14 px-5 lg:grid-cols-2 lg:px-8">
-
-                <!-- Left -->
-                <div>
-
-                    <span class="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
-                        03 — {{ $isAr ? 'لماذا HAG' : 'WHY HAG' }}
-                    </span>
-
-                    <h2 class="mt-4 text-3xl font-black sm:text-4xl">
-                        {{ $isAr
-                            ? 'نقطة اتصال واحدة بدل التعامل مع عدة أطراف'
-                            : 'One Coordination Point Instead of Managing Multiple Parties' }}
-                    </h2>
-
-                    <p class="mt-6 leading-8 text-slate-400">
-                        {{ $isAr
-                            ? 'دور HAG Brokers هو تبسيط عملية البحث والتواصل والتنسيق بين العميل والناقلين والشركاء اللوجستيين المشاركين في رحلة الشحن.'
-                            : 'HAG Brokers helps simplify the process of sourcing, communicating and coordinating between customers, carriers and logistics partners involved in the shipment journey.' }}
-                    </p>
-
-
-                    <div class="mt-8 space-y-4">
-
-                        @php
-                            $benefits = $isAr
-                                ? [
-                                    'تقليل الوقت المطلوب للبحث عن خيارات الشحن',
-                                    'تنظيم عروض وخيارات الناقلين في عملية واحدة',
-                                    'تواصل مركزي مع الأطراف ذات العلاقة',
-                                    'تنسيق أفضل للمستندات والحجز والمتابعة',
-                                    'رؤية أوضح لحالة الشحنة والمراحل القادمة',
-                                ]
-                                : [
-                                    'Reduce the time spent searching for freight options',
-                                    'Organize carrier offers through one process',
-                                    'Centralize communication with relevant parties',
-                                    'Coordinate booking, documentation and follow-up',
-                                    'Improve visibility across shipment milestones',
-                                ];
-                        @endphp
-
-                        @foreach ($benefits as $benefit)
-                            <div class="flex items-start gap-3">
-
-                                <div
-                                    class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-400/10 text-xs text-cyan-300">
-                                    ✓
-                                </div>
-
-                                <p class="text-sm leading-6 text-slate-300">
-                                    {{ $benefit }}
-                                </p>
-
-                            </div>
-                        @endforeach
-
-                    </div>
-
-                </div>
-
-
-                <!-- Right -->
-                <div class="glass rounded-[2rem] p-5 glow sm:p-7">
-
-                    <div class="rounded-2xl border border-white/10 bg-[#081522] p-5">
-
-                        <div class="flex items-center justify-between">
-
-                            <div>
-                                <p class="text-xs text-slate-500">
-                                    HAG BROKERS
-                                </p>
-
-                                <p class="mt-1 font-bold">
-                                    {{ $isAr ? 'لوحة طلب الشحن' : 'Freight Request Dashboard' }}
-                                </p>
-                            </div>
-
-                            <span class="rounded-full bg-cyan-300/10 px-3 py-1 text-xs text-cyan-300">
-                                {{ $isAr ? 'طلب جديد' : 'New Request' }}
-                            </span>
-
-                        </div>
-
-
-                        <div class="mt-6 space-y-3">
-
-                            <div class="rounded-xl border border-white/5 bg-white/[0.03] p-4">
-
-                                <div class="flex justify-between">
-
-                                    <span class="text-xs text-slate-500">
-                                        {{ $isAr ? 'المسار' : 'Route' }}
-                                    </span>
-
-                                    <span class="text-xs font-semibold text-white">
-                                        {{ $isAr ? 'ميناء → ميناء' : 'Port → Port' }}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="rounded-xl border border-white/5 bg-white/[0.03] p-4">
-
-                                <div class="flex justify-between">
-
-                                    <span class="text-xs text-slate-500">
-                                        {{ $isAr ? 'نوع الشحنة' : 'Cargo Type' }}
-                                    </span>
-
-                                    <span class="text-xs font-semibold text-white">
-                                        {{ $isAr ? 'حمولة عامة' : 'General Cargo' }}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="rounded-xl border border-white/5 bg-white/[0.03] p-4">
-
-                                <div class="flex justify-between">
-
-                                    <span class="text-xs text-slate-500">
-                                        {{ $isAr ? 'الخيارات' : 'Options' }}
-                                    </span>
-
-                                    <span class="text-xs font-semibold text-cyan-300">
-                                        {{ $isAr ? 'بانتظار عروض' : 'Awaiting Quotes' }}
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="mt-6 rounded-2xl bg-cyan-400/10 p-5">
-
-                            <div class="flex items-center gap-3">
-
-                                <div
-                                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400 text-slate-950">
-                                    ✓
-                                </div>
-
-                                <div>
-
-                                    <p class="text-sm font-bold">
-                                        {{ $isAr ? 'HAG كوسيط ومنسق' : 'HAG as Broker & Coordinator' }}
-                                    </p>
-
-                                    <p class="mt-1 text-xs leading-5 text-slate-400">
-                                        {{ $isAr
-                                            ? 'ننسق بين العميل ومقدمي خدمات النقل المتاحين.'
-                                            : 'Coordinating between customers and available freight service providers.' }}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ========================================================= -->
-        <!-- WHO WE SERVE -->
-        <!-- ========================================================= -->
-
-        <section class="border-y border-white/5 bg-white/[0.02] py-24">
+        {{-- PORTS --}}
+        <section id="ports" class="scroll-mt-24 py-24 lg:py-32">
 
             <div class="mx-auto max-w-7xl px-5 lg:px-8">
 
-                <div class="grid gap-5 lg:grid-cols-2">
+                <div class="max-w-3xl">
 
-                    <div class="rounded-[2rem] border border-cyan-300/10 bg-cyan-300/[0.04] p-8 lg:p-10">
+                    <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
+                        04 — {{ $isAr ? 'الموانئ الخليجية' : 'GULF PORTS' }}
+                    </span>
 
-                        <div class="text-3xl">
-                            📦
+                    <h2 class="mt-4 text-3xl font-black sm:text-4xl">
+                        {{ $isAr ? 'شبكة الموانئ والمسارات' : 'Ports & Shipping Corridors' }}
+                    </h2>
+
+                    <p class="mt-5 leading-8 text-slate-400">
+                        {{ $isAr ? 'واجهة موحدة لاستعراض الموانئ المهمة لعمليات الشحن في الخليج.' : 'A unified view of ports relevant to freight operations across the Gulf.' }}
+                    </p>
+
+                </div>
+
+                @php
+                    $gulfPorts = [
+                        [
+                            '🇦🇪',
+                            $isAr ? 'الإمارات العربية المتحدة' : 'United Arab Emirates',
+                            [
+                                $isAr ? 'ميناء جبل علي' : 'Jebel Ali Port',
+                                $isAr ? 'ميناء خليفة' : 'Khalifa Port',
+                                $isAr ? 'ميناء راشد' : 'Port Rashid',
+                            ],
+                        ],
+                        [
+                            '🇸🇦',
+                            $isAr ? 'المملكة العربية السعودية' : 'Saudi Arabia',
+                            [
+                                $isAr ? 'ميناء الدمام' : 'Dammam Port',
+                                $isAr ? 'ميناء الملك عبدالله' : 'King Abdullah Port',
+                                $isAr ? 'ميناء جدة' : 'Jeddah Port',
+                            ],
+                        ],
+                        [
+                            '🇴🇲',
+                            $isAr ? 'سلطنة عُمان' : 'Oman',
+                            [
+                                $isAr ? 'ميناء صحار' : 'Sohar Port',
+                                $isAr ? 'ميناء صلالة' : 'Salalah Port',
+                                $isAr ? 'ميناء الدقم' : 'Duqm Port',
+                            ],
+                        ],
+                        ['🇶🇦', $isAr ? 'دولة قطر' : 'Qatar', [$isAr ? 'ميناء حمد' : 'Hamad Port']],
+                        [
+                            '🇧🇭',
+                            $isAr ? 'مملكة البحرين' : 'Bahrain',
+                            [$isAr ? 'ميناء خليفة بن سلمان' : 'Khalifa Bin Salman Port'],
+                        ],
+                        [
+                            '🇰🇼',
+                            $isAr ? 'دولة الكويت' : 'Kuwait',
+                            [$isAr ? 'ميناء الشويخ' : 'Shuwaikh Port', $isAr ? 'ميناء الشعيبة' : 'Shuaiba Port'],
+                        ],
+                    ];
+                @endphp
+
+                <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+                    @foreach ($gulfPorts as $country)
+                        <div class="glass-light rounded-3xl p-6">
+
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">{{ $country[0] }}</span>
+
+                                <div>
+                                    <h3 class="font-bold">{{ $country[1] }}</h3>
+
+                                    <p class="text-xs text-slate-500">
+                                        {{ $isAr ? 'موانئ ضمن شبكة الخليج' : 'Ports in Gulf network' }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 space-y-2">
+
+                                @foreach ($country[2] as $port)
+                                    <div
+                                        class="flex items-center gap-2 rounded-xl bg-white/[.03] px-3 py-2 text-sm text-slate-300">
+
+                                        <span class="h-1.5 w-1.5 rounded-full bg-cyan-300"></span>
+
+                                        {{ $port }}
+
+                                    </div>
+                                @endforeach
+
+                            </div>
+
                         </div>
-
-                        <h3 class="mt-6 text-2xl font-black">
-                            {{ $isAr ? 'للمستوردين والمصدرين' : 'For Importers & Exporters' }}
-                        </h3>
-
-                        <p class="mt-4 leading-8 text-slate-400">
-                            {{ $isAr
-                                ? 'أرسل متطلبات الشحنة واحصل على عملية منظمة للبحث عن خيارات الشحن والتنسيق معها من نقطة اتصال واحدة.'
-                                : 'Share your shipment requirements and get an organized process for sourcing and coordinating freight options through one point of contact.' }}
-                        </p>
-
-                        <a href="#contact" class="mt-7 inline-flex items-center gap-2 font-bold text-cyan-300">
-                            {{ $isAr ? 'ابدأ طلب الشحن' : 'Start a Freight Request' }}
-                            <span>{{ $isAr ? '←' : '→' }}</span>
-                        </a>
-
-                    </div>
-
-
-                    <div class="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 lg:p-10">
-
-                        <div class="text-3xl">
-                            🚢
-                        </div>
-
-                        <h3 class="mt-6 text-2xl font-black">
-                            {{ $isAr ? 'لشركات النقل والشركاء' : 'For Carriers & Logistics Partners' }}
-                        </h3>
-
-                        <p class="mt-4 leading-8 text-slate-400">
-                            {{ $isAr
-                                ? 'وسّع فرص الوصول إلى طلبات الشحن من خلال شبكة HAG من العملاء والشركاء، وفقاً للخدمات والمسارات المتاحة لديك.'
-                                : 'Access freight opportunities through the HAG network of customers and partners, based on your available services and routes.' }}
-                        </p>
-
-                        <a href="#partners" class="mt-7 inline-flex items-center gap-2 font-bold text-cyan-300">
-                            {{ $isAr ? 'انضم كشريك' : 'Become a Partner' }}
-                            <span>{{ $isAr ? '←' : '→' }}</span>
-                        </a>
-
-                    </div>
+                    @endforeach
 
                 </div>
 
             </div>
-
         </section>
 
+        {{-- HOW IT WORKS --}}
+        <section id="how-it-works" class="scroll-mt-24 border-y border-white/5 bg-white/[.02] py-24 lg:py-32">
 
-        <!-- ========================================================= -->
-        <!-- PARTNERS -->
-        <!-- ========================================================= -->
+            <div class="mx-auto max-w-7xl px-5 lg:px-8">
 
+                <div class="text-center">
+
+                    <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
+                        05 — {{ $isAr ? 'كيف نعمل' : 'HOW IT WORKS' }}
+                    </span>
+
+                    <h2 class="mt-4 text-3xl font-black sm:text-4xl">
+                        {{ $isAr ? 'من طلب الشحن إلى التتبع' : 'From Freight Request to Tracking' }}
+                    </h2>
+
+                </div>
+
+                <div class="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+
+                    @foreach ([['📋', $isAr ? 'طلب الشحن' : 'Shipment Request', $isAr ? 'أدخل تفاصيل البضاعة والموانئ والمعدات.' : 'Submit cargo, port and equipment requirements.'], ['🔎', $isAr ? 'البحث عن الخيارات' : 'Source Options', $isAr ? 'ننسق مع الناقلين والشركاء المتاحين.' : 'Source options from available carriers and partners.'], ['⚖️', $isAr ? 'مقارنة العروض' : 'Compare Offers', $isAr ? 'راجع الخيارات قبل اتخاذ قرار الحجز.' : 'Review available options before booking.'], ['📝', $isAr ? 'الحجز' : 'Booking', $isAr ? 'ننسق خطوات الحجز مع الطرف المقدم للخدمة.' : 'Coordinate booking steps with the service provider.'], ['📍', $isAr ? 'التتبع' : 'Tracking', $isAr ? 'تابع الشحنة ومعلومات السفينة حسب البيانات المتاحة.' : 'Follow shipment and vessel information based on available data.']] as $step)
+                        <div class="glass-light rounded-3xl p-6">
+
+                            <div class="text-3xl">{{ $step[0] }}</div>
+
+                            <h3 class="mt-5 font-bold">
+                                {{ $step[1] }}
+                            </h3>
+
+                            <p class="mt-3 text-sm leading-7 text-slate-400">
+                                {{ $step[2] }}
+                            </p>
+
+                        </div>
+                    @endforeach
+
+                </div>
+
+            </div>
+        </section>
+
+        {{-- PARTNERS --}}
         <section id="partners" class="scroll-mt-24 py-24 lg:py-32">
 
             <div class="mx-auto max-w-5xl px-5 text-center lg:px-8">
 
-                <span class="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
-                    04 — {{ $isAr ? 'شبكة الشركاء' : 'PARTNER NETWORK' }}
+                <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
+                    06 — {{ $isAr ? 'شبكة الشركاء' : 'PARTNER NETWORK' }}
                 </span>
 
                 <h2 class="mt-4 text-3xl font-black sm:text-4xl">
-                    {{ $isAr ? 'هل أنت شركة نقل بحري أو شريك لوجستي؟' : 'Are You a Shipping Line or Logistics Partner?' }}
+                    {{ $isAr ? 'لشركات النقل البحري والشركاء اللوجستيين' : 'For Carriers & Logistics Partners' }}
                 </h2>
 
                 <p class="mx-auto mt-5 max-w-2xl leading-8 text-slate-400">
-                    {{ $isAr
-                        ? 'انضم إلى شبكة HAG لتلقي طلبات الشحن المناسبة لخدماتك ومساراتك المتاحة.'
-                        : 'Join the HAG partner network and receive freight opportunities that match your available services and routes.' }}
+                    {{ $isAr ? 'انضم إلى شبكة HAG لتلقي طلبات الشحن التي تتوافق مع خدماتك ومساراتك المتاحة.' : 'Join the HAG network to receive freight opportunities matching your available services and routes.' }}
                 </p>
 
+                <div class="mt-10 grid gap-4 sm:grid-cols-3">
 
-                <div class="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+                    <div class="glass rounded-3xl p-6">
+                        <div class="text-2xl">🚢</div>
+                        <p class="mt-4 font-bold">{{ $isAr ? 'شركات النقل' : 'Carriers' }}</p>
+                        <p class="mt-2 text-xs leading-6 text-slate-500">
+                            {{ $isAr ? 'استقبل طلبات مناسبة للخدمات المتاحة.' : 'Receive opportunities matching available services.' }}
+                        </p>
+                    </div>
 
-                    <a href="#contact"
-                        class="rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 transition hover:bg-cyan-300">
-                        {{ $isAr ? 'تواصل مع فريق الشراكات' : 'Contact Partnerships' }}
-                    </a>
+                    <div class="glass rounded-3xl p-6">
+                        <div class="text-2xl">🌐</div>
+                        <p class="mt-4 font-bold">{{ $isAr ? 'شركاء لوجستيون' : 'Logistics Partners' }}</p>
+                        <p class="mt-2 text-xs leading-6 text-slate-500">
+                            {{ $isAr ? 'تواصل مركزي مع شبكة HAG.' : 'Centralized communication through HAG.' }}
+                        </p>
+                    </div>
+
+                    <div class="glass rounded-3xl p-6">
+                        <div class="text-2xl">📊</div>
+                        <p class="mt-4 font-bold">{{ $isAr ? 'طلبات منظمة' : 'Structured Requests' }}</p>
+                        <p class="mt-2 text-xs leading-6 text-slate-500">
+                            {{ $isAr ? 'بيانات أوضح لاتخاذ خطوات تشغيلية مناسبة.' : 'Clearer requests for operational follow-up.' }}
+                        </p>
+                    </div>
 
                 </div>
 
-            </div>
+                <a href="#contact"
+                    class="mt-10 inline-flex rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 hover:bg-cyan-300">
+                    {{ $isAr ? 'تواصل مع فريق الشراكات' : 'Contact Partnerships' }}
+                </a>
 
+            </div>
         </section>
 
-
-        <!-- ========================================================= -->
-        <!-- CONTACT / CTA -->
-        <!-- ========================================================= -->
-
+        {{-- CONTACT --}}
         <section id="contact" class="scroll-mt-24 pb-24 lg:pb-32">
 
             <div class="mx-auto max-w-7xl px-5 lg:px-8">
@@ -1141,41 +1084,38 @@
 
                         <div>
 
-                            <span class="text-xs font-bold uppercase tracking-[0.25em] text-cyan-300">
+                            <span class="text-xs font-bold uppercase tracking-[.25em] text-cyan-300">
                                 {{ $isAr ? 'ابدأ الآن' : 'GET STARTED' }}
                             </span>
 
                             <h2 class="mt-4 text-3xl font-black sm:text-4xl">
-                                {{ $isAr ? 'لديك شحنة؟ دعنا نبدأ من متطلباتها.' : 'Have a shipment? Let’s start with your requirements.' }}
+                                {{ $isAr ? 'لديك شحنة؟ ابدأ من متطلباتها.' : 'Have a shipment? Start with your requirements.' }}
                             </h2>
 
                             <p class="mt-5 max-w-xl leading-8 text-slate-400">
-                                {{ $isAr
-                                    ? 'أرسل بيانات الشحنة، وسيتحول طلبك إلى عملية وساطة منظمة للبحث عن خيارات النقل والتنسيق معها.'
-                                    : 'Share your shipment details and turn your request into an organized brokerage process for sourcing and coordinating freight options.' }}
+                                {{ $isAr ? 'أرسل تفاصيل الشحنة لتحويلها إلى طلب منظم يمكن تنسيقه مع خيارات الناقلين والشركاء المتاحة.' : 'Share your shipment details and turn them into a structured request for coordination with available carriers and partners.' }}
                             </p>
 
                         </div>
-
 
                         <div class="flex flex-col gap-3 sm:flex-row lg:justify-end">
 
                             @auth
 
                                 <a href="{{ url('/dashboard') }}"
-                                    class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 transition hover:bg-cyan-300">
+                                    class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 hover:bg-cyan-300">
                                     {{ $isAr ? 'فتح لوحة التحكم' : 'Open Dashboard' }}
                                 </a>
                             @else
                                 @if (Route::has('register'))
                                     <a href="{{ route('register') }}"
-                                        class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 transition hover:bg-cyan-300">
-                                        {{ $isAr ? 'ابدأ طلبك' : 'Start Your Request' }}
+                                        class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 hover:bg-cyan-300">
+                                        {{ $isAr ? 'إنشاء حساب والبدء' : 'Create Account & Start' }}
                                     </a>
                                 @endif
 
                                 <a href="{{ route('login') }}"
-                                    class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-7 py-4 font-semibold text-white transition hover:bg-white/10">
+                                    class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-7 py-4 font-semibold text-white hover:bg-white/10">
                                     {{ $isAr ? 'تسجيل الدخول' : 'Login' }}
                                 </a>
 
@@ -1184,34 +1124,25 @@
                         </div>
 
                     </div>
-
                 </div>
-
             </div>
-
         </section>
 
     </main>
 
-
-    <!-- ========================================================= -->
-    <!-- FOOTER -->
-    <!-- ========================================================= -->
-
-    <footer class="border-t border-white/5 bg-[#050d18]">
+    <footer class="border-t border-white/5 bg-[#040a12]">
 
         <div class="mx-auto max-w-7xl px-5 py-12 lg:px-8">
 
             <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
 
-                <!-- Brand -->
                 <div>
 
                     <div class="flex items-center gap-3">
 
                         <div
                             class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
-                            H
+                            HAG
                         </div>
 
                         <div>
@@ -1220,22 +1151,18 @@
                             </p>
 
                             <p class="text-[9px] uppercase tracking-widest text-slate-600">
-                                Sea Freight Brokerage
+                                {{ $isAr ? 'وساطة الشحن البحري' : 'Sea Freight Brokerage' }}
                             </p>
                         </div>
 
                     </div>
 
                     <p class="mt-5 text-sm leading-7 text-slate-500">
-                        {{ $isAr
-                            ? 'وساطة وتنسيق للشحن البحري تربط العملاء بالناقلين والشركاء اللوجستيين.'
-                            : 'Sea freight brokerage and coordination connecting customers with carriers and logistics partners.' }}
+                        {{ $isAr ? 'وساطة وتنسيق للشحن البحري تربط العملاء بخيارات الناقلين والشركاء اللوجستيين المتاحة.' : 'Sea freight brokerage and coordination connecting customers with available carrier and logistics partner options.' }}
                     </p>
 
                 </div>
 
-
-                <!-- Navigation -->
                 <div>
 
                     <h3 class="font-bold">
@@ -1244,50 +1171,46 @@
 
                     <div class="mt-5 space-y-3 text-sm text-slate-500">
 
-                        <a href="#how-it-works" class="block hover:text-cyan-300">
-                            {{ $isAr ? 'كيف نعمل' : 'How It Works' }}
+                        <a href="#network" class="block hover:text-cyan-300">
+                            {{ $isAr ? 'الخريطة البحرية' : 'Maritime Map' }}
+                        </a>
+
+                        <a href="#tracking" class="block hover:text-cyan-300">
+                            {{ $isAr ? 'تتبع الشحنات' : 'Tracking' }}
                         </a>
 
                         <a href="#services" class="block hover:text-cyan-300">
                             {{ $isAr ? 'الخدمات' : 'Services' }}
                         </a>
 
-                        <a href="#why-hag" class="block hover:text-cyan-300">
-                            {{ $isAr ? 'لماذا HAG' : 'Why HAG' }}
-                        </a>
-
                     </div>
 
                 </div>
 
-
-                <!-- Partners -->
                 <div>
 
                     <h3 class="font-bold">
-                        {{ $isAr ? 'الشركاء' : 'Partners' }}
+                        {{ $isAr ? 'الخليج' : 'Gulf' }}
                     </h3>
 
                     <div class="mt-5 space-y-3 text-sm text-slate-500">
 
-                        <a href="#partners" class="block hover:text-cyan-300">
-                            {{ $isAr ? 'شركات النقل البحري' : 'Shipping Lines' }}
+                        <a href="#ports" class="block hover:text-cyan-300">
+                            {{ $isAr ? 'الموانئ الخليجية' : 'Gulf Ports' }}
+                        </a>
+
+                        <a href="#network" class="block hover:text-cyan-300">
+                            {{ $isAr ? 'شبكة السفن' : 'Vessel Network' }}
                         </a>
 
                         <a href="#partners" class="block hover:text-cyan-300">
-                            {{ $isAr ? 'الشركاء اللوجستيون' : 'Logistics Partners' }}
-                        </a>
-
-                        <a href="#contact" class="block hover:text-cyan-300">
-                            {{ $isAr ? 'انضم لشبكة HAG' : 'Join HAG Network' }}
+                            {{ $isAr ? 'الشركاء' : 'Partners' }}
                         </a>
 
                     </div>
 
                 </div>
 
-
-                <!-- Contact -->
                 <div>
 
                     <h3 class="font-bold">
@@ -1314,7 +1237,6 @@
 
             </div>
 
-
             <div
                 class="mt-12 flex flex-col gap-4 border-t border-white/5 pt-7 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between">
 
@@ -1324,40 +1246,31 @@
                 </p>
 
                 <p>
-                    {{ $isAr
-                        ? 'وساطة وتنسيق الشحن البحري — حسب توفر الناقل والشريك.'
-                        : 'Sea freight brokerage & coordination — subject to carrier and partner availability.' }}
+                    {{ $isAr ? 'وساطة وتنسيق الشحن البحري — حسب توفر الناقل والشريك والبيانات.' : 'Sea freight brokerage & coordination — subject to carrier, partner and data availability.' }}
                 </p>
 
             </div>
 
         </div>
-
     </footer>
 
-
-    <!-- ========================================================= -->
-    <!-- JAVASCRIPT -->
-    <!-- ========================================================= -->
+    {{-- Leaflet JS --}}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         /*
-                                |--------------------------------------------------------------------------
-                                | Language Menu
-                                |--------------------------------------------------------------------------
-                                */
+                    |--------------------------------------------------------------------------
+                    | Language menu
+                    |--------------------------------------------------------------------------
+                    */
 
         function toggleLanguageMenu() {
-
             const dropdown = document.getElementById('language-dropdown');
 
-            if (!dropdown) {
-                return;
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
             }
-
-            dropdown.classList.toggle('hidden');
         }
-
 
         document.addEventListener('click', function(event) {
 
@@ -1374,16 +1287,14 @@
 
         });
 
-
         /*
         |--------------------------------------------------------------------------
-        | Mobile Menu
+        | Mobile menu
         |--------------------------------------------------------------------------
         */
 
         const mobileButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-
         const menuOpenIcon = document.getElementById('menu-open-icon');
         const menuCloseIcon = document.getElementById('menu-close-icon');
 
@@ -1391,61 +1302,35 @@
 
             mobileButton.addEventListener('click', function() {
 
-                const isHidden = mobileMenu.classList.contains('hidden');
+                const hidden = mobileMenu.classList.contains('hidden');
 
-                if (isHidden) {
+                mobileMenu.classList.toggle('hidden', !hidden);
 
-                    mobileMenu.classList.remove('hidden');
+                menuOpenIcon?.classList.toggle('hidden', hidden);
 
-                    menuOpenIcon.classList.add('hidden');
-                    menuCloseIcon.classList.remove('hidden');
-
-                } else {
-
-                    mobileMenu.classList.add('hidden');
-
-                    menuOpenIcon.classList.remove('hidden');
-                    menuCloseIcon.classList.add('hidden');
-
-                }
+                menuCloseIcon?.classList.toggle('hidden', !hidden);
 
             });
 
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Close Mobile Menu After Navigation
-        |--------------------------------------------------------------------------
-        */
-
         document.querySelectorAll('.mobile-link').forEach(function(link) {
 
             link.addEventListener('click', function() {
 
-                if (!mobileMenu) {
-                    return;
-                }
+                mobileMenu?.classList.add('hidden');
 
-                mobileMenu.classList.add('hidden');
+                menuOpenIcon?.classList.remove('hidden');
 
-                if (menuOpenIcon) {
-                    menuOpenIcon.classList.remove('hidden');
-                }
-
-                if (menuCloseIcon) {
-                    menuCloseIcon.classList.add('hidden');
-                }
+                menuCloseIcon?.classList.add('hidden');
 
             });
 
         });
 
-
         /*
         |--------------------------------------------------------------------------
-        | Navbar Background On Scroll
+        | Navbar shadow
         |--------------------------------------------------------------------------
         */
 
@@ -1457,17 +1342,568 @@
                 return;
             }
 
-            if (window.scrollY > 20) {
+            navbar.classList.toggle(
+                'shadow-2xl',
+                window.scrollY > 20
+            );
 
-                navbar.classList.add('shadow-2xl');
+        });
 
-            } else {
+        /*
+        |--------------------------------------------------------------------------
+        | HAG Gulf Map
+        |--------------------------------------------------------------------------
+        */
 
-                navbar.classList.remove('shadow-2xl');
+        (function() {
+
+            function initializeGulfMap() {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Check Leaflet
+                |--------------------------------------------------------------------------
+                */
+
+                if (typeof L === 'undefined') {
+
+                    console.error(
+                        'Leaflet.js is not loaded.'
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Find map element
+                |--------------------------------------------------------------------------
+                */
+
+                const mapElement =
+                    document.getElementById('gulf-map');
+
+                if (!mapElement) {
+
+                    console.error(
+                        'Gulf map element not found.'
+                    );
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Prevent duplicate initialization
+                |--------------------------------------------------------------------------
+                */
+
+                if (mapElement._leaflet_id) {
+                    return;
+                }
+
+                const isAr = @json($isAr);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Gulf bounds
+                |--------------------------------------------------------------------------
+                |
+                | The map is restricted to the Gulf region.
+                |
+                */
+
+                const gulfBounds = L.latLngBounds(
+                    [23.0, 47.0],
+                    [30.5, 60.5]
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Create map
+                |--------------------------------------------------------------------------
+                */
+
+                const map = L.map(
+                    'gulf-map', {
+                        zoomControl: false,
+
+                        scrollWheelZoom: true,
+
+                        dragging: true,
+
+                        doubleClickZoom: true,
+
+                        touchZoom: true,
+
+                        boxZoom: true,
+
+                        keyboard: true,
+
+                        minZoom: 5,
+
+                        maxZoom: 10,
+
+                        maxBounds: gulfBounds,
+
+                        maxBoundsViscosity: 1.0
+                    }
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Zoom control
+                |--------------------------------------------------------------------------
+                */
+
+                L.control.zoom({
+                    position: 'bottomright'
+                }).addTo(map);
+
+                /*
+                |--------------------------------------------------------------------------
+                | OpenStreetMap
+                |--------------------------------------------------------------------------
+                */
+
+                L.tileLayer(
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        minZoom: 4,
+
+                        maxZoom: 19,
+
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+                    }
+                ).addTo(map);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Initial Gulf view
+                |--------------------------------------------------------------------------
+                */
+
+                map.fitBounds(
+                    gulfBounds, {
+                        padding: [20, 20]
+                    }
+                );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Port data
+                |--------------------------------------------------------------------------
+                */
+
+                const ports = [
+
+                    {
+                        name: isAr ?
+                            'ميناء جبل علي' : 'Jebel Ali Port',
+                        country: '🇦🇪',
+                        lat: 24.9857,
+                        lng: 55.0273
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء خليفة' : 'Khalifa Port',
+                        country: '🇦🇪',
+                        lat: 24.7991,
+                        lng: 54.6703
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء راشد' : 'Port Rashid',
+                        country: '🇦🇪',
+                        lat: 25.2700,
+                        lng: 55.2900
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء الدمام' : 'Dammam Port',
+                        country: '🇸🇦',
+                        lat: 26.4300,
+                        lng: 50.1000
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء الملك عبدالله' : 'King Abdullah Port',
+                        country: '🇸🇦',
+                        lat: 22.7500,
+                        lng: 39.1000
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء صحار' : 'Sohar Port',
+                        country: '🇴🇲',
+                        lat: 24.5000,
+                        lng: 56.6200
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء حمد' : 'Hamad Port',
+                        country: '🇶🇦',
+                        lat: 24.8500,
+                        lng: 51.5500
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء خليفة بن سلمان' : 'Khalifa Bin Salman Port',
+                        country: '🇧🇭',
+                        lat: 26.0500,
+                        lng: 50.6000
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء الشويخ' : 'Shuwaikh Port',
+                        country: '🇰🇼',
+                        lat: 29.3500,
+                        lng: 47.9000
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء الشعيبة' : 'Shuaiba Port',
+                        country: '🇰🇼',
+                        lat: 28.9800,
+                        lng: 48.1700
+                    },
+
+                    {
+                        name: isAr ?
+                            'ميناء خصب' : 'Khasab Port',
+                        country: '🇴🇲',
+                        lat: 26.1800,
+                        lng: 56.2500
+                    }
+
+                ];
+
+                /*
+                |--------------------------------------------------------------------------
+                | Port icon
+                |--------------------------------------------------------------------------
+                */
+
+                const portIcon = L.divIcon({
+
+                    className: '',
+
+                    html: '<div class="port-marker"></div>',
+
+                    iconSize: [14, 14],
+
+                    iconAnchor: [7, 7]
+
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | Add ports
+                |--------------------------------------------------------------------------
+                */
+
+                ports.forEach(function(port) {
+
+                    L.marker(
+                            [port.lat, port.lng], {
+                                icon: portIcon
+                            }
+                        )
+                        .addTo(map)
+                        .bindPopup(`
+                        <div style="
+                            min-width:210px;
+                            font-family:Arial,Helvetica,sans-serif;
+                        ">
+
+                            <div style="
+                                font-size:16px;
+                                font-weight:800;
+                                color:#ffffff;
+                            ">
+                                ${port.country} ${port.name}
+                            </div>
+
+                            <div style="
+                                margin-top:7px;
+                                color:#94a3b8;
+                                font-size:12px;
+                            ">
+                                ${
+                                    isAr
+                                    ? 'ميناء ضمن شبكة HAG البحرية'
+                                    : 'Port within the HAG maritime network'
+                                }
+                            </div>
+
+                        </div>
+                    `);
+
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | Demo vessels
+                |--------------------------------------------------------------------------
+                */
+
+                const vessels = [
+
+                    {
+                        name: 'HAG DEMO 001',
+                        lat: 24.45,
+                        lng: 54.85,
+                        destination: isAr ?
+                            'جبل علي' : 'Jebel Ali',
+                        speed: '14 kn'
+                    },
+
+                    {
+                        name: 'HAG DEMO 002',
+                        lat: 25.05,
+                        lng: 52.15,
+                        destination: isAr ?
+                            'ميناء حمد' : 'Hamad Port',
+                        speed: '12 kn'
+                    },
+
+                    {
+                        name: 'HAG DEMO 003',
+                        lat: 25.70,
+                        lng: 49.80,
+                        destination: isAr ?
+                            'الدمام' : 'Dammam',
+                        speed: '11 kn'
+                    },
+
+                    {
+                        name: 'HAG DEMO 004',
+                        lat: 24.10,
+                        lng: 56.00,
+                        destination: isAr ?
+                            'صحار' : 'Sohar',
+                        speed: '15 kn'
+                    }
+
+                ];
+
+                /*
+                |--------------------------------------------------------------------------
+                | Vessel icon
+                |--------------------------------------------------------------------------
+                */
+
+                const vesselIcon = L.divIcon({
+
+                    className: '',
+
+                    html: '<div class="vessel-marker">🚢</div>',
+
+                    iconSize: [38, 38],
+
+                    iconAnchor: [19, 19],
+
+                    popupAnchor: [0, -19]
+
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | Add vessels
+                |--------------------------------------------------------------------------
+                */
+
+                vessels.forEach(function(vessel) {
+
+                    L.marker(
+                            [vessel.lat, vessel.lng], {
+                                icon: vesselIcon
+                            }
+                        )
+                        .addTo(map)
+                        .bindPopup(`
+
+                        <div style="
+                            min-width:220px;
+                            font-family:Arial,Helvetica,sans-serif;
+                        ">
+
+                            <div style="
+                                font-size:16px;
+                                font-weight:800;
+                                color:#ffffff;
+                            ">
+                                🚢 ${vessel.name}
+                            </div>
+
+                            <div style="
+                                margin-top:8px;
+                                color:#22d3ee;
+                                font-size:13px;
+                            ">
+                                ${
+                                    isAr
+                                    ? 'سفينة قيد الحركة'
+                                    : 'Vessel in transit'
+                                }
+                            </div>
+
+                            <div style="
+                                margin-top:6px;
+                                color:#94a3b8;
+                                font-size:12px;
+                            ">
+                                ${
+                                    isAr
+                                    ? 'الوجهة:'
+                                    : 'Destination:'
+                                }
+                                ${vessel.destination}
+                            </div>
+
+                            <div style="
+                                margin-top:5px;
+                                color:#94a3b8;
+                                font-size:12px;
+                            ">
+                                ${
+                                    isAr
+                                    ? 'السرعة:'
+                                    : 'Speed:'
+                                }
+                                ${vessel.speed}
+                            </div>
+
+                            <div style="
+                                margin-top:9px;
+                                color:#64748b;
+                                font-size:10px;
+                            ">
+                                ${
+                                    isAr
+                                    ? 'بيانات تجريبية للواجهة'
+                                    : 'Demo data for interface'
+                                }
+                            </div>
+
+                        </div>
+
+                    `);
+
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | Shipping routes
+                |--------------------------------------------------------------------------
+                */
+
+                const routes = [
+
+                    [
+                        [24.9857, 55.0273],
+                        [24.8500, 51.5500]
+                    ],
+
+                    [
+                        [24.9857, 55.0273],
+                        [26.4300, 50.1000]
+                    ],
+
+                    [
+                        [24.5000, 56.6200],
+                        [24.8500, 51.5500]
+                    ],
+
+                    [
+                        [24.9857, 55.0273],
+                        [25.70, 49.80]
+                    ]
+
+                ];
+
+                routes.forEach(function(route) {
+
+                    L.polyline(
+                        route, {
+                            color: '#22d3ee',
+
+                            weight: 2,
+
+                            opacity: .55,
+
+                            dashArray: '8 10'
+                        }
+                    ).addTo(map);
+
+                });
+
+                /*
+                |--------------------------------------------------------------------------
+                | Final rendering fix
+                |--------------------------------------------------------------------------
+                */
+
+                function refreshMap() {
+
+                    map.invalidateSize({
+                        pan: false
+                    });
+
+                }
+
+                setTimeout(
+                    refreshMap,
+                    100
+                );
+
+                setTimeout(
+                    refreshMap,
+                    300
+                );
+
+                setTimeout(
+                    refreshMap,
+                    800
+                );
+
+                window.addEventListener(
+                    'resize',
+                    refreshMap
+                );
 
             }
 
-        });
+            /*
+            |--------------------------------------------------------------------------
+            | Start after DOM is ready
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                document.readyState === 'loading'
+            ) {
+
+                document.addEventListener(
+                    'DOMContentLoaded',
+                    initializeGulfMap
+                );
+
+            } else {
+
+                initializeGulfMap();
+
+            }
+
+        })();
     </script>
 
 </body>

@@ -13,16 +13,17 @@ class ShipmentController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Shipment::with([
-            'originPort',
-            'destinationPort',
-            'vessel',
-        ])->where(
-            'customer_id',
-            $request->user()->customer_id
-        );
+        $query = Shipment::query()
+            ->with([
+                'originPort',
+                'destinationPort',
+                'vessel',
+            ])
+            ->where(
+                'customer_id',
+                $request->user()->customer_id
+            );
 
-        // Optional status filter
         if ($request->filled('status')) {
             $query->where(
                 'status',
@@ -47,10 +48,7 @@ class ShipmentController extends Controller
         Request $request,
         Shipment $shipment
     ): View {
-        abort_unless(
-            $shipment->customer_id === $request->user()->customer_id,
-            403
-        );
+        $this->authorizeCustomer($request, $shipment);
 
         $shipment->load([
             'originPort',
@@ -58,7 +56,7 @@ class ShipmentController extends Controller
             'vessel',
             'containers',
             'documents',
-            'events',
+            'events.port',
         ]);
 
         return view('shipments.show', [
@@ -73,18 +71,18 @@ class ShipmentController extends Controller
         Request $request,
         Shipment $shipment
     ): View {
-        abort_unless(
-            $shipment->customer_id === $request->user()->customer_id,
-            403
-        );
+        $this->authorizeCustomer($request, $shipment);
 
         $shipment->load([
+            'originPort',
+            'destinationPort',
             'vessel',
         ]);
 
         $events = $shipment
             ->events()
-            ->latest('event_date')
+            ->with('port')
+            ->orderByDesc('event_date')
             ->get();
 
         return view('shipments.tracking', [
@@ -98,10 +96,11 @@ class ShipmentController extends Controller
      */
     public function dashboard(Request $request): View
     {
-        $query = Shipment::where(
-            'customer_id',
-            $request->user()->customer_id
-        );
+        $query = Shipment::query()
+            ->where(
+                'customer_id',
+                $request->user()->customer_id
+            );
 
         $stats = [
             'total_shipments' => (clone $query)->count(),
@@ -122,5 +121,18 @@ class ShipmentController extends Controller
         return view('dashboard', [
             'stats' => $stats,
         ]);
+    }
+
+    /**
+     * Make sure the shipment belongs to the authenticated customer.
+     */
+    private function authorizeCustomer(
+        Request $request,
+        Shipment $shipment
+    ): void {
+        abort_unless(
+            $shipment->customer_id === $request->user()->customer_id,
+            403
+        );
     }
 }
