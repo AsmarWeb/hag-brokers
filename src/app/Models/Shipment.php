@@ -1,4 +1,89 @@
 <?php
+
 namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-class Shipment extends Model {protected $fillable=['customer_id','shipment_no','booking_no','origin_port_id','destination_port_id','vessel_id','cargo_type','container_type','quantity','weight','status','preferred_date','eta','actual_arrival'];protected $casts=['preferred_date'=>'date','eta'=>'date','actual_arrival'=>'datetime'];public function customer(){return $this->belongsTo(Customer::class);}public function containers(){return $this->hasMany(Container::class);}public function events(){return $this->hasMany(ShipmentEvent::class);}public function documents(){return $this->hasMany(Document::class);}public function vessel(){return $this->belongsTo(Vessel::class);}public function originPort(){return $this->belongsTo(Port::class,'origin_port_id');}public function destinationPort(){return $this->belongsTo(Port::class,'destination_port_id');}}
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Shipment extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'customer_id',
+        'carrier_id',
+        'quotation_id',
+        'vessel_id',
+        'shipment_no',
+        'booking_no',
+        'origin_port_id',
+        'destination_port_id',
+        'cargo_type',
+        'container_type',
+        'quantity',
+        'weight',
+        'preferred_date',
+        'etd',
+        'eta',
+        'actual_departure',
+        'actual_arrival',
+        'status',
+    ];
+
+    protected $casts = [
+        'quantity' => 'integer',
+        'weight' => 'decimal:2',
+        'preferred_date' => 'date',
+        'etd' => 'date',
+        'eta' => 'date',
+        'actual_departure' => 'datetime',
+        'actual_arrival' => 'datetime',
+    ];
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function carrier(): BelongsTo
+    {
+        return $this->belongsTo(Carrier::class);
+    }
+
+    public function quotation(): BelongsTo
+    {
+        return $this->belongsTo(Quotation::class);
+    }
+
+    public function vessel(): BelongsTo
+    {
+        return $this->belongsTo(Vessel::class);
+    }
+
+    public function originPort(): BelongsTo
+    {
+        return $this->belongsTo(Port::class, 'origin_port_id');
+    }
+
+    public function destinationPort(): BelongsTo
+    {
+        return $this->belongsTo(Port::class, 'destination_port_id');
+    }
+
+    public function containers(): HasMany
+    {
+        return $this->hasMany(Container::class);
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(ShipmentEvent::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+}
