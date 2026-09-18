@@ -232,10 +232,7 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
 
         // Customers
-        Route::get('/customers', [
-            AdminCustomerController::class,
-            'index',
-        ])->name('customers.index');
+        Route::resource('customers', AdminCustomerController::class);
 
 
         // Users
