@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>
+        {{ $title ?? 'Admin Dashboard' }} — HAG Brokers
+    </title>
+
+    <link rel="preconnect" href="https://fonts.bunny.net">
+
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="{{ asset('storage/favicon.png') }}">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+
+    {{-- =========================================================
+        Mobile Overlay
+    ========================================================== --}}
+    <div id="admin-mobile-overlay" class="fixed inset-0 z-40 hidden bg-slate-950/70 backdrop-blur-sm lg:hidden"
+        onclick="closeAdminSidebar()"></div>
+
+
+    {{-- =========================================================
+        Sidebar
+    ========================================================== --}}
+    <aside id="admin-sidebar"
+        class="fixed inset-y-0 start-0 z-50 flex w-72 -translate-x-full flex-col border-e border-slate-800 bg-slate-950 shadow-2xl transition-transform duration-300 lg:translate-x-0 rtl:translate-x-full rtl:lg:translate-x-0">
+
+        {{-- Brand --}}
+        <div class="flex h-20 shrink-0 items-center border-b border-slate-800 px-5">
+
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+
+                <div
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-400 text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/20">
+                    HAG
+                </div>
+
+                <div class="min-w-0">
+                    <div class="truncate text-base font-extrabold text-white">
+                        HAG Brokers
+                    </div>
+
+                    <div class="truncate text-xs font-medium text-slate-500">
+                        Admin Control Center
+                    </div>
+                </div>
+
+            </a>
+
+            {{-- Mobile close --}}
+            <button type="button" onclick="closeAdminSidebar()"
+                class="ms-auto rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white lg:hidden"
+                aria-label="Close menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+        </div>
+
+
+        {{-- Admin indicator --}}
+        <div class="px-4 pt-5">
+
+            <div class="rounded-2xl border border-cyan-400/10 bg-cyan-400/5 px-4 py-3">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-400">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2V9a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2zM8 7V5a4 4 0 118 0v2" />
+                        </svg>
+                    </div>
+
+                    <div class="min-w-0">
+
+                        <p class="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                            Administrator
+                        </p>
+
+                        <p class="mt-0.5 truncate text-xs text-slate-500">
+                            Full system access
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {{-- Navigation --}}
+        <nav class="flex-1 overflow-y-auto px-4 py-6">
+
+            {{-- Main --}}
+            <p class="mb-3 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-600">
+                Main
+            </p>
+
+            <div class="space-y-1">
+
+                {{-- Dashboard --}}
+                <a href="{{ route('admin.dashboard') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                    {{ request()->routeIs('admin.dashboard')
+                        ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                        : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                    <svg class="h-5 w-5 shrink-0
+                        {{ request()->routeIs('admin.dashboard') ? 'text-slate-950' : 'text-slate-500 group-hover:text-cyan-400' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
+                    </svg>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+                {{-- Shipments --}}
+                <a href="{{ route('admin.shipments.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                    {{ request()->routeIs('admin.shipments.*')
+                        ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                        : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                    <svg class="h-5 w-5 shrink-0
+                        {{ request()->routeIs('admin.shipments.*') ? 'text-slate-950' : 'text-slate-500 group-hover:text-cyan-400' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" />
+
+                        <circle cx="7" cy="17" r="2" stroke-width="1.7" />
+
+                        <circle cx="18" cy="17" r="2" stroke-width="1.7" />
+                    </svg>
+
+                    <span>
+                        Shipments
+                    </span>
+
+                </a>
+
+
+                {{-- Quotations --}}
+                <a href="{{ route('admin.quotations.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                    {{ request()->routeIs('admin.quotations.*')
+                        ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                        : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                    <svg class="h-5 w-5 shrink-0
+                        {{ request()->routeIs('admin.quotations.*') ? 'text-slate-950' : 'text-slate-500 group-hover:text-cyan-400' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M15 3v5h5M9 13h6M9 17h4" />
+                    </svg>
+
+                    <span>
+                        Quotations
+                    </span>
+
+                </a>
+
+
+                {{-- Customers --}}
+                <a href="{{ route('admin.customers.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                    {{ request()->routeIs('admin.customers.*')
+                        ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                        : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                    <svg class="h-5 w-5 shrink-0
+                        {{ request()->routeIs('admin.customers.*') ? 'text-slate-950' : 'text-slate-500 group-hover:text-cyan-400' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+
+                        <circle cx="9" cy="7" r="4" stroke-width="1.7" />
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                    </svg>
+
+                    <span>
+                        Customers
+                    </span>
+
+                </a>
+
+
+                {{-- Users --}}
+                <a href="{{ route('admin.users.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                    {{ request()->routeIs('admin.users.*')
+                        ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                        : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                    <svg class="h-5 w-5 shrink-0
+                        {{ request()->routeIs('admin.users.*') ? 'text-slate-950' : 'text-slate-500 group-hover:text-cyan-400' }}"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1M12 12a4 4 0 100-8 4 4 0 000 8z" />
+                    </svg>
+
+                    <span>
+                        Users
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            {{-- Operations --}}
+            <p class="mb-3 mt-8 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-600">
+                Operations
+            </p>
+
+            <div class="space-y-1">
+
+                {{-- Documents --}}
+                <a href="{{ route('shipments.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15 3v5h5" />
+                    </svg>
+
+                    <span>
+                        Documents
+                    </span>
+
+                </a>
+
+
+                {{-- Notifications --}}
+                <a href="{{ route('notifications.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+
+                    <span>
+                        Notifications
+                    </span>
+
+                </a>
+
+
+                {{-- Ports --}}
+                <a href="#"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 20h18M5 20v-8h14v8M8 12V7h8v5M10 7V4h4v3" />
+                    </svg>
+
+                    <span>
+                        Ports
+                    </span>
+
+                </a>
+
+
+                {{-- Vessels --}}
+                <a href="#"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 17l2-7h14l2 7M5 17h14M7 10V6h10v4M9 6V3h6v3" />
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M4 20c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0" />
+                    </svg>
+
+                    <span>
+                        Vessels
+                    </span>
+
+                </a>
+
+
+                {{-- Reports --}}
+                <a href="#"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M4 19V5M4 19h17M8 16v-5M12 16V7M16 16v-9M20 16V4" />
+                    </svg>
+
+                    <span>
+                        Reports
+                    </span>
+
+                </a>
+
+            </div>
+
+
+            {{-- System --}}
+            <p class="mb-3 mt-8 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-600">
+                System
+            </p>
+
+            <div class="space-y-1">
+
+                {{-- Profile --}}
+                <a href="{{ route('profile.edit') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M20 21a8 8 0 00-16 0M12 13a5 5 0 100-10 5 5 0 000 10z" />
+                    </svg>
+
+                    <span>
+                        Profile
+                    </span>
+
+                </a>
+
+
+                {{-- Home --}}
+                <a href="{{ route('home') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
+                    </svg>
+
+                    <span>
+                        View Website
+                    </span>
+
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        {{-- User / Logout --}}
+        <div class="shrink-0 border-t border-slate-800 p-4">
+
+            <div class="rounded-2xl bg-slate-900 p-3">
+
+                <div class="flex items-center gap-3">
+
+                    <div
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-400 font-extrabold text-slate-950">
+                        {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+
+                        <p class="truncate text-sm font-bold text-white">
+                            {{ auth()->user()->name ?? 'Administrator' }}
+                        </p>
+
+                        <p class="truncate text-xs text-slate-500">
+                            {{ auth()->user()->email ?? '' }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form method="POST" action="{{ route('logout') }}" class="mt-3">
+                    @csrf
+
+                    <button type="submit"
+                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
+
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 00-2-2h-6" />
+                        </svg>
+
+                        <span>
+                            Logout
+                        </span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    {{-- =========================================================
+        Main Wrapper
+    ========================================================== --}}
+    <div class="min-h-screen lg:ms-72 rtl:lg:ms-0 rtl:lg:me-72">
+
+        {{-- =====================================================
+            Top Header
+        ====================================================== --}}
+        <header
+            class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
+
+            <div class="flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
+
+                {{-- Left --}}
+                <div class="flex items-center gap-3">
+
+                    {{-- Mobile menu --}}
+                    <button type="button" onclick="openAdminSidebar()"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-cyan-300 hover:text-cyan-600 lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
+                        aria-label="Open menu">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+
+
+                    {{-- Mobile brand --}}
+                    <div class="flex items-center gap-3 lg:hidden">
+
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400 text-xs font-black text-slate-950">
+                            HAG
+                        </div>
+
+                        <div class="hidden sm:block">
+                            <p class="text-sm font-extrabold text-slate-900 dark:text-white">
+                                HAG Brokers
+                            </p>
+
+                            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                                Admin
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Right --}}
+                <div class="flex items-center gap-2 sm:gap-3">
+
+                    {{-- Language --}}
+                    <div
+                        class="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 sm:flex">
+
+                        <span class="text-slate-400">
+                            {{ __('messages.language') }}
+                        </span>
+
+                        <a href="{{ route('language.switch', 'en') }}"
+                            class="{{ app()->getLocale() === 'en'
+                                ? 'text-cyan-600 dark:text-cyan-400'
+                                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }}">
+                            EN
+                        </a>
+
+                        <span class="text-slate-300 dark:text-slate-700">
+                            |
+                        </span>
+
+                        <a href="{{ route('language.switch', 'ar') }}"
+                            class="{{ app()->getLocale() === 'ar'
+                                ? 'text-cyan-600 dark:text-cyan-400'
+                                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }}">
+                            AR
+                        </a>
+
+                    </div>
+
+
+                    {{-- Notifications --}}
+                    <a href="{{ route('notifications.index') }}"
+                        class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-300 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
+                        aria-label="Notifications">
+
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+
+                    </a>
+
+
+                    {{-- User --}}
+                    <div
+                        class="hidden items-center gap-3 border-s border-slate-200 ps-3 dark:border-slate-800 sm:flex">
+
+                        <div class="text-end">
+
+                            <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                {{ auth()->user()->name ?? 'Administrator' }}
+                            </p>
+
+                            <p class="text-xs text-slate-400">
+                                Administrator
+                            </p>
+
+                        </div>
+
+                        <div
+                            class="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-400 text-sm font-extrabold text-slate-950">
+                            {{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        {{-- =====================================================
+            Page Content
+        ====================================================== --}}
+        <main>
+
+            @if (isset($header))
+                <div class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                    <div class="px-4 py-6 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </div>
+            @endif
+
+            {{ $slot }}
+
+        </main>
+
+    </div>
+
+
+    {{-- =========================================================
+        Sidebar JavaScript
+    ========================================================== --}}
+    <script>
+        function openAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('admin-mobile-overlay');
+
+            if (!sidebar || !overlay) {
+                return;
+            }
+
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.remove('rtl:translate-x-full');
+
+            overlay.classList.remove('hidden');
+
+            document.body.classList.add('overflow-hidden');
+        }
+
+
+        function closeAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('admin-mobile-overlay');
+
+            if (!sidebar || !overlay) {
+                return;
+            }
+
+            sidebar.classList.add('-translate-x-full');
+
+            overlay.classList.add('hidden');
+
+            document.body.classList.remove('overflow-hidden');
+        }
+
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAdminSidebar();
+            }
+        });
+
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                const overlay = document.getElementById('admin-mobile-overlay');
+
+                if (overlay) {
+                    overlay.classList.add('hidden');
+                }
+
+                document.body.classList.remove('overflow-hidden');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
