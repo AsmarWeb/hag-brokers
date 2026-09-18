@@ -9,9 +9,6 @@ use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
-    /**
-     * Display the user's notifications.
-     */
     public function index(Request $request): View
     {
         $notifications = Notification::query()
@@ -24,9 +21,6 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Display a single notification.
-     */
     public function show(
         Request $request,
         Notification $notification
@@ -36,7 +30,6 @@ class NotificationController extends Controller
             403
         );
 
-        // Mark as read when the user opens it.
         if (! $notification->is_read) {
             $notification->update([
                 'is_read' => true,
@@ -48,9 +41,6 @@ class NotificationController extends Controller
         ]);
     }
 
-    /**
-     * Mark a notification as read.
-     */
     public function markRead(
         Request $request,
         Notification $notification
@@ -70,11 +60,9 @@ class NotificationController extends Controller
         );
     }
 
-    /**
-     * Mark all notifications as read.
-     */
-    public function markAllRead(Request $request): RedirectResponse
-    {
+    public function markAllRead(
+        Request $request
+    ): RedirectResponse {
         Notification::query()
             ->where('user_id', $request->user()->id)
             ->where('is_read', false)
@@ -88,9 +76,6 @@ class NotificationController extends Controller
         );
     }
 
-    /**
-     * Delete a notification.
-     */
     public function destroy(
         Request $request,
         Notification $notification
