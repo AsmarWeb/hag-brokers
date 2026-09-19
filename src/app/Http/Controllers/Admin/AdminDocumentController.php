@@ -16,13 +16,20 @@ class AdminDocumentController extends Controller
         $documents = Document::query()
             ->with([
                 'shipment',
+                'uploadedBy',
             ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
+
+                    // Search document fields
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('type', 'like', "%{$search}%")
+                        ->orWhere('original_name', 'like', "%{$search}%")
+
+                        // Search shipment fields
                         ->orWhereHas('shipment', function ($shipment) use ($search) {
-                            $shipment->where('reference_no', 'like', "%{$search}%");
+                            $shipment->where('shipment_no', 'like', "%{$search}%")
+                                ->orWhere('booking_no', 'like', "%{$search}%");
                         });
                 });
             })

@@ -138,16 +138,8 @@
 
 
         {{-- Edit Form --}}
-        @include('admin.shipments.form', [
-            'action' => route('admin.shipments.update', $shipment),
-            'method' => 'PUT',
-            'shipment' => $shipment,
-            'customers' => $customers,
-            'quotations' => $quotations,
-            'carriers' => $carriers,
-            'vessels' => $vessels,
-            'ports' => $ports,
-        ])
+        <x-admin.shipments.form :action="route('admin.shipments.update', $shipment)" method="PUT" :shipment="$shipment" :customers="$customers" :quotations="$quotations"
+            :carriers="$carriers" :vessels="$vessels" :ports="$ports" />
 
 
         {{-- Danger Zone --}}

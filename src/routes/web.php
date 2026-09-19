@@ -237,14 +237,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         // Customers
         Route::resource('customers', AdminCustomerController::class);
 
-        Route::resource('ports', AdminPortController::class)
-            ->except(['show']);
+        Route::resource('ports', AdminPortController::class);
 
-        Route::resource('carriers', AdminCarrierController::class)
-            ->except(['show']);
+        Route::resource('carriers', AdminCarrierController::class);
 
-        Route::resource('vessels', AdminVesselController::class)
-            ->except(['show']);
+        Route::resource('vessels', AdminVesselController::class);
 
 
         // Users

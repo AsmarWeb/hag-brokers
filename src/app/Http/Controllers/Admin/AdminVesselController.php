@@ -93,6 +93,22 @@ class AdminVesselController extends Controller
             ->with('success', 'Vessel created successfully.');
     }
 
+    public function show(Vessel $vessel)
+    {
+        $vessel->load([
+            'carrier',
+            'positions' => function ($query) {
+                $query->latest('recorded_at');
+            },
+            'portCalls.port',
+            'quotationOffers.quotation',
+            'quotationOffers.carrier',
+            'shipments',
+        ]);
+
+        return view('admin.vessels.show', compact('vessel'));
+    }
+
     public function edit(Vessel $vessel): View
     {
         $carriers = Carrier::query()
