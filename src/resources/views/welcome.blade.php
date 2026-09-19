@@ -1219,7 +1219,7 @@
 
                     <div class="mt-5 space-y-3 text-sm text-slate-500">
 
-                        <a href="#contact" class="block hover:text-cyan-300">
+                        <a href="{{ route('quotations.create') }}" class="block hover:text-cyan-300">
                             {{ $isAr ? 'طلب عرض شحن' : 'Request a Quote' }}
                         </a>
 
@@ -1259,10 +1259,10 @@
 
     <script>
         /*
-                    |--------------------------------------------------------------------------
-                    | Language menu
-                    |--------------------------------------------------------------------------
-                    */
+                            |--------------------------------------------------------------------------
+                            | Language menu
+                            |--------------------------------------------------------------------------
+                            */
 
         function toggleLanguageMenu() {
             const dropdown = document.getElementById('language-dropdown');
