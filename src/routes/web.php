@@ -211,15 +211,10 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
 
         // Shipments
-        Route::get('/shipments', [
-            AdminShipmentController::class,
-            'index',
-        ])->name('shipments.index');
-
-        Route::get('/shipments/{shipment}', [
-            AdminShipmentController::class,
-            'show',
-        ])->name('shipments.show');
+        Route::resource(
+            'shipments',
+            AdminShipmentController::class
+        );
 
 
         // Quotations
@@ -241,6 +236,15 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
         // Customers
         Route::resource('customers', AdminCustomerController::class);
+
+        Route::resource('ports', AdminPortController::class)
+            ->except(['show']);
+
+        Route::resource('carriers', AdminCarrierController::class)
+            ->except(['show']);
+
+        Route::resource('vessels', AdminVesselController::class)
+            ->except(['show']);
 
 
         // Users
@@ -268,21 +272,6 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             AdminNotificationController::class,
             'index',
         ])->name('notifications.index');
-
-        Route::get('/ports', [
-            AdminPortController::class,
-            'index',
-        ])->name('ports.index');
-
-        Route::get('/carriers', [
-            AdminCarrierController::class,
-            'index',
-        ])->name('carriers.index');
-
-        Route::get('/vessels', [
-            AdminVesselController::class,
-            'index',
-        ])->name('vessels.index');
 
         Route::get('/reports', [
             AdminReportController::class,

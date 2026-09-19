@@ -1,469 +1,458 @@
 <x-admin-layout>
+
     <div class="space-y-6">
 
         {{-- Header --}}
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
 
             <div class="flex items-start gap-4">
 
-                {{-- Back --}}
-                <a href="{{ route('admin.customers.index') }}"
-                    class="mt-1 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-900"
-                    title="Back to customers">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5m7 7-7-7 7-7" />
-                    </svg>
-                </a>
+                <div
+                    class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-cyan-400/10 text-2xl font-black text-cyan-400">
+                    {{ strtoupper(substr($customer->company_name, 0, 1)) }}
+                </div>
 
                 <div>
-                    <p class="text-sm font-medium text-blue-600">
-                        HAG Brokers
-                    </p>
 
-                    <div class="mt-1 flex flex-wrap items-center gap-3">
-                        <h1 class="text-2xl font-bold tracking-tight text-slate-900">
-                            {{ $customer->company_name ?: 'Unnamed Company' }}
-                        </h1>
-
-                        @if ($customer->is_active)
-                            <span
-                                class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                Active
-                            </span>
-                        @else
-                            <span
-                                class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                                <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-                                Inactive
-                            </span>
-                        @endif
+                    <div class="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-400">
+                        Customer #{{ $customer->id }}
                     </div>
 
-                    <p class="mt-1 text-sm text-slate-500">
-                        Customer #{{ $customer->id }}
+                    <h1 class="text-3xl font-black text-white">
+                        {{ $customer->company_name }}
+                    </h1>
+
+                    <p class="mt-2 text-sm text-slate-500">
+                        {{ $customer->contact_person ?: 'No contact person' }}
                     </p>
+
                 </div>
 
             </div>
 
-
-            {{-- Actions --}}
-            <div class="flex flex-wrap items-center gap-2">
-
-                @if ($customer->email)
-                    <a href="mailto:{{ $customer->email }}"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3 7.5 12 13l9-5.5M4.5 19.5h15A1.5 1.5 0 0 0 21 18V6a1.5 1.5 0 0 0-1.5-1.5h-15A1.5 1.5 0 0 0 3 6v12a1.5 1.5 0 0 0 1.5 1.5Z" />
-                        </svg>
-                        Email
-                    </a>
-                @endif
+            <div class="flex flex-wrap gap-3">
 
                 <a href="{{ route('admin.customers.edit', $customer) }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m16.862 4.487 2.651 2.651M4 20l4.5-1 10.313-10.313a1.875 1.875 0 0 0-2.652-2.652L5.849 16.348 4 20Z" />
-                    </svg>
+                    class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
                     Edit Customer
                 </a>
 
+                <a href="{{ route('admin.customers.index') }}"
+                    class="rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-900 hover:text-white">
+                    ← Customers
+                </a>
+
             </div>
 
         </div>
 
+        {{-- Status --}}
+        <div>
+            @if ($customer->is_active)
+                <span
+                    class="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
+                    ● Active Customer
+                </span>
+            @else
+                <span
+                    class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-300">
+                    ● Inactive Customer
+                </span>
+            @endif
+        </div>
 
-        {{-- Success Message --}}
-        @if (session('success'))
-            <div
-                class="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-                <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
-                </svg>
+        {{-- Overview --}}
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-                {{ session('success') }}
-            </div>
-        @endif
-
-
-        {{-- Customer Overview --}}
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-            {{-- Main Information --}}
-            <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div class="border-b border-slate-100 px-6 py-5">
-                    <h2 class="text-base font-semibold text-slate-900">
-                        Customer Information
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Contact and company details.
-                    </p>
+            <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Users
                 </div>
 
+                <div class="mt-2 text-3xl font-black text-white">
+                    {{ $customer->users->count() }}
+                </div>
+            </div>
 
-                <div class="grid grid-cols-1 gap-x-8 gap-y-6 px-6 py-6 sm:grid-cols-2">
+            <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Quotations
+                </div>
 
-                    {{-- Company --}}
+                <div class="mt-2 text-3xl font-black text-white">
+                    {{ $customer->quotations->count() }}
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Shipments
+                </div>
+
+                <div class="mt-2 text-3xl font-black text-white">
+                    {{ $customer->shipments->count() }}
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                    Country
+                </div>
+
+                <div class="mt-2 text-3xl font-black text-cyan-400">
+                    {{ strtoupper($customer->country_code) }}
+                </div>
+            </div>
+
+        </div>
+
+        {{-- Company Details --}}
+        <div class="grid gap-6 lg:grid-cols-2">
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
+
+                <h2 class="mb-5 text-lg font-black text-white">
+                    Company Details
+                </h2>
+
+                <div class="space-y-4">
+
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-                            Company Name
-                        </p>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                            Company
+                        </div>
 
-                        <p class="mt-1.5 text-sm font-semibold text-slate-900">
-                            {{ $customer->company_name ?: '—' }}
-                        </p>
+                        <div class="mt-1 text-sm font-semibold text-slate-200">
+                            {{ $customer->company_name }}
+                        </div>
                     </div>
 
-
-                    {{-- Contact Person --}}
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
                             Contact Person
-                        </p>
+                        </div>
 
-                        <p class="mt-1.5 text-sm font-semibold text-slate-900">
+                        <div class="mt-1 text-sm font-semibold text-slate-200">
                             {{ $customer->contact_person ?: '—' }}
-                        </p>
+                        </div>
                     </div>
 
-
-                    {{-- Email --}}
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-                            Email Address
-                        </p>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                            Email
+                        </div>
 
-                        @if ($customer->email)
-                            <a href="mailto:{{ $customer->email }}"
-                                class="mt-1.5 block text-sm font-semibold text-blue-600 hover:text-blue-700">
-                                {{ $customer->email }}
-                            </a>
-                        @else
-                            <p class="mt-1.5 text-sm font-semibold text-slate-900">
-                                —
-                            </p>
-                        @endif
+                        <div class="mt-1 text-sm font-semibold text-slate-200">
+                            {{ $customer->email ?: '—' }}
+                        </div>
                     </div>
 
-
-                    {{-- Phone --}}
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
                             Phone
-                        </p>
+                        </div>
 
-                        @if ($customer->phone)
-                            <a href="tel:{{ $customer->phone }}"
-                                class="mt-1.5 block text-sm font-semibold text-slate-900 hover:text-blue-600">
-                                {{ $customer->phone }}
-                            </a>
-                        @else
-                            <p class="mt-1.5 text-sm font-semibold text-slate-900">
-                                —
-                            </p>
-                        @endif
+                        <div class="mt-1 text-sm font-semibold text-slate-200">
+                            {{ $customer->phone ?: '—' }}
+                        </div>
                     </div>
 
-
-                    {{-- Country --}}
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-                            Country
-                        </p>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
+                            Location
+                        </div>
 
-                        <p class="mt-1.5 text-sm font-semibold text-slate-900">
-                            {{ $customer->country_code ?: '—' }}
-                        </p>
-                    </div>
-
-
-                    {{-- City --}}
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-                            City
-                        </p>
-
-                        <p class="mt-1.5 text-sm font-semibold text-slate-900">
+                        <div class="mt-1 text-sm font-semibold text-slate-200">
                             {{ $customer->city ?: '—' }}
-                        </p>
+                            ·
+                            {{ strtoupper($customer->country_code) }}
+                        </div>
                     </div>
 
-
-                    {{-- Customer ID --}}
                     <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
-                            Customer ID
-                        </p>
-
-                        <p class="mt-1.5 text-sm font-semibold text-slate-900">
-                            #{{ $customer->id }}
-                        </p>
-                    </div>
-
-
-                    {{-- Created --}}
-                    <div>
-                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
                             Created
-                        </p>
+                        </div>
 
-                        <p class="mt-1.5 text-sm font-semibold text-slate-900">
-                            {{ $customer->created_at?->format('d M Y, H:i') ?? '—' }}
-                        </p>
+                        <div class="mt-1 text-sm font-semibold text-slate-200">
+                            {{ $customer->created_at?->format('d M Y, H:i') }}
+                        </div>
                     </div>
 
                 </div>
 
             </div>
 
+            {{-- Users --}}
+            <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-6">
 
-            {{-- Customer Summary --}}
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="mb-5 flex items-center justify-between">
 
-                <div class="border-b border-slate-100 px-6 py-5">
-                    <h2 class="text-base font-semibold text-slate-900">
-                        Customer Summary
-                    </h2>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        Account activity overview.
-                    </p>
-                </div>
-
-
-                <div class="space-y-4 p-6">
-
-                    {{-- Users --}}
-                    <div class="flex items-center justify-between rounded-xl bg-slate-50 p-4">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                    <circle cx="9" cy="7" r="4" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                                </svg>
-                            </div>
-
-                            <div>
-                                <p class="text-sm font-medium text-slate-600">
-                                    Users
-                                </p>
-                                <p class="text-xs text-slate-400">
-                                    Account users
-                                </p>
-                            </div>
-                        </div>
-
-                        <span class="text-xl font-bold text-slate-900">
-                            {{ $customer->users->count() }}
-                        </span>
-                    </div>
-
-
-                    {{-- Quotations --}}
-                    <div class="flex items-center justify-between rounded-xl bg-slate-50 p-4">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8M8 11h8M8 15h5" />
-                                </svg>
-                            </div>
-
-                            <div>
-                                <p class="text-sm font-medium text-slate-600">
-                                    Quotations
-                                </p>
-                                <p class="text-xs text-slate-400">
-                                    Customer quotes
-                                </p>
-                            </div>
-                        </div>
-
-                        <span class="text-xl font-bold text-slate-900">
-                            {{ $customer->quotations->count() }}
-                        </span>
-                    </div>
-
-
-                    {{-- Shipments --}}
-                    <div class="flex items-center justify-between rounded-xl bg-slate-50 p-4">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 7h11v10H3zM14 10h4l3 3v4h-7z" />
-                                    <circle cx="7" cy="19" r="2" />
-                                    <circle cx="18" cy="19" r="2" />
-                                </svg>
-                            </div>
-
-                            <div>
-                                <p class="text-sm font-medium text-slate-600">
-                                    Shipments
-                                </p>
-                                <p class="text-xs text-slate-400">
-                                    Customer shipments
-                                </p>
-                            </div>
-                        </div>
-
-                        <span class="text-xl font-bold text-slate-900">
-                            {{ $customer->shipments->count() }}
-                        </span>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- Users --}}
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-            <div
-                class="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-
-                <div>
-                    <h2 class="text-base font-semibold text-slate-900">
+                    <h2 class="text-lg font-black text-white">
                         Customer Users
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
-                        Users associated with this customer account.
-                    </p>
+                    <span class="rounded-lg bg-slate-900 px-3 py-1 text-xs font-bold text-slate-400">
+                        {{ $customer->users->count() }}
+                    </span>
+
                 </div>
 
-                <span
-                    class="inline-flex w-fit items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                    {{ $customer->users->count() }} Users
-                </span>
+                <div class="space-y-3">
+
+                    @forelse($customer->users as $user)
+                        <div
+                            class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+
+                            <div>
+
+                                <div class="font-bold text-white">
+                                    {{ $user->name }}
+                                </div>
+
+                                <div class="mt-1 text-xs text-slate-500">
+                                    {{ $user->email }}
+                                </div>
+
+                            </div>
+
+                            <span class="rounded-lg bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-300">
+                                {{ $user->role }}
+                            </span>
+
+                        </div>
+
+                    @empty
+
+                        <div
+                            class="rounded-xl border border-dashed border-slate-800 p-6 text-center text-sm text-slate-600">
+                            No users assigned to this customer.
+                        </div>
+                    @endforelse
+
+                </div>
 
             </div>
 
+        </div>
 
-            @if ($customer->users->count())
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-100">
+        {{-- Quotations --}}
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/70">
 
-                        <thead class="bg-slate-50">
+            <div class="border-b border-slate-800 p-6">
+
+                <h2 class="text-lg font-black text-white">
+                    Quotations
+                </h2>
+
+            </div>
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full min-w-[850px] text-left">
+
+                    <thead class="border-b border-slate-800 bg-slate-900/50">
+
+                        <tr>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Reference
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Route
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Cargo
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-800">
+
+                        @forelse($customer->quotations as $quotation)
                             <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    User
-                                </th>
 
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    Email
-                                </th>
+                                <td class="px-5 py-4 font-bold text-cyan-400">
+                                    {{ $quotation->reference_no }}
+                                </td>
 
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                    Created
-                                </th>
+                                <td class="px-5 py-4">
+
+                                    <div class="text-sm text-slate-300">
+                                        {{ $quotation->originPort?->name ?: '—' }}
+                                    </div>
+
+                                    <div class="my-1 text-xs text-slate-600">
+                                        ↓
+                                    </div>
+
+                                    <div class="text-sm text-slate-300">
+                                        {{ $quotation->destinationPort?->name ?: '—' }}
+                                    </div>
+
+                                </td>
+
+                                <td class="px-5 py-4">
+
+                                    <div class="text-sm text-slate-300">
+                                        {{ $quotation->cargo_type ?: '—' }}
+                                    </div>
+
+                                    <div class="mt-1 text-xs text-slate-500">
+                                        {{ $quotation->container_type ?: '—' }}
+                                        ·
+                                        Qty {{ $quotation->quantity }}
+                                    </div>
+
+                                </td>
+
+                                <td class="px-5 py-4">
+
+                                    <span class="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-slate-300">
+                                        {{ ucfirst($quotation->status) }}
+                                    </span>
+
+                                </td>
+
                             </tr>
-                        </thead>
 
-                        <tbody class="divide-y divide-slate-100">
+                        @empty
 
-                            @foreach ($customer->users as $user)
-                                <tr class="hover:bg-slate-50">
+                            <tr>
 
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
+                                <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-600">
+                                    No quotations found.
+                                </td>
 
-                                            <div
-                                                class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-blue-700">
-                                                {{ strtoupper(substr($user->name ?? 'U', 0, 1)) }}
-                                            </div>
+                            </tr>
+                        @endforelse
 
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-900">
-                                                    {{ $user->name ?? 'Unnamed User' }}
-                                                </p>
+                    </tbody>
 
-                                                <p class="text-xs text-slate-400">
-                                                    User #{{ $user->id }}
-                                                </p>
-                                            </div>
+                </table>
 
-                                        </div>
-                                    </td>
-
-                                    <td class="px-6 py-4 text-sm text-slate-600">
-                                        {{ $user->email ?? '—' }}
-                                    </td>
-
-                                    <td class="px-6 py-4 text-sm text-slate-600">
-                                        {{ $user->created_at?->format('d M Y') ?? '—' }}
-                                    </td>
-
-                                </tr>
-                            @endforeach
-
-                        </tbody>
-
-                    </table>
-                </div>
-            @else
-                <div class="px-6 py-12 text-center">
-                    <p class="text-sm font-medium text-slate-900">
-                        No users associated
-                    </p>
-
-                    <p class="mt-1 text-sm text-slate-500">
-                        This customer does not have any users yet.
-                    </p>
-                </div>
-
-            @endif
+            </div>
 
         </div>
 
+        {{-- Shipments --}}
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/70">
 
-        {{-- Danger Zone --}}
-        <div class="rounded-2xl border border-red-200 bg-white shadow-sm">
+            <div class="border-b border-slate-800 p-6">
 
-            <div class="px-6 py-5">
-
-                <h2 class="text-base font-semibold text-red-700">
-                    Danger Zone
+                <h2 class="text-lg font-black text-white">
+                    Shipments
                 </h2>
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Permanently remove this customer and its account record.
-                </p>
+            </div>
 
-                <form method="POST" action="{{ route('admin.customers.destroy', $customer) }}" class="mt-4"
-                    onsubmit="return confirm('Are you sure you want to delete this customer? This action cannot be undone.')">
+            <div class="overflow-x-auto">
 
-                    @csrf
-                    @method('DELETE')
+                <table class="w-full min-w-[950px] text-left">
 
-                    <button type="submit"
-                        class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-100">
-                        Delete Customer
-                    </button>
+                    <thead class="border-b border-slate-800 bg-slate-900/50">
 
-                </form>
+                        <tr>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Shipment
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Route
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Carrier
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Vessel
+                            </th>
+
+                            <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-800">
+
+                        @forelse($customer->shipments as $shipment)
+                            <tr>
+
+                                <td class="px-5 py-4">
+
+                                    <div class="font-bold text-cyan-400">
+                                        {{ $shipment->shipment_no }}
+                                    </div>
+
+                                    @if ($shipment->booking_no)
+                                        <div class="mt-1 text-xs text-slate-600">
+                                            Booking: {{ $shipment->booking_no }}
+                                        </div>
+                                    @endif
+
+                                </td>
+
+                                <td class="px-5 py-4">
+
+                                    <div class="text-sm text-slate-300">
+                                        {{ $shipment->originPort?->name ?: '—' }}
+                                    </div>
+
+                                    <div class="my-1 text-xs text-slate-600">
+                                        ↓
+                                    </div>
+
+                                    <div class="text-sm text-slate-300">
+                                        {{ $shipment->destinationPort?->name ?: '—' }}
+                                    </div>
+
+                                </td>
+
+                                <td class="px-5 py-4 text-sm text-slate-300">
+                                    {{ $shipment->carrier?->name ?: '—' }}
+                                </td>
+
+                                <td class="px-5 py-4 text-sm text-slate-300">
+                                    {{ $shipment->vessel?->name ?: '—' }}
+                                </td>
+
+                                <td class="px-5 py-4">
+
+                                    <span class="rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-slate-300">
+                                        {{ ucfirst(str_replace('_', ' ', $shipment->status)) }}
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="5" class="px-5 py-10 text-center text-sm text-slate-600">
+                                    No shipments found.
+                                </td>
+
+                            </tr>
+                        @endforelse
+
+                    </tbody>
+
+                </table>
 
             </div>
 

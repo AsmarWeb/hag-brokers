@@ -2,203 +2,229 @@
     <div class="space-y-6">
 
         {{-- Header --}}
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm font-medium text-blue-600">
-                    HAG Brokers
-                </p>
+        <div class="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
 
-                <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+            <div>
+                <div class="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-400">
+                    HAG Brokers
+                </div>
+
+                <h1 class="text-3xl font-black text-white">
                     Customers
                 </h1>
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Manage customer accounts connected to HAG Brokers.
+                <p class="mt-2 text-sm text-slate-500">
+                    Manage HAG Brokers customers and their company accounts.
                 </p>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span
-                    class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
-                    {{ $customers->total() }} Customers
-                </span>
-            </div>
+            <a href="{{ route('admin.customers.create') }}"
+                class="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/10 transition hover:bg-cyan-300">
+                + Add Customer
+            </a>
+
         </div>
 
+        {{-- Flash Messages --}}
+        @if (session('success'))
+            <div
+                class="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-4 text-sm font-bold text-emerald-300">
+                {{ session('success') }}
+            </div>
+        @endif
 
-        {{-- Search / Filters --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <form method="GET" action="{{ route('admin.customers.index') }}" class="flex flex-col gap-3 sm:flex-row">
+        @if (session('error'))
+            <div class="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-sm font-bold text-red-300">
+                {{ session('error') }}
+            </div>
+        @endif
 
-                <div class="relative flex-1">
+        {{-- Filters --}}
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
 
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="m21 21-4.35-4.35m1.35-5.4a6.75 6.75 0 1 1-13.5 0 6.75 6.75 0 0 1 13.5 0Z" />
-                        </svg>
-                    </div>
+            <form method="GET" action="{{ route('admin.customers.index') }}"
+                class="grid gap-3 md:grid-cols-[1fr_180px_auto]">
 
-                    <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Search company, contact person, email..."
-                        class="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
-                </div>
+                <input type="search" name="search" value="{{ request('search') }}"
+                    placeholder="Search company, contact, email, phone..."
+                    class="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-400">
+
+                <select name="status"
+                    class="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
+                    <option value="">All Statuses</option>
+                    <option value="active" @selected(request('status') === 'active')>
+                        Active
+                    </option>
+
+                    <option value="inactive" @selected(request('status') === 'inactive')>
+                        Inactive
+                    </option>
+                </select>
 
                 <button type="submit"
-                    class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
+                    class="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-700">
                     Search
                 </button>
 
-                @if (request()->filled('search'))
-                    <a href="{{ route('admin.customers.index') }}"
-                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                        Clear
-                    </a>
-                @endif
-
             </form>
+
         </div>
 
+        {{-- Table --}}
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70">
 
-        {{-- Customers Table --}}
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="overflow-x-auto">
 
-            {{-- Desktop --}}
-            <div class="hidden overflow-x-auto md:block">
+                <table class="w-full min-w-[1000px] text-left">
 
-                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="border-b border-slate-800 bg-slate-900/70">
 
-                    <thead class="bg-slate-50">
                         <tr>
 
-                            <th scope="col"
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
                                 Customer
                             </th>
 
-                            <th scope="col"
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Email
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
+                                Contact
                             </th>
 
-                            <th scope="col"
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Customer ID
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
+                                Location
                             </th>
 
-                            <th scope="col"
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Joined
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
+                                Activity
                             </th>
 
-                            <th scope="col"
-                                class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
                                 Status
                             </th>
 
+                            <th class="px-5 py-4 text-right text-xs font-black uppercase tracking-wider text-slate-500">
+                                Actions
+                            </th>
+
                         </tr>
+
                     </thead>
 
+                    <tbody class="divide-y divide-slate-800">
 
-                    <tbody class="divide-y divide-slate-100 bg-white">
-
-                        @forelse ($customers as $customer)
-                            <tr class="transition hover:bg-slate-50">
+                        @forelse($customers as $customer)
+                            <tr class="transition hover:bg-slate-900/60">
 
                                 {{-- Customer --}}
-                                <td class="whitespace-nowrap px-6 py-4">
+                                <td class="px-5 py-5">
 
                                     <div class="flex items-center gap-3">
 
-                                        {{-- Avatar --}}
                                         <div
-                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700">
-                                            {{ strtoupper(substr($customer->company_name ?? 'C', 0, 1)) }}
+                                            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-400/10 font-black text-cyan-400">
+                                            {{ strtoupper(substr($customer->company_name, 0, 1)) }}
                                         </div>
 
-
                                         <div>
+                                            <a href="{{ route('admin.customers.show', $customer) }}"
+                                                class="font-bold text-white hover:text-cyan-400">
+                                                {{ $customer->company_name }}
+                                            </a>
 
-                                            {{-- Company --}}
-                                            <div class="font-semibold text-slate-900">
-                                                {{ $customer->company_name ?: 'Unnamed Company' }}
+                                            <div class="mt-1 text-xs text-slate-600">
+                                                ID #{{ $customer->id }}
                                             </div>
-
-                                            {{-- Contact Person --}}
-                                            <div class="text-xs text-slate-500">
-                                                {{ $customer->contact_person ?: 'No contact person' }}
-                                            </div>
-
                                         </div>
 
                                     </div>
 
                                 </td>
 
+                                {{-- Contact --}}
+                                <td class="px-5 py-5">
 
-                                {{-- Email --}}
-                                <td class="whitespace-nowrap px-6 py-4">
+                                    <div class="text-sm font-semibold text-slate-300">
+                                        {{ $customer->contact_person ?: '—' }}
+                                    </div>
 
-                                    @if ($customer->email)
-                                        <a href="mailto:{{ $customer->email }}"
-                                            class="text-sm text-slate-700 transition hover:text-blue-600">
-                                            {{ $customer->email }}
-                                        </a>
-                                    @else
-                                        <span class="text-sm text-slate-400">
-                                            —
+                                    <div class="mt-1 text-xs text-slate-500">
+                                        {{ $customer->email ?: 'No email' }}
+                                    </div>
+
+                                    @if ($customer->phone)
+                                        <div class="mt-1 text-xs text-slate-600">
+                                            {{ $customer->phone }}
+                                        </div>
+                                    @endif
+
+                                </td>
+
+                                {{-- Location --}}
+                                <td class="px-5 py-5">
+
+                                    <div class="text-sm text-slate-300">
+                                        {{ $customer->city ?: '—' }}
+                                    </div>
+
+                                    <div class="mt-1 text-xs font-bold text-cyan-400">
+                                        {{ strtoupper($customer->country_code) }}
+                                    </div>
+
+                                </td>
+
+                                {{-- Activity --}}
+                                <td class="px-5 py-5">
+
+                                    <div class="flex flex-wrap gap-2">
+
+                                        <span class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs text-slate-400">
+                                            {{ $customer->users_count }} users
                                         </span>
-                                    @endif
+
+                                        <span class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs text-slate-400">
+                                            {{ $customer->quotations_count }} quotes
+                                        </span>
+
+                                        <span class="rounded-lg bg-slate-900 px-2.5 py-1 text-xs text-slate-400">
+                                            {{ $customer->shipments_count }} shipments
+                                        </span>
+
+                                    </div>
 
                                 </td>
-
-
-                                {{-- Customer ID --}}
-                                <td class="whitespace-nowrap px-6 py-4">
-
-                                    <span
-                                        class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
-                                        #{{ $customer->id }}
-                                    </span>
-
-                                </td>
-
-
-                                {{-- Joined --}}
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-
-                                    @if ($customer->created_at)
-                                        <div class="font-medium text-slate-700">
-                                            {{ $customer->created_at->format('d M Y') }}
-                                        </div>
-
-                                        <div class="text-xs text-slate-400">
-                                            {{ $customer->created_at->format('H:i') }}
-                                        </div>
-                                    @else
-                                        —
-                                    @endif
-
-                                </td>
-
 
                                 {{-- Status --}}
-                                <td class="whitespace-nowrap px-6 py-4 text-right">
+                                <td class="px-5 py-5">
 
                                     @if ($customer->is_active)
                                         <span
-                                            class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                            class="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
                                             Active
                                         </span>
                                     @else
                                         <span
-                                            class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                                            <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
+                                            class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-300">
                                             Inactive
                                         </span>
                                     @endif
+
+                                </td>
+
+                                {{-- Actions --}}
+                                <td class="px-5 py-5">
+
+                                    <div class="flex items-center justify-end gap-2">
+
+                                        <a href="{{ route('admin.customers.show', $customer) }}"
+                                            class="rounded-lg border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
+                                            View
+                                        </a>
+
+                                        <a href="{{ route('admin.customers.edit', $customer) }}"
+                                            class="rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 text-xs font-bold text-cyan-300 transition hover:bg-cyan-400/10">
+                                            Edit
+                                        </a>
+
+                                    </div>
 
                                 </td>
 
@@ -208,33 +234,29 @@
 
                             <tr>
 
-                                <td colspan="5" class="px-6 py-16 text-center">
+                                <td colspan="6" class="px-5 py-16 text-center">
 
-                                    <div
-                                        class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                                        <svg class="h-7 w-7 text-slate-400" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.7">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                            <circle cx="9" cy="7" r="4" />
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                                        </svg>
+                                    <div class="mx-auto max-w-md">
+
+                                        <div
+                                            class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-2xl">
+                                            👥
+                                        </div>
+
+                                        <h3 class="text-lg font-black text-white">
+                                            No customers found
+                                        </h3>
+
+                                        <p class="mt-2 text-sm text-slate-500">
+                                            Try changing your search or create a new customer.
+                                        </p>
+
+                                        <a href="{{ route('admin.customers.create') }}"
+                                            class="mt-5 inline-flex rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950">
+                                            Add Customer
+                                        </a>
+
                                     </div>
-
-                                    <h3 class="mt-4 text-sm font-semibold text-slate-900">
-                                        No customers found
-                                    </h3>
-
-                                    <p class="mt-1 text-sm text-slate-500">
-
-                                        @if (request()->filled('search'))
-                                            No customers match your search.
-                                        @else
-                                            There are no customer accounts yet.
-                                        @endif
-
-                                    </p>
 
                                 </td>
 
@@ -247,204 +269,13 @@
 
             </div>
 
-
-            {{-- Mobile --}}
-            <div class="divide-y divide-slate-100 md:hidden">
-
-                @forelse ($customers as $customer)
-                    <div class="p-4">
-
-                        <div class="flex items-start justify-between gap-3">
-
-                            <div class="flex min-w-0 items-center gap-3">
-
-                                {{-- Avatar --}}
-                                <div
-                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700">
-                                    {{ strtoupper(substr($customer->company_name ?? 'C', 0, 1)) }}
-                                </div>
-
-
-                                <div class="min-w-0">
-
-                                    <p class="truncate font-semibold text-slate-900">
-                                        {{ $customer->company_name ?: 'Unnamed Company' }}
-                                    </p>
-
-                                    <p class="truncate text-sm text-slate-500">
-                                        {{ $customer->contact_person ?: 'No contact person' }}
-                                    </p>
-
-                                    @if ($customer->email)
-                                        <p class="truncate text-xs text-slate-400">
-                                            {{ $customer->email }}
-                                        </p>
-                                    @endif
-
-                                </div>
-
-                            </div>
-
-
-                            {{-- Status --}}
-                            @if ($customer->is_active)
-                                <span
-                                    class="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                    Active
-                                </span>
-                            @else
-                                <span
-                                    class="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-                                    Inactive
-                                </span>
-                            @endif
-
-                        </div>
-
-
-                        {{-- Customer Information --}}
-                        <div class="mt-4 grid grid-cols-2 gap-3">
-
-                            {{-- Customer ID --}}
-                            <div class="rounded-xl bg-slate-50 p-3">
-
-                                <p class="text-xs font-medium text-slate-400">
-                                    Customer ID
-                                </p>
-
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
-                                    #{{ $customer->id }}
-                                </p>
-
-                            </div>
-
-
-                            {{-- User ID --}}
-                            <div class="rounded-xl bg-slate-50 p-3">
-
-                                <p class="text-xs font-medium text-slate-400">
-                                    User ID
-                                </p>
-
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
-                                    #{{ $customer->users->first()?->id ?? '—' }}
-                                </p>
-
-                            </div>
-
-
-                            {{-- Country --}}
-                            <div class="rounded-xl bg-slate-50 p-3">
-
-                                <p class="text-xs font-medium text-slate-400">
-                                    Country
-                                </p>
-
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
-                                    {{ $customer->country_code ?: '—' }}
-                                </p>
-
-                            </div>
-
-
-                            {{-- City --}}
-                            <div class="rounded-xl bg-slate-50 p-3">
-
-                                <p class="text-xs font-medium text-slate-400">
-                                    City
-                                </p>
-
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
-                                    {{ $customer->city ?: '—' }}
-                                </p>
-
-                            </div>
-
-
-                            {{-- Joined --}}
-                            <div class="col-span-2 rounded-xl bg-slate-50 p-3">
-
-                                <p class="text-xs font-medium text-slate-400">
-                                    Joined
-                                </p>
-
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
-
-                                    @if ($customer->created_at)
-                                        {{ $customer->created_at->format('d M Y, H:i') }}
-                                    @else
-                                        —
-                                    @endif
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        {{-- Actions --}}
-                        <div class="mt-4 flex gap-2">
-
-                            @if ($customer->email)
-                                <a href="mailto:{{ $customer->email }}"
-                                    class="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                                    Contact
-                                </a>
-                            @endif
-
-                            <a href="{{ route('admin.customers.show', $customer) }}"
-                                class="inline-flex flex-1 items-center justify-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
-                                View Customer
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                @empty
-
-                    <div class="px-6 py-16 text-center">
-
-                        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                            <svg class="h-7 w-7 text-slate-400" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.7">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                            </svg>
-                        </div>
-
-                        <h3 class="mt-4 text-sm font-semibold text-slate-900">
-                            No customers found
-                        </h3>
-
-                        <p class="mt-1 text-sm text-slate-500">
-
-                            @if (request()->filled('search'))
-                                No customers match your search.
-                            @else
-                                No customer accounts are available.
-                            @endif
-
-                        </p>
-
-                    </div>
-                @endforelse
-
-            </div>
+            @if ($customers->hasPages())
+                <div class="border-t border-slate-800 px-5 py-4">
+                    {{ $customers->links() }}
+                </div>
+            @endif
 
         </div>
-
-
-        {{-- Pagination --}}
-        @if ($customers->hasPages())
-            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:px-6">
-                {{ $customers->links() }}
-            </div>
-        @endif
 
     </div>
 </x-admin-layout>

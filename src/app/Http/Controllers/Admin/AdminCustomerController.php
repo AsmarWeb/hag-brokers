@@ -6,68 +6,57 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminCustomerController extends Controller
 {
-    /**
-     * Display a listing of customers.
-     */
     public function index(Request $request): View
     {
-        $search = $request->string('search')->trim()->toString();
-
-        $customers = Customer::query()
+        $query = Customer::query()
             ->withCount([
                 'users',
                 'quotations',
                 'shipments',
-            ])
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('company_name', 'like', "%{$search}%")
-                        ->orWhere('contact_person', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%");
-                });
-            })
+            ]);
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+
+            $query->where(function ($q) use ($search) {
+                $q->where('company_name', 'like', "%{$search}%")
+                    ->orWhere('contact_person', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->string('status')->toString();
+
+            if ($status === 'active') {
+                $query->where('is_active', true);
+            }
+
+            if ($status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        $customers = $query
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.customers.index', [
-            'customers' => $customers,
-        ]);
+        return view('admin.customers.index', compact('customers'));
     }
 
-    /**
-     * Show the specified customer.
-     */
-    public function show(Customer $customer): View
-    {
-        $customer->load([
-            'users',
-            'quotations',
-            'shipments',
-        ]);
-
-        return view('admin.customers.show', [
-            'customer' => $customer,
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new customer.
-     */
     public function create(): View
     {
         return view('admin.customers.create');
     }
 
-    /**
-     * Store a newly created customer.
-     */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -78,13 +67,13 @@ class AdminCustomerController extends Controller
             ],
 
             'contact_person' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
             ],
 
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 'max:255',
             ],
@@ -113,35 +102,45 @@ class AdminCustomerController extends Controller
             ],
         ]);
 
-        $validated['country_code'] =
-            strtoupper($validated['country_code']);
+        $validated['country_code'] = strtoupper(
+            $validated['country_code']
+        );
 
-        $validated['is_active'] =
-            $request->boolean('is_active');
+        $validated['is_active'] = $request->boolean('is_active');
 
-        $customer = Customer::create($validated);
+        Customer::create($validated);
 
         return redirect()
-            ->route('admin.customers.show', $customer)
-            ->with(
-                'success',
-                'Customer created successfully.'
-            );
+            ->route('admin.customers.index')
+            ->with('success', 'Customer created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified customer.
-     */
+    public function show(Customer $customer): View
+    {
+        $customer->load([
+            'users',
+            'quotations.originPort',
+            'quotations.destinationPort',
+            'shipments.originPort',
+            'shipments.destinationPort',
+            'shipments.carrier',
+            'shipments.vessel',
+        ]);
+
+        return view(
+            'admin.customers.show',
+            compact('customer')
+        );
+    }
+
     public function edit(Customer $customer): View
     {
-        return view('admin.customers.edit', [
-            'customer' => $customer,
-        ]);
+        return view(
+            'admin.customers.edit',
+            compact('customer')
+        );
     }
 
-    /**
-     * Update the specified customer.
-     */
     public function update(
         Request $request,
         Customer $customer
@@ -154,13 +153,13 @@ class AdminCustomerController extends Controller
             ],
 
             'contact_person' => [
-                'required',
+                'nullable',
                 'string',
                 'max:255',
             ],
 
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 'max:255',
             ],
@@ -189,28 +188,54 @@ class AdminCustomerController extends Controller
             ],
         ]);
 
-        $validated['country_code'] =
-            strtoupper($validated['country_code']);
+        $validated['country_code'] = strtoupper(
+            $validated['country_code']
+        );
 
-        $validated['is_active'] =
-            $request->boolean('is_active');
+        $validated['is_active'] = $request->boolean('is_active');
 
         $customer->update($validated);
 
         return redirect()
-            ->route('admin.customers.show', $customer)
-            ->with(
-                'success',
-                'Customer updated successfully.'
-            );
+            ->route('admin.customers.index')
+            ->with('success', 'Customer updated successfully.');
     }
 
-    /**
-     * Remove the specified customer.
-     */
-    public function destroy(
-        Customer $customer
-    ): RedirectResponse {
+    public function destroy(Customer $customer): RedirectResponse
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Protect customers with related data
+        |--------------------------------------------------------------------------
+        */
+
+        if ($customer->users()->exists()) {
+            return redirect()
+                ->route('admin.customers.index')
+                ->with(
+                    'error',
+                    'This customer cannot be deleted because it has users assigned.'
+                );
+        }
+
+        if ($customer->quotations()->exists()) {
+            return redirect()
+                ->route('admin.customers.index')
+                ->with(
+                    'error',
+                    'This customer cannot be deleted because it has quotations.'
+                );
+        }
+
+        if ($customer->shipments()->exists()) {
+            return redirect()
+                ->route('admin.customers.index')
+                ->with(
+                    'error',
+                    'This customer cannot be deleted because it has shipments.'
+                );
+        }
+
         $customer->delete();
 
         return redirect()
