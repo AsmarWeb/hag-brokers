@@ -5,6 +5,14 @@ use App\Http\Controllers\Admin\AdminShipmentController;
 use App\Http\Controllers\Admin\AdminQuotationController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminUserController;
+
+use App\Http\Controllers\Admin\AdminDocumentController;
+
+use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\AdminPortController;
+use App\Http\Controllers\Admin\AdminCarrierController;
+use App\Http\Controllers\Admin\AdminVesselController;
+use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -245,6 +253,41 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             AdminUserController::class,
             'updateCustomer',
         ])->name('users.customer');
+
+        Route::get('/documents', [
+            AdminDocumentController::class,
+            'index',
+        ])->name('documents.index');
+
+        Route::get('/quotations', [
+            AdminQuotationController::class,
+            'index',
+        ])->name('quotations.index');
+
+        Route::get('/notifications', [
+            AdminNotificationController::class,
+            'index',
+        ])->name('notifications.index');
+
+        Route::get('/ports', [
+            AdminPortController::class,
+            'index',
+        ])->name('ports.index');
+
+        Route::get('/carriers', [
+            AdminCarrierController::class,
+            'index',
+        ])->name('carriers.index');
+
+        Route::get('/vessels', [
+            AdminVesselController::class,
+            'index',
+        ])->name('vessels.index');
+
+        Route::get('/reports', [
+            AdminReportController::class,
+            'index',
+        ])->name('reports.index');
     });
 
 

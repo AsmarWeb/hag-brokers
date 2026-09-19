@@ -239,16 +239,65 @@
 
             <div class="space-y-1">
 
-                {{-- Documents --}}
-                <a href="{{ route('shipments.index') }}"
+                {{-- Customers --}}
+                <a href="{{ route('admin.customers.index') }}"
                     class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
 
                     <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
-                            d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                            d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                    </svg>
 
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15 3v5h5" />
+                    <span>
+                        Customers
+                    </span>
+
+                </a>
+
+
+                {{-- Users --}}
+                <a href="{{ route('admin.users.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M15 20v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M8.5 10a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6" />
+                    </svg>
+
+                    <span>
+                        Users
+                    </span>
+
+                </a>
+
+
+                {{-- Shipments --}}
+                <a href="{{ route('admin.shipments.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10" />
+                    </svg>
+
+                    <span>
+                        Shipments
+                    </span>
+
+                </a>
+
+
+                {{-- Documents --}}
+                <a href="{{ route('admin.documents.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2zM15 3v5h5" />
                     </svg>
 
                     <span>
@@ -258,8 +307,25 @@
                 </a>
 
 
+                {{-- Quotations --}}
+                <a href="{{ route('admin.quotations.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zM8 8h8M8 12h8M8 16h5" />
+                    </svg>
+
+                    <span>
+                        Quotations
+                    </span>
+
+                </a>
+
+
                 {{-- Notifications --}}
-                <a href="{{ route('notifications.index') }}"
+                <a href="{{ route('admin.notifications.index') }}"
                     class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
 
                     <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
@@ -276,7 +342,7 @@
 
 
                 {{-- Ports --}}
-                <a href="#"
+                <a href="{{ route('admin.ports.index') }}"
                     class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
 
                     <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
@@ -292,8 +358,25 @@
                 </a>
 
 
+                {{-- Carriers --}}
+                <a href="{{ route('admin.carriers.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
+
+                    <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M3 18h18M5 18l2-7h10l2 7M8 11V7h8v4M10 7V4h4v3M7 21h10" />
+                    </svg>
+
+                    <span>
+                        Carriers
+                    </span>
+
+                </a>
+
+
                 {{-- Vessels --}}
-                <a href="#"
+                <a href="{{ route('admin.vessels.index') }}"
                     class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
 
                     <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
@@ -302,7 +385,7 @@
                             d="M3 17l2-7h14l2 7M5 17h14M7 10V6h10v4M9 6V3h6v3" />
 
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
-                            d="M4 20c1.5 1 3 1 4.5 0s3-1 4.5 0 3 1 4.5 0 3-1 4.5 0" />
+                            d="M4 20c1.5 1 3 1 4.5 0s3-1 4.5 0 3-1 4.5 0 3-1 4.5 0" />
                     </svg>
 
                     <span>
@@ -313,7 +396,7 @@
 
 
                 {{-- Reports --}}
-                <a href="#"
+                <a href="{{ route('admin.reports.index') }}"
                     class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 transition hover:bg-slate-900 hover:text-white">
 
                     <svg class="h-5 w-5 shrink-0 text-slate-500 group-hover:text-cyan-400" fill="none"
