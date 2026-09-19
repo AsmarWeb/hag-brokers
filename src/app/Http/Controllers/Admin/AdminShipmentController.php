@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Carrier;
 use App\Models\Customer;
+use App\Models\Port;
 use App\Models\Quotation;
 use App\Models\Shipment;
 use App\Models\Vessel;
@@ -51,26 +52,12 @@ class AdminShipmentController extends Controller
             $search = $request->string('search')->toString();
 
             $query->where(function ($q) use ($search) {
-
-                $q->where(
-                    'shipment_no',
-                    'like',
-                    "%{$search}%"
-                )
-
-                    ->orWhere(
-                        'booking_no',
-                        'like',
-                        "%{$search}%"
-                    )
+                $q->where('shipment_no', 'like', "%{$search}%")
+                    ->orWhere('booking_no', 'like', "%{$search}%")
 
                     ->orWhereHas('customer', function ($customer) use ($search) {
                         $customer
-                            ->where(
-                                'company_name',
-                                'like',
-                                "%{$search}%"
-                            )
+                            ->where('company_name', 'like', "%{$search}%")
                             ->orWhere(
                                 'contact_person',
                                 'like',
@@ -136,13 +123,26 @@ class AdminShipmentController extends Controller
             ->orderBy('name')
             ->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Active Ports
+        |--------------------------------------------------------------------------
+        */
+
+        $ports = Port::query()
+            ->where('is_active', true)
+            ->orderBy('country')
+            ->orderBy('name')
+            ->get();
+
         return view(
             'admin.shipments.create',
             compact(
                 'customers',
                 'quotations',
                 'carriers',
-                'vessels'
+                'vessels',
+                'ports'
             )
         );
     }
@@ -247,7 +247,10 @@ class AdminShipmentController extends Controller
         $nextId = (Shipment::max('id') ?? 0) + 1;
 
         $validated['shipment_no'] =
-            'HAG-' . now()->format('Y') . '-' . str_pad(
+            'HAG-' .
+            now()->format('Y') .
+            '-' .
+            str_pad(
                 $nextId,
                 5,
                 '0',
@@ -315,6 +318,18 @@ class AdminShipmentController extends Controller
             ->orderBy('name')
             ->get();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Active Ports
+        |--------------------------------------------------------------------------
+        */
+
+        $ports = Port::query()
+            ->where('is_active', true)
+            ->orderBy('country')
+            ->orderBy('name')
+            ->get();
+
         return view(
             'admin.shipments.edit',
             compact(
@@ -322,7 +337,8 @@ class AdminShipmentController extends Controller
                 'customers',
                 'quotations',
                 'carriers',
-                'vessels'
+                'vessels',
+                'ports'
             )
         );
     }

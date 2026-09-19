@@ -39,6 +39,7 @@
                 </div>
 
                 <div>
+
                     <h2 class="font-black text-cyan-300">
                         Create an operational shipment
                     </h2>
@@ -46,9 +47,10 @@
                     <p class="mt-1 text-sm leading-6 text-slate-500">
                         A shipment represents the actual sea-freight movement
                         after a customer request and quotation process.
-                        You can assign the customer, quotation, route,
-                        carrier, vessel and shipping schedule below.
+                        Assign the customer, quotation, route, carrier,
+                        vessel and shipping schedule below.
                     </p>
+
                 </div>
 
             </div>
@@ -56,8 +58,39 @@
         </div>
 
 
-        {{-- Create Form --}}
-        <x-admin.shipments.form :action="route('admin.shipments.store')" method="POST" />
+        {{-- Validation Errors --}}
+        @if ($errors->any())
+
+            <div class="mb-6 rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
+
+                <div class="mb-3 flex items-center gap-3">
+
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10 text-red-400">
+                        !
+                    </div>
+
+                    <h2 class="font-black text-red-300">
+                        Please fix the following errors
+                    </h2>
+
+                </div>
+
+                <ul class="space-y-1 text-sm text-red-300">
+
+                    @foreach ($errors->all() as $error)
+                        <li>• {{ $error }}</li>
+                    @endforeach
+
+                </ul>
+
+            </div>
+
+        @endif
+
+
+        {{-- Shipment Form --}}
+        <x-admin.shipments.form :action="route('admin.shipments.store')" method="POST" :shipment="null" :customers="$customers" :quotations="$quotations"
+            :carriers="$carriers" :vessels="$vessels" :ports="$ports" />
 
     </div>
 </x-admin-layout>
