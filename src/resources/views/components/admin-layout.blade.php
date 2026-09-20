@@ -433,6 +433,24 @@
 
                 </a>
 
+                <a href="{{ route('admin.settings.edit') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+    {{ request()->routeIs('admin.settings.*')
+        ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+        : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
+                        stroke="currentColor" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M10.5 6h3m-6.75 3.75h10.5M5.25 9.75v7.5A2.25 2.25 0 007.5 19.5h9a2.25 2.25 0 002.25-2.25v-7.5M8.25 9.75V6.75A2.25 2.25 0 0110.5 4.5h3a2.25 2.25 0 012.25 2.25v3M12 13.5v3" />
+                    </svg>
+
+                    <span>
+                        Settings
+                    </span>
+
+                </a>
+
             </div>
 
 

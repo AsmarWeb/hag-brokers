@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminPortController;
 use App\Http\Controllers\Admin\AdminCarrierController;
 use App\Http\Controllers\Admin\AdminVesselController;
 use App\Http\Controllers\Admin\AdminReportController;
+use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,9 +47,15 @@ Route::get('/language/{locale}', function (string $locale) {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::middleware('maintenance.check')->group(function () {
+
+    // Public website routes
+
+    Route::get('/', function () {
+        return view('welcome');
+    })->name('home');
+});
+
 
 Route::post('/register', [AuthController::class, 'register'])
     ->name('register');
@@ -232,6 +239,13 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             AdminQuotationController::class,
             'updateStatus',
         ])->name('quotations.status');
+
+
+        Route::get('/settings', [AdminSettingController::class, 'edit'])
+            ->name('settings.edit');
+
+        Route::put('/settings', [AdminSettingController::class, 'update'])
+            ->name('settings.update');
 
 
         // Customers
