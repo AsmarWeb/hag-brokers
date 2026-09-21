@@ -11,6 +11,10 @@
         $locale = app()->getLocale();
         $isArabic = $locale === 'ar';
 
+        // Prepare optional contact data once.
+        $phone = isset($setting) ? $setting->phone ?? null : null;
+        $email = isset($setting) ? $setting->email ?? null : null;
+
         $t = $isArabic
             ? [
                 'title' => 'صيانة المنصة',
@@ -138,19 +142,101 @@
 
                 'switch_ar' => 'العربية',
             ];
+
+        // SEO / Social Sharing
+        $siteName = config('app.name', 'HAG Brokers');
+        $siteUrl = rtrim(config('app.url', url('/')), '/');
+        $canonicalUrl = url()->current();
+        $socialImage = asset('storage/favicon.png');
+        $socialImageAlt = 'HAG Brokers logo';
+        $seoTitle = $siteName . ' | ' . $t['title'];
+        $seoDescription = $t['description'];
     @endphp
 
 
-    <title>
-        {{ config('app.name', 'HAG Brokers') }}
-        | {{ $t['title'] }}
-    </title>
+    <title>{{ $seoTitle }}</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{{ asset('storage/favicon.png') }}">
+    <!-- Basic SEO -->
+    <meta name="description" content="{{ $seoDescription }}">
+    <meta name="keywords"
+        content="HAG Brokers, sea freight, maritime shipping, shipping brokerage, freight forwarding, UAE, Dubai, Abu Dhabi, logistics">
+    <meta name="author" content="HAG Brokers">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="googlebot" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#020c17">
+    <meta name="application-name" content="{{ $siteName }}">
+    <meta name="format-detection" content="telephone=no">
 
-    <meta name="description" content="{{ $t['description'] }}">
+    <!-- Canonical -->
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <link rel="alternate" hreflang="ar-AE" href="{{ url()->current() }}?lang=ar">
+    <link rel="alternate" hreflang="en-AE" href="{{ url()->current() }}?lang=en">
+    <link rel="alternate" hreflang="x-default" href="{{ url('/') }}">
 
+    <!-- Favicon / App Icons -->
+    <link rel="icon" type="image/png" href="{{ $socialImage }}">
+    <link rel="apple-touch-icon" href="{{ $socialImage }}">
+
+    <!-- Open Graph / WhatsApp / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:image" content="{{ $socialImage }}">
+    <meta property="og:image:secure_url" content="{{ $socialImage }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="{{ $socialImageAlt }}">
+    <meta property="og:locale" content="{{ $isArabic ? 'ar_AE' : 'en_AE' }}">
+    <meta property="og:locale:alternate" content="{{ $isArabic ? 'en_AE' : 'ar_AE' }}">
+
+    <!-- X / Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $socialImage }}">
+    <meta name="twitter:image:alt" content="{{ $socialImageAlt }}">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => $siteName,
+        'url' => $siteUrl,
+        'logo' => $socialImage,
+        'description' => $seoDescription,
+        'areaServed' => [
+            '@type' => 'Country',
+            'name' => 'United Arab Emirates',
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebPage',
+        'name' => $seoTitle,
+        'url' => $canonicalUrl,
+        'description' => $seoDescription,
+        'isPartOf' => [
+            '@type' => 'WebSite',
+            'name' => $siteName,
+            'url' => $siteUrl,
+        ],
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => $siteName,
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => $socialImage,
+            ],
+        ],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -1428,17 +1514,16 @@
 
                         {{-- Contact --}}
 
-                        @if (isset($setting) && $setting->email)
-                            <a href="mailto:{{ $setting->email }}" class="btn btn-secondary">
-
-                                <span>
-                                    ✉
-                                </span>
-
-                                {{ $t['contact'] }}
-
-                            </a>
-                        @endif
+                        @php
+                            $contactButton = $email
+                                ? '<a href="mailto:' .
+                                    e($email) .
+                                    '" class="btn btn-secondary"><span>✉</span> ' .
+                                    e($t['contact']) .
+                                    '</a>'
+                                : '';
+                        @endphp
+                        {!! $contactButton !!}
 
 
                     </div>
@@ -1483,8 +1568,8 @@
 
                         <div class="status-icon">
 
-                            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.7">
+                            <svg width="25" height="25" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.7">
 
                                 <path d="M12 3v4" />
 
@@ -1616,49 +1701,28 @@
                      CONTACT
                 ================================================== --}}
 
-                    @if ((isset($setting) && $setting->phone) || (isset($setting) && $setting->email))
+                    @php
+                        $contactBox = '';
 
-                        <div class="contact-box">
+                        if ($phone || $email) {
+                            $contactBox .= '<div class="contact-box">';
+                            $contactBox .= '<div class="contact-box-title">' . e($t['business_title']) . '</div>';
+                            $contactBox .= '<div class="contact-links">';
 
+                            if ($phone) {
+                                $contactBox .= '<a href="tel:' . e($phone) . '">☎ ' . e($phone) . '</a>';
+                            }
 
-                            <div class="contact-box-title">
+                            if ($email) {
+                                $contactBox .= '<a href="mailto:' . e($email) . '">✉ ' . e($email) . '</a>';
+                            }
 
-                                {{ $t['business_title'] }}
+                            $contactBox .= '</div></div>';
+                        }
+                    @endphp
 
-                            </div>
+                    {!! $contactBox !!}
 
-
-                            <div class="contact-links">
-
-
-                                @if (isset($setting) && $setting->phone)
-                                    <a href="tel:{{ $setting->phone }}">
-
-                                        ☎
-
-                                        {{ $setting->phone }}
-
-                                    </a>
-                                @endif
-
-
-                                @if (isset($setting) && $setting->email)
-                                    <a href="mailto:{{ $setting->email }}">
-
-                                        ✉
-
-                                        {{ $setting->email }}
-
-                                    </a>
-                                @endif
-
-
-                            </div>
-
-
-                        </div>
-
-                    @endif
 
 
                 </aside>
