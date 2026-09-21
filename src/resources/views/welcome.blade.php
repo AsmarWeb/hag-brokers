@@ -10,14 +10,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>
-        {{ $isAr ? 'HAG Brokers | وسيطك للشحن البحري في الخليج' : 'HAG Brokers | Gulf Sea Freight Brokerage Network' }}
-    </title>
+    @php
+        $siteName = 'HAG Brokers';
+        $siteUrl = rtrim(config('app.url', url('/')), '/');
+        $canonicalUrl = url()->current();
+        $faviconUrl = asset('storage/favicon.png');
+        $logoUrl = asset('storage/favicon.png');
+        $ogImage = asset('storage/hag-brokers-og.png');
 
-    <meta name="description"
-        content="{{ $isAr
-            ? 'HAG Brokers منصة وساطة وتنسيق للشحن البحري تربط المستوردين والمصدرين بخيارات الناقلين والشركاء اللوجستيين في الخليج.'
-            : 'HAG Brokers is a Gulf-focused sea freight brokerage and coordination platform connecting importers and exporters with available carriers and logistics partners.' }}">
+        $seoTitle = $isAr ? 'HAG Brokers | وسيط الشحن البحري في الخليج' : 'HAG Brokers | Gulf Sea Freight Brokerage';
+
+        $seoDescription = $isAr
+            ? 'HAG Brokers منصة لوساطة وتنسيق الشحن البحري في الخليج، تربط المستوردين والمصدرين بخيارات الناقلين والشركاء اللوجستيين المتاحة.'
+            : 'HAG Brokers is a Gulf-focused sea freight brokerage platform connecting importers and exporters with available carriers and logistics partners.';
+
+        $seoKeywords = $isAr
+            ? 'HAG Brokers, الشحن البحري, وساطة الشحن, شحن الخليج, شحن الإمارات, دبي, جبل علي, عروض الشحن, تتبع الشحنات, شركات الشحن'
+            : 'HAG Brokers, sea freight, freight brokerage, Gulf shipping, UAE shipping, Dubai, Jebel Ali, freight quotes, shipment tracking, shipping carriers';
+    @endphp
+
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDescription }}">
+    <meta name="keywords" content="{{ $seoKeywords }}">
+    <meta name="author" content="HAG Brokers">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="theme-color" content="#050d18">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    <link rel="alternate" hreflang="en-AE" href="{{ route('language.switch', 'en') }}">
+    <link rel="alternate" hreflang="ar-AE" href="{{ route('language.switch', 'ar') }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url('/') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ $faviconUrl }}?v=2">
+    <link rel="shortcut icon" href="{{ $faviconUrl }}?v=2">
+    <link rel="apple-touch-icon" sizes="64x64" href="{{ $faviconUrl }}?v=2">
+
+    <!-- Open Graph / WhatsApp / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:title" content="{{ $seoTitle }}">
+    <meta property="og:description" content="{{ $seoDescription }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:locale" content="{{ $isAr ? 'ar_AE' : 'en_AE' }}">
+
+    <!-- Social Sharing Image -->
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="HAG Brokers - Gulf Sea Freight Brokerage">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    <meta name="twitter:image:alt" content="HAG Brokers - Gulf Sea Freight Brokerage">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => $siteName,
+        'url' => $siteUrl,
+        'logo' => $logoUrl,
+        'description' => $seoDescription,
+        'areaServed' => [
+            '@type' => 'Place',
+            'name' => 'Gulf Cooperation Council'
+        ],
+        'knowsAbout' => [
+            'Sea freight',
+            'Freight brokerage',
+            'Shipment tracking',
+            'Gulf ports'
+        ]
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'WebSite',
+        'name' => $siteName,
+        'url' => $siteUrl,
+        'description' => $seoDescription,
+        'inLanguage' => $isAr ? 'ar-AE' : 'en-AE'
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -234,7 +318,8 @@
                         <span>🌐</span>
                         <span>{{ $isAr ? 'العربية' : 'English' }}</span>
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
 
@@ -279,7 +364,8 @@
                 aria-label="{{ $isAr ? 'فتح القائمة' : 'Open menu' }}">
 
                 <svg id="menu-open-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
 
                 <svg id="menu-close-icon" class="hidden h-6 w-6" fill="none" stroke="currentColor"
@@ -1259,10 +1345,10 @@
 
     <script>
         /*
-                            |--------------------------------------------------------------------------
-                            | Language menu
-                            |--------------------------------------------------------------------------
-                            */
+                                                            |--------------------------------------------------------------------------
+                                                            | Language menu
+                                                            |--------------------------------------------------------------------------
+                                                            */
 
         function toggleLanguageMenu() {
             const dropdown = document.getElementById('language-dropdown');
