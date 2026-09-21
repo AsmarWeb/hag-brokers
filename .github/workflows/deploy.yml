@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Test Hostinger SSH port
+        run: |
+          echo "Testing Hostinger SSH port..."
+          nc -vz -w 10 "${{ secrets.HOSTINGER_HOST }}" "${{ secrets.HOSTINGER_PORT }}"
+
       - name: Deploy to Hostinger
         uses: appleboy/ssh-action@v1.2.2
         with:
