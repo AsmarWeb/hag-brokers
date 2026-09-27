@@ -216,6 +216,16 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'index',
         ])->name('dashboard');
 
+        Route::resource('leads', \App\Http\Controllers\Admin\AdminLeadController::class);
+
+        Route::resource('contacts', \App\Http\Controllers\Admin\AdminContactController::class);
+
+        Route::resource('activities', \App\Http\Controllers\Admin\AdminActivityController::class);
+
+        Route::resource('tasks', \App\Http\Controllers\Admin\AdminTaskController::class);
+
+        Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class);
+
 
         // Shipments
         Route::resource(
