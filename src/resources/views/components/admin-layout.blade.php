@@ -1,5 +1,44 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+@php
+    $isAr = app()->getLocale() === 'ar';
+
+    $t = [
+        'admin_dashboard' => $isAr ? 'لوحة تحكم الإدارة' : 'Admin Dashboard',
+        'admin_control' => $isAr ? 'مركز تحكم الإدارة' : 'Admin Control Center',
+        'administrator' => $isAr ? 'مدير النظام' : 'Administrator',
+        'full_access' => $isAr ? 'صلاحية كاملة على النظام' : 'Full system access',
+        'main' => $isAr ? 'الرئيسية' : 'Main',
+        'dashboard' => $isAr ? 'لوحة التحكم' : 'Dashboard',
+        'crm_sales' => $isAr ? 'إدارة العملاء والمبيعات' : 'CRM & Sales',
+        'leads' => $isAr ? 'العملاء المحتملون' : 'Leads',
+        'contacts' => $isAr ? 'جهات الاتصال' : 'Contacts',
+        'opportunities' => $isAr ? 'الفرص التجارية' : 'Opportunities',
+        'activities' => $isAr ? 'الأنشطة' : 'Activities',
+        'tasks' => $isAr ? 'المهام' : 'Tasks',
+        'shipments' => $isAr ? 'الشحنات' : 'Shipments',
+        'quotations' => $isAr ? 'عروض الأسعار' : 'Quotations',
+        'customers' => $isAr ? 'العملاء' : 'Customers',
+        'users' => $isAr ? 'المستخدمون' : 'Users',
+        'operations' => $isAr ? 'العمليات' : 'Operations',
+        'documents' => $isAr ? 'المستندات' : 'Documents',
+        'notifications' => $isAr ? 'الإشعارات' : 'Notifications',
+        'ports' => $isAr ? 'الموانئ' : 'Ports',
+        'carriers' => $isAr ? 'الناقلون' : 'Carriers',
+        'vessels' => $isAr ? 'السفن' : 'Vessels',
+        'reports' => $isAr ? 'التقارير' : 'Reports',
+        'settings' => $isAr ? 'الإعدادات' : 'Settings',
+        'system' => $isAr ? 'النظام' : 'System',
+        'profile' => $isAr ? 'الملف الشخصي' : 'Profile',
+        'view_website' => $isAr ? 'عرض الموقع' : 'View Website',
+        'logout' => $isAr ? 'تسجيل الخروج' : 'Logout',
+        'admin' => $isAr ? 'الإدارة' : 'Admin',
+        'language' => $isAr ? 'اللغة' : 'Language',
+        'close_menu' => $isAr ? 'إغلاق القائمة' : 'Close menu',
+        'open_menu' => $isAr ? 'فتح القائمة' : 'Open menu',
+    ];
+@endphp
+
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $isAr ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8">
@@ -9,7 +48,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>
-        {{ $title ?? 'Admin Dashboard' }} — HAG Brokers
+        {{ $title ?? $t['admin_dashboard'] }} — HAG Brokers
     </title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -52,7 +91,7 @@
                     </div>
 
                     <div class="truncate text-xs font-medium text-slate-500">
-                        Admin Control Center
+                        {{ $t['admin_control'] }}
                     </div>
                 </div>
 
@@ -61,7 +100,7 @@
             {{-- Mobile close --}}
             <button type="button" onclick="closeAdminSidebar()"
                 class="ms-auto rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white lg:hidden"
-                aria-label="Close menu">
+                aria-label="{{ $t['close_menu'] }}">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -87,11 +126,11 @@
                     <div class="min-w-0">
 
                         <p class="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                            Administrator
+                            {{ $t['administrator'] }}
                         </p>
 
                         <p class="mt-0.5 truncate text-xs text-slate-500">
-                            Full system access
+                            {{ $t['full_access'] }}
                         </p>
 
                     </div>
@@ -108,7 +147,7 @@
 
             {{-- Main --}}
             <p class="mb-3 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-600">
-                Main
+                {{ $t['main'] }}
             </p>
 
             <div class="space-y-1">
@@ -128,9 +167,60 @@
                     </svg>
 
                     <span>
-                        Dashboard
+                        {{ $t['dashboard'] }}
                     </span>
 
+                </a>
+
+                <div class="px-3 pt-6 pb-2">
+                    <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-600">
+                        {{ $t['crm_sales'] }}
+                    </p>
+                </div>
+
+                <a href="{{ route('admin.leads.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+   {{ request()->routeIs('admin.leads.*')
+       ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+       : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                    <span>◌</span>
+                    <span>{{ $t['leads'] }}</span>
+                </a>
+
+                <a href="{{ route('admin.contacts.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+   {{ request()->routeIs('admin.contacts.*')
+       ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+       : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                    <span>◎</span>
+                    <span>{{ $t['contacts'] }}</span>
+                </a>
+
+                <a href="{{ route('admin.opportunities.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+   {{ request()->routeIs('admin.opportunities.*')
+       ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+       : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                    <span>◆</span>
+                    <span>{{ $t['opportunities'] }}</span>
+                </a>
+
+                <a href="{{ route('admin.activities.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+   {{ request()->routeIs('admin.activities.*')
+       ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+       : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                    <span>◷</span>
+                    <span>{{ $t['activities'] }}</span>
+                </a>
+
+                <a href="{{ route('admin.tasks.index') }}"
+                    class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+   {{ request()->routeIs('admin.tasks.*')
+       ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+       : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                    <span>✓</span>
+                    <span>{{ $t['tasks'] }}</span>
                 </a>
 
 
@@ -153,7 +243,7 @@
                     </svg>
 
                     <span>
-                        Shipments
+                        {{ $t['shipments'] }}
                     </span>
 
                 </a>
@@ -177,7 +267,7 @@
                     </svg>
 
                     <span>
-                        Quotations
+                        {{ $t['quotations'] }}
                     </span>
 
                 </a>
@@ -203,7 +293,7 @@
                     </svg>
 
                     <span>
-                        Customers
+                        {{ $t['customers'] }}
                     </span>
 
                 </a>
@@ -224,7 +314,7 @@
                     </svg>
 
                     <span>
-                        Users
+                        {{ $t['users'] }}
                     </span>
 
                 </a>
@@ -234,7 +324,7 @@
 
             {{-- Operations --}}
             <p class="mb-3 mt-8 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-600">
-                Operations
+                {{ $t['operations'] }}
             </p>
 
             <div class="space-y-1">
@@ -256,7 +346,7 @@
                     </svg>
 
                     <span>
-                        Shipments
+                        {{ $t['shipments'] }}
                     </span>
 
                 </a>
@@ -281,7 +371,7 @@
                     </svg>
 
                     <span>
-                        Documents
+                        {{ $t['documents'] }}
                     </span>
 
                 </a>
@@ -307,7 +397,7 @@
                     </svg>
 
                     <span>
-                        Quotations
+                        {{ $t['quotations'] }}
                     </span>
 
                 </a>
@@ -330,7 +420,7 @@
                     </svg>
 
                     <span>
-                        Notifications
+                        {{ $t['notifications'] }}
                     </span>
 
                 </a>
@@ -353,7 +443,7 @@
                     </svg>
 
                     <span>
-                        Ports
+                        {{ $t['ports'] }}
                     </span>
 
                 </a>
@@ -379,7 +469,7 @@
                     </svg>
 
                     <span>
-                        Carriers
+                        {{ $t['carriers'] }}
                     </span>
 
                 </a>
@@ -405,7 +495,7 @@
                     </svg>
 
                     <span>
-                        Vessels
+                        {{ $t['vessels'] }}
                     </span>
 
                 </a>
@@ -428,7 +518,7 @@
                     </svg>
 
                     <span>
-                        Reports
+                        {{ $t['reports'] }}
                     </span>
 
                 </a>
@@ -446,7 +536,7 @@
                     </svg>
 
                     <span>
-                        Settings
+                        {{ $t['settings'] }}
                     </span>
 
                 </a>
@@ -456,7 +546,7 @@
 
             {{-- System --}}
             <p class="mb-3 mt-8 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-600">
-                System
+                {{ $t['system'] }}
             </p>
 
             <div class="space-y-1">
@@ -472,7 +562,7 @@
                     </svg>
 
                     <span>
-                        Profile
+                        {{ $t['profile'] }}
                     </span>
 
                 </a>
@@ -489,7 +579,7 @@
                     </svg>
 
                     <span>
-                        View Website
+                        {{ $t['view_website'] }}
                     </span>
 
                 </a>
@@ -514,7 +604,7 @@
                     <div class="min-w-0 flex-1">
 
                         <p class="truncate text-sm font-bold text-white">
-                            {{ auth()->user()->name ?? 'Administrator' }}
+                            {{ auth()->user()->name ?? $t['administrator'] }}
                         </p>
 
                         <p class="truncate text-xs text-slate-500">
@@ -538,7 +628,7 @@
                         </svg>
 
                         <span>
-                            Logout
+                            {{ $t['logout'] }}
                         </span>
 
                     </button>
@@ -571,7 +661,7 @@
                     {{-- Mobile menu --}}
                     <button type="button" onclick="openAdminSidebar()"
                         class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-cyan-300 hover:text-cyan-600 lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
-                        aria-label="Open menu">
+                        aria-label="{{ $t['open_menu'] }}">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 6h16M4 12h16M4 18h16" />
@@ -593,7 +683,7 @@
                             </p>
 
                             <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                                Admin
+                                {{ $t['admin'] }}
                             </p>
                         </div>
 
@@ -610,7 +700,7 @@
                         class="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 sm:flex">
 
                         <span class="text-slate-400">
-                            {{ __('messages.language') }}
+                            {{ $t['language'] }}
                         </span>
 
                         <a href="{{ route('language.switch', 'en') }}"
@@ -637,7 +727,7 @@
                     {{-- Notifications --}}
                     <a href="{{ route('notifications.index') }}"
                         class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-300 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
-                        aria-label="Notifications">
+                        aria-label="{{ $t['notifications'] }}">
 
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
@@ -654,11 +744,11 @@
                         <div class="text-end">
 
                             <p class="text-sm font-bold text-slate-900 dark:text-white">
-                                {{ auth()->user()->name ?? 'Administrator' }}
+                                {{ auth()->user()->name ?? $t['administrator'] }}
                             </p>
 
                             <p class="text-xs text-slate-400">
-                                Administrator
+                                {{ $t['administrator'] }}
                             </p>
 
                         </div>
@@ -709,8 +799,12 @@
                 return;
             }
 
+            const isRtl = document.documentElement.dir === 'rtl';
+
             sidebar.classList.remove('-translate-x-full');
-            sidebar.classList.remove('rtl:translate-x-full');
+            sidebar.classList.remove('translate-x-full');
+
+            sidebar.classList.add(isRtl ? 'translate-x-0' : 'translate-x-0');
 
             overlay.classList.remove('hidden');
 
@@ -726,7 +820,10 @@
                 return;
             }
 
-            sidebar.classList.add('-translate-x-full');
+            const isRtl = document.documentElement.dir === 'rtl';
+
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add(isRtl ? 'translate-x-full' : '-translate-x-full');
 
             overlay.classList.add('hidden');
 

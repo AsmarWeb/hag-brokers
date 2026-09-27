@@ -1,12 +1,70 @@
+@php
+    $isAr = app()->getLocale() === 'ar';
+    $dir = $isAr ? 'rtl' : 'ltr';
+
+    $t = [
+        'dashboard' => $isAr ? 'لوحة التحكم' : 'Admin Dashboard',
+        'manage_intro' => $isAr
+            ? 'إدارة الشحنات وعروض الأسعار والعملاء وعمليات الشحن والخدمات اللوجستية.'
+            : 'Manage shipments, quotations, customers and logistics operations.',
+        'new_shipment' => $isAr ? 'شحنة جديدة' : 'New Shipment',
+        'quotations' => $isAr ? 'عروض الأسعار' : 'Quotations',
+        'total_shipments' => $isAr ? 'إجمالي الشحنات' : 'Total Shipments',
+        'all_shipments' => $isAr ? 'جميع الشحنات المسجلة' : 'All registered shipments',
+        'view_shipments' => $isAr ? 'عرض الشحنات' : 'View shipments',
+        'in_transit' => $isAr ? 'قيد النقل' : 'In Transit',
+        'currently_transit' => $isAr ? 'الشحنات الموجودة حالياً في الطريق' : 'Currently in transit',
+        'view_transit' => $isAr ? 'عرض الشحنات قيد النقل' : 'View in-transit',
+        'delivered' => $isAr ? 'تم التسليم' : 'Delivered',
+        'successfully_delivered' => $isAr ? 'الشحنات التي تم تسليمها بنجاح' : 'Successfully delivered',
+        'view_delivered' => $isAr ? 'عرض الشحنات المسلّمة' : 'View delivered',
+        'pending_quotations' => $isAr ? 'عروض الأسعار المعلقة' : 'Pending Quotations',
+        'awaiting_admin' => $isAr ? 'بانتظار إجراء الإدارة' : 'Awaiting admin action',
+        'review_quotations' => $isAr ? 'مراجعة عروض الأسعار' : 'Review quotations',
+        'pending_shipments' => $isAr ? 'الشحنات المعلقة' : 'Pending Shipments',
+        'total_quotations' => $isAr ? 'إجمالي عروض الأسعار' : 'Total Quotations',
+        'customers' => $isAr ? 'العملاء' : 'Customers',
+        'recent_shipments' => $isAr ? 'أحدث الشحنات' : 'Recent Shipments',
+        'latest_shipment_activity' => $isAr
+            ? 'أحدث أنشطة الشحن في المنصة.'
+            : 'Latest shipment activity across the platform.',
+        'view_all' => $isAr ? 'عرض الكل' : 'View all',
+        'unknown' => $isAr ? 'غير معروف' : 'Unknown',
+        'view' => $isAr ? 'عرض' : 'View',
+        'no_shipments' => $isAr ? 'لا توجد شحنات بعد' : 'No shipments yet',
+        'shipment_activity_here' => $isAr ? 'ستظهر أنشطة الشحن هنا.' : 'Shipment activity will appear here.',
+        'recent_quotations' => $isAr ? 'أحدث عروض الأسعار' : 'Recent Quotations',
+        'latest_customer_requests' => $isAr ? 'أحدث طلبات العملاء.' : 'Latest customer requests.',
+        'cargo_request' => $isAr ? 'طلب شحن' : 'Cargo request',
+        'no_quotations' => $isAr ? 'لا توجد عروض أسعار بعد' : 'No quotations yet',
+        'quotation_requests_here' => $isAr
+            ? 'ستظهر طلبات عروض الأسعار من العملاء هنا.'
+            : 'Customer quotation requests will appear here.',
+        'quick_actions' => $isAr ? 'إجراءات سريعة' : 'Quick Actions',
+        'frequently_used' => $isAr ? 'أدوات الإدارة المستخدمة بشكل متكرر.' : 'Frequently used administration tools.',
+        'manage_shipments' => $isAr ? 'إدارة الشحنات' : 'Manage Shipments',
+        'create_edit_shipments' => $isAr ? 'إنشاء وتعديل وإدارة الشحنات.' : 'Create, edit and manage shipments.',
+        'review_quotations_action' => $isAr ? 'مراجعة عروض الأسعار' : 'Review Quotations',
+        'review_process_requests' => $isAr ? 'مراجعة ومعالجة طلبات العملاء.' : 'Review and process customer requests.',
+        'manage_customer_accounts' => $isAr
+            ? 'إدارة حسابات وبيانات العملاء.'
+            : 'Manage customer accounts and information.',
+        'users' => $isAr ? 'المستخدمون' : 'Users',
+        'manage_users' => $isAr ? 'إدارة المشرفين ومستخدمي المنصة.' : 'Manage administrators and platform users.',
+        'footer' => $isAr ? 'HAG Brokers — حلول الشحن البحري' : 'HAG Brokers — Sea Freight Solutions',
+        'control_center' => $isAr ? 'مركز التحكم الإداري' : 'Admin Control Center',
+    ];
+@endphp
+
 <x-admin-layout>
 
     <x-slot name="title">
-        Admin Dashboard
+        {{ $t['dashboard'] }}
     </x-slot>
 
     <x-slot name="header">
 
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div dir="{{ $dir }}" class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
             <div>
                 <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-500">
@@ -15,11 +73,11 @@
                 </div>
 
                 <h1 class="mt-2 text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                    Admin Dashboard
+                    {{ $t['dashboard'] }}
                 </h1>
 
                 <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                    Manage shipments, quotations, customers and logistics operations.
+                    {{ $t['manage_intro'] }}
                 </p>
             </div>
 
@@ -31,12 +89,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
                     </svg>
 
-                    New Shipment
+                    {{ $t['new_shipment'] }}
                 </a>
 
                 <a href="{{ route('admin.quotations.index') }}"
                     class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-cyan-300 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-cyan-500 dark:hover:text-cyan-400">
-                    Quotations
+                    {{ $t['quotations'] }}
                 </a>
 
             </div>
@@ -46,7 +104,7 @@
     </x-slot>
 
 
-    <div class="min-h-screen bg-slate-100 dark:bg-slate-950">
+    <div dir="{{ $dir }}" class="min-h-screen bg-slate-100 dark:bg-slate-950">
 
         <div class="mx-auto max-w-[1600px] space-y-6 px-4 py-8 sm:px-6 lg:px-8">
 
@@ -57,7 +115,7 @@
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-                {{-- Total Shipments --}}
+                {{-- {{ $t['total_shipments'] }} --}}
                 <div
                     class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
@@ -65,7 +123,7 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Total Shipments
+                                {{ $t['total_shipments'] }}
                             </p>
 
                             <p class="mt-3 text-3xl font-black text-slate-900 dark:text-white">
@@ -73,7 +131,7 @@
                             </p>
 
                             <p class="mt-2 text-xs text-slate-500">
-                                All registered shipments
+                                {{ $t['all_shipments'] }}
                             </p>
                         </div>
 
@@ -97,7 +155,7 @@
 
                         <a href="{{ route('admin.shipments.index') }}"
                             class="text-xs font-bold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
-                            View shipments →
+                            {{ $t['view_shipments'] }} {{ $isAr ? '←' : '→' }}
                         </a>
 
                     </div>
@@ -105,7 +163,7 @@
                 </div>
 
 
-                {{-- In Transit --}}
+                {{-- {{ $t['in_transit'] }} --}}
                 <div
                     class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
@@ -113,7 +171,7 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                In Transit
+                                {{ $t['in_transit'] }}
                             </p>
 
                             <p class="mt-3 text-3xl font-black text-slate-900 dark:text-white">
@@ -121,7 +179,7 @@
                             </p>
 
                             <p class="mt-2 text-xs text-slate-500">
-                                Currently in transit
+                                {{ $t['currently_transit'] }}
                             </p>
                         </div>
 
@@ -141,7 +199,7 @@
 
                         <a href="{{ route('admin.shipments.index', ['status' => 'in_transit']) }}"
                             class="text-xs font-bold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
-                            View in-transit →
+                            {{ $t['view_transit'] }} {{ $isAr ? '←' : '→' }}
                         </a>
 
                     </div>
@@ -149,7 +207,7 @@
                 </div>
 
 
-                {{-- Delivered --}}
+                {{-- {{ $t['delivered'] }} --}}
                 <div
                     class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
@@ -157,7 +215,7 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Delivered
+                                {{ $t['delivered'] }}
                             </p>
 
                             <p class="mt-3 text-3xl font-black text-slate-900 dark:text-white">
@@ -165,7 +223,7 @@
                             </p>
 
                             <p class="mt-2 text-xs text-slate-500">
-                                Successfully delivered
+                                {{ $t['successfully_delivered'] }}
                             </p>
                         </div>
 
@@ -185,7 +243,7 @@
 
                         <a href="{{ route('admin.shipments.index', ['status' => 'delivered']) }}"
                             class="text-xs font-bold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
-                            View delivered →
+                            {{ $t['view_delivered'] }} {{ $isAr ? '←' : '→' }}
                         </a>
 
                     </div>
@@ -201,7 +259,7 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Pending Quotations
+                                {{ $t['pending_quotations'] }}
                             </p>
 
                             <p class="mt-3 text-3xl font-black text-slate-900 dark:text-white">
@@ -209,7 +267,7 @@
                             </p>
 
                             <p class="mt-2 text-xs text-slate-500">
-                                Awaiting admin action
+                                {{ $t['awaiting_admin'] }}
                             </p>
                         </div>
 
@@ -229,7 +287,7 @@
 
                         <a href="{{ route('admin.quotations.index', ['status' => 'pending']) }}"
                             class="text-xs font-bold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
-                            Review quotations →
+                            {{ $t['review_quotations'] }} {{ $isAr ? '←' : '→' }}
                         </a>
 
                     </div>
@@ -252,7 +310,7 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Pending Shipments
+                                {{ $t['pending_shipments'] }}
                             </p>
 
                             <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -280,7 +338,7 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Total Quotations
+                                {{ $t['total_quotations'] }}
                             </p>
 
                             <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">
@@ -308,11 +366,11 @@
 
                         <div>
                             <p class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Customers
+                                {{ $t['customers'] }}
                             </p>
 
                             <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">
-                                {{ $stats['total_customers'] ?? 0 }}
+                                {{ $stats['customers'] ?? ($stats['total_customers'] ?? 0) }}
                             </p>
                         </div>
 
@@ -350,17 +408,17 @@
 
                         <div>
                             <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">
-                                Recent Shipments
+                                {{ $t['recent_shipments'] }}
                             </h2>
 
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Latest shipment activity across the platform.
+                                {{ $t['latest_shipment_activity'] }}
                             </p>
                         </div>
 
                         <a href="{{ route('admin.shipments.index') }}"
                             class="text-xs font-bold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
-                            View all
+                            {{ $t['view_all'] }}
                         </a>
 
                     </div>
@@ -408,15 +466,15 @@
                                         <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
 
                                             <span>
-                                                {{ $shipment->originPort->name ?? 'Unknown' }}
+                                                {{ $shipment->originPort->name ?? $t['unknown'] }}
                                             </span>
 
                                             <span>
-                                                →
+                                                {{ $isAr ? '←' : '→' }}
                                             </span>
 
                                             <span>
-                                                {{ $shipment->destinationPort->name ?? 'Unknown' }}
+                                                {{ $shipment->destinationPort->name ?? $t['unknown'] }}
                                             </span>
 
                                             @if ($shipment->vessel)
@@ -440,12 +498,12 @@
 
                                     <span
                                         class="inline-flex rounded-full px-3 py-1.5 text-[11px] font-extrabold capitalize {{ $statusClasses }}">
-                                        {{ str_replace('_', ' ', $status) }}
+                                        {{ $isAr? match ($status) {'pending' => 'معلق','booked' => 'تم الحجز','confirmed' => 'مؤكد','in_transit' => 'قيد النقل','arrived' => 'وصل','delivered' => 'تم التسليم','cancelled' => 'ملغى',default => str_replace('_', ' ', $status)}: str_replace('_', ' ', $status) }}
                                     </span>
 
                                     <a href="{{ route('admin.shipments.show', $shipment) }}"
                                         class="text-xs font-bold text-slate-500 hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400">
-                                        View
+                                        {{ $t['view'] }}
                                     </a>
 
                                 </div>
@@ -469,11 +527,11 @@
                             </div>
 
                             <h3 class="mt-4 font-extrabold text-slate-900 dark:text-white">
-                                No shipments yet
+                                {{ $t['no_shipments'] }}
                             </h3>
 
                             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                                Shipment activity will appear here.
+                                {{ $t['shipment_activity_here'] }}
                             </p>
 
                         </div>
@@ -494,17 +552,17 @@
 
                         <div>
                             <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">
-                                Recent Quotations
+                                {{ $t['recent_quotations'] }}
                             </h2>
 
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Latest customer requests.
+                                {{ $t['latest_customer_requests'] }}
                             </p>
                         </div>
 
                         <a href="{{ route('admin.quotations.index') }}"
                             class="text-xs font-bold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
-                            View all
+                            {{ $t['view_all'] }}
                         </a>
 
                     </div>
@@ -538,7 +596,7 @@
                                     </a>
 
                                     <p class="mt-1 text-xs text-slate-400">
-                                        {{ $quotation->cargo_type ?? 'Cargo request' }}
+                                        {{ $quotation->cargo_type ?? $t['cargo_request'] }}
                                     </p>
 
                                     @if ($quotation->created_at)
@@ -551,7 +609,7 @@
 
                                 <span
                                     class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold capitalize {{ $quotationStatusClasses }}">
-                                    {{ str_replace('_', ' ', $quotationStatus) }}
+                                    {{ $isAr? match ($quotationStatus) {'pending' => 'معلق','approved' => 'معتمد','rejected' => 'مرفوض','quoted' => 'تم التسعير','accepted' => 'مقبول',default => str_replace('_', ' ', $quotationStatus)}: str_replace('_', ' ', $quotationStatus) }}
                                 </span>
 
                             </div>
@@ -574,11 +632,11 @@
                             </div>
 
                             <h3 class="mt-4 font-extrabold text-slate-900 dark:text-white">
-                                No quotations yet
+                                {{ $t['no_quotations'] }}
                             </h3>
 
                             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                                Customer quotation requests will appear here.
+                                {{ $t['quotation_requests_here'] }}
                             </p>
 
                         </div>
@@ -597,11 +655,11 @@
 
                 <div class="mb-4">
                     <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">
-                        Quick Actions
+                        {{ $t['quick_actions'] }}
                     </h2>
 
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Frequently used administration tools.
+                        {{ $t['frequently_used'] }}
                     </p>
                 </div>
 
@@ -619,11 +677,11 @@
                         </div>
 
                         <h3 class="mt-4 text-sm font-extrabold text-slate-900 dark:text-white">
-                            Manage Shipments
+                            {{ $t['manage_shipments'] }}
                         </h3>
 
                         <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                            Create, edit and manage shipments.
+                            {{ $t['create_edit_shipments'] }}
                         </p>
 
                     </a>
@@ -640,11 +698,11 @@
                         </div>
 
                         <h3 class="mt-4 text-sm font-extrabold text-slate-900 dark:text-white">
-                            Review Quotations
+                            {{ $t['review_quotations_action'] }}
                         </h3>
 
                         <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                            Review and process customer requests.
+                            {{ $t['review_process_requests'] }}
                         </p>
 
                     </a>
@@ -662,11 +720,11 @@
                         </div>
 
                         <h3 class="mt-4 text-sm font-extrabold text-slate-900 dark:text-white">
-                            Customers
+                            {{ $t['customers'] }}
                         </h3>
 
                         <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                            Manage customer accounts and information.
+                            {{ $t['manage_customer_accounts'] }}
                         </p>
 
                     </a>
@@ -684,11 +742,11 @@
                         </div>
 
                         <h3 class="mt-4 text-sm font-extrabold text-slate-900 dark:text-white">
-                            Users
+                            {{ $t['users'] }}
                         </h3>
 
                         <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                            Manage administrators and platform users.
+                            {{ $t['manage_users'] }}
                         </p>
 
                     </a>
@@ -703,13 +761,13 @@
                 class="flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 text-xs text-slate-400 sm:flex-row dark:border-slate-800">
 
                 <p>
-                    HAG Brokers — Sea Freight Solutions
+                    {{ $t['footer'] }}
                 </p>
 
                 <div class="flex items-center gap-2">
                     <span class="h-2 w-2 rounded-full bg-cyan-500"></span>
                     <span>
-                        Admin Control Center
+                        {{ $t['control_center'] }}
                     </span>
                 </div>
 
