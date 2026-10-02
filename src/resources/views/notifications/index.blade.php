@@ -246,3 +246,117 @@
         </div>
     </div>
 </x-app-layout>
+<x-app-layout>
+
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                Notifications
+            </h2>
+
+            @if ($notifications->where('is_read', false)->count())
+                <form method="POST" action="{{ route('notifications.markAllRead') }}">
+                    @csrf
+                    @method('PATCH')
+
+                    <button
+                        type="submit"
+                        class="text-sm font-semibold text-cyan-600 hover:text-cyan-500"
+                    >
+                        Mark all as read
+                    </button>
+                </form>
+            @endif
+        </div>
+    </x-slot>
+
+    <div class="py-8">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+            @if (session('success'))
+                <div class="mb-5 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            <div class="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-slate-900">
+
+                @forelse ($notifications as $notification)
+
+                    <div class="border-b border-slate-200 p-5 last:border-b-0 dark:border-slate-800
+                        {{ ! $notification->is_read ? 'bg-cyan-50/50 dark:bg-cyan-950/20' : '' }}">
+
+                        <div class="flex items-start justify-between gap-4">
+
+                            <div class="flex-1">
+
+                                <a
+                                    href="{{ route('notifications.show', $notification) }}"
+                                    class="font-bold text-slate-900 hover:text-cyan-600 dark:text-white"
+                                >
+                                    {{ $notification->title }}
+                                </a>
+
+                                <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                                    {{ $notification->message }}
+                                </p>
+
+                                <p class="mt-2 text-xs text-slate-400">
+                                    {{ $notification->created_at->diffForHumans() }}
+                                </p>
+
+                            </div>
+
+                            @if (! $notification->is_read)
+                                <form
+                                    method="POST"
+                                    action="{{ route('notifications.markRead', $notification) }}"
+                                >
+                                    @csrf
+                                    @method('PATCH')
+
+                                    <button
+                                        type="submit"
+                                        class="rounded-lg px-3 py-2 text-xs font-semibold text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950/30"
+                                    >
+                                        Mark as read
+                                    </button>
+                                </form>
+                            @endif
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <div class="p-12 text-center">
+
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                            🔔
+                        </div>
+
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+                            No notifications
+                        </h3>
+
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                            You don't have any notifications yet.
+                        </p>
+
+                    </div>
+
+                @endforelse
+
+            </div>
+
+            @if ($notifications->hasPages())
+                <div class="mt-6">
+                    {{ $notifications->links() }}
+                </div>
+            @endif
+
+        </div>
+    </div>
+
+</x-app-layout>
