@@ -681,6 +681,787 @@
             </div>
         </section>
 
+        {{-- =========================================================
+     BUSINESS OPPORTUNITIES — MARKETPLACE SECTION
+========================================================= --}}
+
+        @php
+            $isAr = app()->getLocale() === 'ar';
+
+            $homeOpportunities = collect($opportunities ?? []);
+
+            $categoryLabels = [
+                'import' => $isAr ? 'استيراد' : 'Import',
+                'export' => $isAr ? 'تصدير' : 'Export',
+                'sea_freight' => $isAr ? 'شحن' : 'Shipping',
+                'distribution' => $isAr ? 'توزيع' : 'Distribution',
+                'manufacturing' => $isAr ? 'تصنيع' : 'Manufacturing',
+                'real_estate' => $isAr ? 'عقارات' : 'Real Estate',
+                'technology' => $isAr ? 'تقنية' : 'Technology',
+                'services' => $isAr ? 'خدمات' : 'Services',
+                'other' => $isAr ? 'أخرى' : 'Other',
+            ];
+
+            $typeLabels = [
+                'business' => $isAr ? 'أعمال' : 'Business',
+                'investment' => $isAr ? 'استثمار' : 'Investment',
+                'trade' => $isAr ? 'تجارة' : 'Trade',
+                'procurement' => $isAr ? 'مشتريات' : 'Procurement',
+                'distribution' => $isAr ? 'توزيع' : 'Distribution',
+                'logistics' => $isAr ? 'لوجستيات' : 'Logistics',
+                'partnership' => $isAr ? 'شراكة' : 'Partnership',
+                'other' => $isAr ? 'أخرى' : 'Other',
+            ];
+        @endphp
+
+
+        <section id="opportunities" dir="{{ $isAr ? 'rtl' : 'ltr' }}"
+            class="relative overflow-hidden bg-[#06101d] py-16 sm:py-20 lg:py-24">
+
+            {{-- Background --}}
+            <div class="pointer-events-none absolute inset-0 overflow-hidden">
+
+                <div
+                    class="absolute -top-32 {{ $isAr ? '-right-32' : '-left-32' }}
+                   h-80 w-80 rounded-full
+                   bg-cyan-500/10 blur-3xl">
+                </div>
+
+                <div
+                    class="absolute bottom-0 {{ $isAr ? '-left-32' : '-right-32' }}
+                   h-80 w-80 rounded-full
+                   bg-blue-500/10 blur-3xl">
+                </div>
+
+                <div class="absolute inset-0 opacity-[0.025]"
+                    style="
+                background-image:
+                    linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+                background-size: 50px 50px;
+            ">
+                </div>
+
+            </div>
+
+
+            <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+                {{-- =====================================================
+             HEADER
+        ====================================================== --}}
+                <div class="mb-8 sm:mb-10">
+
+                    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+
+                        <div class="max-w-2xl">
+
+                            <div
+                                class="mb-4 inline-flex items-center gap-2 rounded-full
+                               border border-cyan-400/20 bg-cyan-400/5
+                               px-3 py-1.5 text-xs font-semibold text-cyan-300">
+                                <span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
+
+                                {{ $isAr ? 'سوق الفرص التجارية' : 'Business Opportunities Marketplace' }}
+                            </div>
+
+
+                            <h2
+                                class="text-3xl font-black tracking-tight text-white
+                               sm:text-4xl lg:text-5xl">
+                                {{ $isAr ? 'اكتشف فرصتك القادمة' : 'Discover Your Next Opportunity' }}
+                            </h2>
+
+
+                            <p class="mt-4 text-sm leading-7 text-slate-400 sm:text-base">
+
+                                {{ $isAr
+                                    ? 'فرص تجارية واستثمارية وشراكات مختارة عبر شبكة HAG Brokers.'
+                                    : 'Discover selected business, investment and partnership opportunities through HAG Brokers.' }}
+
+                            </p>
+
+                        </div>
+
+
+                        {{-- Desktop CTA --}}
+                        <div class="hidden lg:flex items-center gap-3">
+
+                            <a href="{{ route('opportunities.index') }}"
+                                class="inline-flex h-11 items-center justify-center gap-2
+                               rounded-xl border border-white/10
+                               bg-white/[0.04] px-5
+                               text-sm font-semibold text-white
+                               transition hover:bg-white/[0.08]">
+                                {{ $isAr ? 'كل الفرص' : 'All Opportunities' }}
+
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    @if ($isAr)
+                                        <path fill-rule="evenodd"
+                                            d="M12.79 3.79a1 1 0 010 1.42L8 10l4.79 4.79a1 1 0 01-1.42 1.42l-5.5-5.5a1 1 0 010-1.42l5.5-5.5a1 1 0 011.42 0z"
+                                            clip-rule="evenodd" />
+                                    @else
+                                        <path fill-rule="evenodd"
+                                            d="M7.21 16.21a1 1 0 010-1.42L12 10 7.21 5.21a1 1 0 011.42 0l5.5 5.5a1 1 0 010 1.42z"
+                                            clip-rule="evenodd" />
+                                    @endif
+                                </svg>
+                            </a>
+
+                            @auth
+                                <a href="{{ route('opportunities.create') }}"
+                                    class="inline-flex h-11 items-center justify-center gap-2
+                                   rounded-xl bg-cyan-400 px-5
+                                   text-sm font-bold text-slate-950
+                                   transition hover:bg-cyan-300">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path
+                                            d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                                    </svg>
+
+                                    {{ $isAr ? 'أضف فرصة' : 'Add Opportunity' }}
+                                </a>
+                            @endauth
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {{-- =====================================================
+             QUICK FILTERS
+        ====================================================== --}}
+                @if ($homeOpportunities->count())
+
+                    <div class="mb-8 overflow-x-auto pb-2" style="scrollbar-width:none;">
+
+                        <div id="opportunityFilters" class="flex min-w-max items-center gap-2">
+
+                            {{-- All --}}
+                            <button type="button" data-filter="all"
+                                class="opportunity-filter active
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-cyan-400/30
+                               bg-cyan-400/10 px-4
+                               text-xs font-bold text-cyan-300
+                               transition">
+                                {{ $isAr ? 'الكل' : 'All' }}
+                            </button>
+
+
+                            {{-- Trade --}}
+                            <button type="button" data-filter="trade"
+                                class="opportunity-filter
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-white/10
+                               bg-white/[0.035] px-4
+                               text-xs font-semibold text-slate-400
+                               transition hover:border-cyan-400/20
+                               hover:text-white">
+                                {{ $isAr ? 'تجارة' : 'Trade' }}
+                            </button>
+
+
+                            {{-- Investment --}}
+                            <button type="button" data-filter="investment"
+                                class="opportunity-filter
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-white/10
+                               bg-white/[0.035] px-4
+                               text-xs font-semibold text-slate-400
+                               transition hover:border-cyan-400/20
+                               hover:text-white">
+                                {{ $isAr ? 'استثمار' : 'Investment' }}
+                            </button>
+
+
+                            {{-- Import --}}
+                            <button type="button" data-filter="import"
+                                class="opportunity-filter
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-white/10
+                               bg-white/[0.035] px-4
+                               text-xs font-semibold text-slate-400
+                               transition hover:border-cyan-400/20
+                               hover:text-white">
+                                {{ $isAr ? 'استيراد' : 'Import' }}
+                            </button>
+
+
+                            {{-- Export --}}
+                            <button type="button" data-filter="export"
+                                class="opportunity-filter
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-white/10
+                               bg-white/[0.035] px-4
+                               text-xs font-semibold text-slate-400
+                               transition hover:border-cyan-400/20
+                               hover:text-white">
+                                {{ $isAr ? 'تصدير' : 'Export' }}
+                            </button>
+
+
+                            {{-- Shipping --}}
+                            <button type="button" data-filter="sea_freight"
+                                class="opportunity-filter
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-white/10
+                               bg-white/[0.035] px-4
+                               text-xs font-semibold text-slate-400
+                               transition hover:border-cyan-400/20
+                               hover:text-white">
+                                {{ $isAr ? 'شحن' : 'Shipping' }}
+                            </button>
+
+
+                            {{-- Partnership --}}
+                            <button type="button" data-filter="partnership"
+                                class="opportunity-filter
+                               inline-flex h-10 items-center justify-center
+                               rounded-xl border border-white/10
+                               bg-white/[0.035] px-4
+                               text-xs font-semibold text-slate-400
+                               transition hover:border-cyan-400/20
+                               hover:text-white">
+                                {{ $isAr ? 'شراكات' : 'Partnerships' }}
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- =====================================================
+                 OPPORTUNITY GRID
+            ====================================================== --}}
+                    <div id="opportunityGrid" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+                        @foreach ($homeOpportunities as $opportunity)
+                            @php
+                                $media = $opportunity->media ?? collect();
+
+                                $primaryMedia = $media->firstWhere('is_primary', true) ?? $media->first();
+
+                                $mediaUrl = null;
+                                $isVideo = false;
+
+                                if ($primaryMedia) {
+                                    $mediaUrl = str_starts_with($primaryMedia->path, 'http')
+                                        ? $primaryMedia->path
+                                        : asset('storage/' . ltrim($primaryMedia->path, '/'));
+
+                                    $isVideo =
+                                        str_starts_with((string) $primaryMedia->mime_type, 'video/') ||
+                                        $primaryMedia->type === 'video';
+                                }
+
+                                $description = trim(strip_tags($opportunity->description ?? ''));
+
+                                if (mb_strlen($description) > 90) {
+                                    $description = mb_substr($description, 0, 90) . '...';
+                                }
+
+                                $locationParts = array_filter([
+                                    $opportunity->city ?? null,
+                                    $opportunity->country ?? null,
+                                ]);
+
+                                $location = implode(', ', $locationParts);
+
+                                $category = $opportunity->category ?: 'other';
+
+                                $type = $opportunity->type ?: 'other';
+
+                                $categoryLabel = $categoryLabels[$category] ?? ($isAr ? 'أخرى' : 'Other');
+
+                                $typeLabel = $typeLabels[$type] ?? ($isAr ? 'فرصة' : 'Opportunity');
+
+                                /*
+                                 * We allow filtering by:
+                                 * - category
+                                 * - type
+                                 *
+                                 * Example:
+                                 * trade opportunity can be found by "trade"
+                                 */
+                                $filterValues = implode(' ', [strtolower($category), strtolower($type)]);
+                            @endphp
+
+
+                            <article
+                                class="opportunity-card group flex min-w-0 flex-col
+                               overflow-hidden rounded-[24px]
+                               border border-white/[0.08]
+                               bg-white/[0.035]
+                               backdrop-blur-xl
+                               transition duration-300
+                               hover:-translate-y-1
+                               hover:border-cyan-400/20
+                               hover:bg-white/[0.055]"
+                                data-category="{{ strtolower($category) }}" data-type="{{ strtolower($type) }}"
+                                data-filter-values="{{ $filterValues }}">
+
+                                {{-- MEDIA --}}
+                                <a href="{{ route('opportunities.show', $opportunity) }}"
+                                    class="relative block aspect-[16/9] overflow-hidden bg-slate-900">
+
+                                    @if ($primaryMedia && $mediaUrl)
+                                        @if ($isVideo)
+                                            <video
+                                                class="h-full w-full object-cover transition duration-500
+                                               group-hover:scale-105"
+                                                muted loop playsinline preload="metadata">
+                                                <source src="{{ $mediaUrl }}"
+                                                    type="{{ $primaryMedia->mime_type ?: 'video/mp4' }}">
+                                            </video>
+
+                                            <div class="absolute inset-0 flex items-center justify-center">
+                                                <div
+                                                    class="flex h-11 w-11 items-center justify-center
+                                                   rounded-full border border-white/20
+                                                   bg-black/40 text-white
+                                                   backdrop-blur-md">
+                                                    <svg class="ml-0.5 h-4 w-4" viewBox="0 0 20 20"
+                                                        fill="currentColor">
+                                                        <path
+                                                            d="M6.3 3.2A1.5 1.5 0 004 4.5v11a1.5 1.5 0 002.3 1.3l8.2-5.5a1.5 1.5 0 000-2.6L6.3 3.2z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <img src="{{ $mediaUrl }}" alt="{{ $opportunity->title }}"
+                                                class="h-full w-full object-cover transition duration-500
+                                               group-hover:scale-105"
+                                                loading="lazy">
+                                        @endif
+                                    @else
+                                        <div
+                                            class="flex h-full items-center justify-center
+                                           bg-gradient-to-br from-cyan-500/10
+                                           via-slate-900 to-blue-500/10">
+                                            <svg class="h-10 w-10 text-cyan-400/40" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="1.4">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M3 7.5A2.5 2.5 0 015.5 5h3l1.5-2h4L15.5 5h3A2.5 2.5 0 0121 7.5v9a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 16.5v-9z" />
+                                                <circle cx="12" cy="12" r="3.5" />
+                                            </svg>
+                                        </div>
+                                    @endif
+
+
+                                    {{-- Gradient --}}
+                                    <div
+                                        class="absolute inset-0 bg-gradient-to-t
+                                       from-slate-950/70 via-transparent to-transparent">
+                                    </div>
+
+
+                                    {{-- Reviewed --}}
+                                    <div class="absolute left-3 top-3">
+
+                                        <span
+                                            class="inline-flex items-center gap-1.5
+                                           rounded-full border border-emerald-400/20
+                                           bg-slate-950/70 px-2.5 py-1.5
+                                           text-[10px] font-bold
+                                           text-emerald-300 backdrop-blur-md">
+                                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                                            {{ $isAr ? 'موثقة' : 'Verified' }}
+                                        </span>
+
+                                    </div>
+
+
+                                    {{-- Category --}}
+                                    <div class="absolute bottom-3 {{ $isAr ? 'right-3' : 'left-3' }}">
+
+                                        <span
+                                            class="rounded-full border border-white/10
+                                           bg-slate-950/75 px-3 py-1.5
+                                           text-[10px] font-semibold text-white
+                                           backdrop-blur-md">
+                                            {{ $categoryLabel }}
+                                        </span>
+
+                                    </div>
+
+                                </a>
+
+
+                                {{-- CONTENT --}}
+                                <div class="flex flex-1 flex-col p-4 sm:p-5">
+
+                                    <div
+                                        class="mb-2 text-[10px] font-bold uppercase
+                                        tracking-wider text-cyan-300/70">
+                                        {{ $typeLabel }}
+                                    </div>
+
+
+                                    <h3
+                                        class="line-clamp-2 text-base font-bold leading-6
+                                       text-white transition
+                                       group-hover:text-cyan-200">
+                                        <a href="{{ route('opportunities.show', $opportunity) }}">
+                                            {{ $opportunity->title }}
+                                        </a>
+                                    </h3>
+
+
+                                    @if ($description)
+                                        <p class="mt-2 line-clamp-2 text-xs leading-5 text-slate-400">
+                                            {{ $description }}
+                                        </p>
+                                    @endif
+
+
+                                    {{-- Compact details --}}
+                                    <div class="mt-4 space-y-2">
+
+                                        @if ($location)
+                                            <div class="flex min-w-0 items-center gap-2 text-xs text-slate-400">
+
+                                                <svg class="h-3.5 w-3.5 shrink-0 text-cyan-400" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="1.7">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 21s7-5.2 7-11a7 7 0 10-14 0c0 5.8 7 11 7 11z" />
+                                                    <circle cx="12" cy="10" r="2.2" />
+                                                </svg>
+
+                                                <span class="truncate">
+                                                    {{ $location }}
+                                                </span>
+
+                                            </div>
+                                        @endif
+
+
+                                        @if (!is_null($opportunity->budget ?? null))
+                                            <div class="flex items-center gap-2 text-xs text-slate-400">
+
+                                                <svg class="h-3.5 w-3.5 shrink-0 text-cyan-400" viewBox="0 0 24 24"
+                                                    fill="none" stroke="currentColor" stroke-width="1.7">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        d="M12 3v18M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2.2 3 5 3 5 1.3 5 3-2.2 3-5 3-5-1.3-5-3" />
+                                                </svg>
+
+                                                <span>
+                                                    {{ number_format($opportunity->budget) }}
+                                                </span>
+
+                                            </div>
+                                        @endif
+
+                                    </div>
+
+
+                                    {{-- Footer --}}
+                                    <div
+                                        class="mt-4 flex items-center justify-between
+                                       gap-3 border-t border-white/[0.07]
+                                       pt-4">
+
+                                        <span class="text-[10px] text-slate-500">
+                                            {{ optional($opportunity->published_at)->diffForHumans() }}
+                                        </span>
+
+
+                                        <a href="{{ route('opportunities.show', $opportunity) }}"
+                                            class="inline-flex shrink-0 items-center gap-1
+                                           text-xs font-bold text-cyan-300
+                                           transition hover:text-cyan-200">
+                                            {{ $isAr ? 'التفاصيل' : 'Details' }}
+
+                                            <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                @if ($isAr)
+                                                    <path fill-rule="evenodd"
+                                                        d="M12.79 3.79a1 1 0 010 1.42L8 10l4.79 4.79a1 1 0 01-1.42 1.42l-5.5-5.5a1 1 0 010-1.42l5.5-5.5a1 1 0 011.42 0z"
+                                                        clip-rule="evenodd" />
+                                                @else
+                                                    <path fill-rule="evenodd"
+                                                        d="M7.21 16.21a1 1 0 010-1.42L12 10 7.21 5.21a1 1 0 011.42 0l5.5 5.5a1 1 0 010-1.42z"
+                                                        clip-rule="evenodd" />
+                                                @endif
+                                            </svg>
+
+                                        </a>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+                        @endforeach
+
+                    </div>
+
+
+                    {{-- No filter results --}}
+                    <div id="opportunityNoResults"
+                        class="hidden rounded-3xl border border-dashed
+                       border-white/10 bg-white/[0.025]
+                       px-5 py-12 text-center">
+
+                        <div
+                            class="mx-auto flex h-14 w-14 items-center justify-center
+                           rounded-2xl bg-white/[0.05]">
+                            <svg class="h-6 w-6 text-slate-500" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5">
+                                <circle cx="11" cy="11" r="6" />
+                                <path stroke-linecap="round" d="M16 16l4 4" />
+                            </svg>
+                        </div>
+
+                        <h3 class="mt-4 text-lg font-bold text-white">
+                            {{ $isAr ? 'لا توجد فرص بهذا التصنيف' : 'No opportunities in this category' }}
+                        </h3>
+
+                        <p class="mt-2 text-sm text-slate-500">
+                            {{ $isAr
+                                ? 'جرّب تصنيفاً آخر لاستكشاف المزيد من الفرص.'
+                                : 'Try another category to discover more opportunities.' }}
+                        </p>
+
+                    </div>
+
+
+                    {{-- Mobile / Bottom CTA --}}
+                    <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center lg:mt-10">
+
+                        <a href="{{ route('opportunities.index') }}"
+                            class="inline-flex min-h-[48px] items-center justify-center
+                           rounded-xl border border-white/10
+                           bg-white/[0.035] px-6
+                           text-sm font-semibold text-white
+                           transition hover:bg-white/[0.07]">
+                            {{ $isAr ? 'استكشف جميع الفرص' : 'Explore All Opportunities' }}
+                        </a>
+
+
+                        @auth
+
+                            <a href="{{ route('opportunities.create') }}"
+                                class="inline-flex min-h-[48px] items-center justify-center
+                               gap-2 rounded-xl bg-cyan-400
+                               px-6 text-sm font-bold text-slate-950
+                               transition hover:bg-cyan-300">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                                </svg>
+
+                                {{ $isAr ? 'أضف فرصة' : 'Add Opportunity' }}
+                            </a>
+
+                        @endauth
+
+                    </div>
+                @else
+                    {{-- =====================================================
+                 EMPTY STATE
+            ====================================================== --}}
+                    <div
+                        class="rounded-[28px] border border-dashed border-white/10
+                       bg-white/[0.025] px-5 py-14 text-center sm:py-16">
+
+                        <div
+                            class="mx-auto flex h-16 w-16 items-center justify-center
+                           rounded-3xl border border-cyan-400/20
+                           bg-cyan-400/10">
+                            <svg class="h-8 w-8 text-cyan-300" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 7.5A2.5 2.5 0 015.5 5h3l1.5-2h4L15.5 5h3A2.5 2.5 0 0121 7.5v9a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 16.5v-9z" />
+                                <circle cx="12" cy="12" r="3.5" />
+                            </svg>
+                        </div>
+
+
+                        <h3 class="mt-5 text-xl font-bold text-white sm:text-2xl">
+                            {{ $isAr ? 'لا توجد فرص منشورة حالياً' : 'No Opportunities Published Yet' }}
+                        </h3>
+
+
+                        <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-400">
+                            {{ $isAr
+                                ? 'يمكنك أن تكون من أوائل من يضيف فرصة تجارية إلى HAG Brokers.'
+                                : 'Be among the first to publish a business opportunity on HAG Brokers.' }}
+                        </p>
+
+
+                        <div class="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+
+                            @auth
+
+                                <a href="{{ route('opportunities.create') }}"
+                                    class="inline-flex min-h-[50px] items-center justify-center
+                                   gap-2 rounded-2xl bg-cyan-400
+                                   px-6 text-sm font-bold text-slate-950
+                                   transition hover:bg-cyan-300">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path
+                                            d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                                    </svg>
+
+                                    {{ $isAr ? 'أضف أول فرصة' : 'Add First Opportunity' }}
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}"
+                                    class="inline-flex min-h-[50px] items-center justify-center
+                                   rounded-2xl bg-cyan-400 px-6
+                                   text-sm font-bold text-slate-950
+                                   transition hover:bg-cyan-300">
+                                    {{ $isAr ? 'تسجيل الدخول لإضافة فرصة' : 'Login to Add Opportunity' }}
+                                </a>
+
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}"
+                                        class="inline-flex min-h-[50px] items-center justify-center
+                                       rounded-2xl border border-white/10
+                                       bg-white/[0.04] px-6
+                                       text-sm font-semibold text-white
+                                       transition hover:bg-white/[0.07]">
+                                        {{ $isAr ? 'إنشاء حساب' : 'Create Account' }}
+                                    </a>
+                                @endif
+
+                            @endauth
+
+                        </div>
+
+                    </div>
+
+                @endif
+
+            </div>
+
+
+            {{-- =========================================================
+         FILTER SCRIPT
+    ========================================================== --}}
+            @if ($homeOpportunities->count())
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+
+                        const filters = document.querySelectorAll('.opportunity-filter');
+                        const cards = document.querySelectorAll('.opportunity-card');
+                        const noResults = document.getElementById('opportunityNoResults');
+
+                        if (!filters.length || !cards.length) {
+                            return;
+                        }
+
+                        filters.forEach(function(button) {
+
+                            button.addEventListener('click', function() {
+
+                                const filter = this.dataset.filter;
+                                let visibleCount = 0;
+
+                                /*
+                                 * Reset buttons
+                                 */
+                                filters.forEach(function(item) {
+
+                                    item.classList.remove(
+                                        'active',
+                                        'border-cyan-400/30',
+                                        'bg-cyan-400/10',
+                                        'text-cyan-300'
+                                    );
+
+                                    item.classList.add(
+                                        'border-white/10',
+                                        'bg-white/[0.035]',
+                                        'text-slate-400'
+                                    );
+
+                                });
+
+
+                                /*
+                                 * Activate selected filter
+                                 */
+                                this.classList.remove(
+                                    'border-white/10',
+                                    'bg-white/[0.035]',
+                                    'text-slate-400'
+                                );
+
+                                this.classList.add(
+                                    'active',
+                                    'border-cyan-400/30',
+                                    'bg-cyan-400/10',
+                                    'text-cyan-300'
+                                );
+
+
+                                /*
+                                 * Filter cards
+                                 */
+                                cards.forEach(function(card) {
+
+                                    const category =
+                                        (card.dataset.category || '').toLowerCase();
+
+                                    const type =
+                                        (card.dataset.type || '').toLowerCase();
+
+                                    let show = false;
+
+                                    if (filter === 'all') {
+
+                                        show = true;
+
+                                    } else {
+
+                                        show =
+                                            category === filter ||
+                                            type === filter;
+
+                                    }
+
+
+                                    if (show) {
+
+                                        card.classList.remove('hidden');
+
+                                        visibleCount++;
+
+                                    } else {
+
+                                        card.classList.add('hidden');
+
+                                    }
+
+                                });
+
+
+                                /*
+                                 * Empty filter result
+                                 */
+                                if (noResults) {
+
+                                    if (visibleCount === 0) {
+                                        noResults.classList.remove('hidden');
+                                    } else {
+                                        noResults.classList.add('hidden');
+                                    }
+
+                                }
+
+                            });
+
+                        });
+
+                    });
+                </script>
+            @endif
+
+        </section>
+
         {{-- NETWORK MAP --}}
         <section id="network" class="scroll-mt-24 border-y border-white/5 bg-[#06101d] py-20 lg:py-28">
 
@@ -1382,10 +2163,10 @@
 
     <script>
         /*
-                                                                                    |--------------------------------------------------------------------------
-                                                                                    | Language menu
-                                                                                    |--------------------------------------------------------------------------
-                                                                                    */
+                                                                                                                                        |--------------------------------------------------------------------------
+                                                                                                                                        | Language menu
+                                                                                                                                        |--------------------------------------------------------------------------
+                                                                                                                                        */
 
         function toggleLanguageMenu() {
             const dropdown = document.getElementById('language-dropdown');

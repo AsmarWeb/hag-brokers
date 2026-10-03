@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Opportunity;
 use App\Models\OpportunityInterest;
+use App\Models\OpportunityMedia;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class OpportunityController extends Controller
@@ -21,6 +24,7 @@ class OpportunityController extends Controller
             ->with([
                 'originPort',
                 'destinationPort',
+                'media',
             ])
             ->where('visibility', 'public')
             ->where('verification_status', 'verified')
@@ -87,7 +91,12 @@ class OpportunityController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
+            /*
+        |--------------------------------------------------------------------------
+        | Opportunity
+        |--------------------------------------------------------------------------
+        */
             'title' => [
                 'required',
                 'string',
@@ -112,6 +121,11 @@ class OpportunityController extends Controller
                 'min:20',
             ],
 
+            /*
+        |--------------------------------------------------------------------------
+        | Logistics
+        |--------------------------------------------------------------------------
+        */
             'cargo_type' => [
                 'nullable',
                 'string',
@@ -146,6 +160,11 @@ class OpportunityController extends Controller
                 'max:100',
             ],
 
+            /*
+        |--------------------------------------------------------------------------
+        | Financial
+        |--------------------------------------------------------------------------
+        */
             'estimated_value' => [
                 'nullable',
                 'numeric',
@@ -170,6 +189,11 @@ class OpportunityController extends Controller
                 'size:3',
             ],
 
+            /*
+        |--------------------------------------------------------------------------
+        | Commission
+        |--------------------------------------------------------------------------
+        */
             'commission_type' => [
                 'required',
                 'in:percentage,fixed',
@@ -181,6 +205,11 @@ class OpportunityController extends Controller
                 'min:0',
             ],
 
+            /*
+        |--------------------------------------------------------------------------
+        | Timeline
+        |--------------------------------------------------------------------------
+        */
             'expected_close_date' => [
                 'nullable',
                 'date',
@@ -192,19 +221,41 @@ class OpportunityController extends Controller
                 'after_or_equal:today',
             ],
 
+            /*
+        |--------------------------------------------------------------------------
+        | Notes
+        |--------------------------------------------------------------------------
+        */
             'notes' => [
                 'nullable',
                 'string',
             ],
-        ]);
 
-        /*
+            /*
         |--------------------------------------------------------------------------
-        | Find/Create Customer for authenticated user
+        | Media
         |--------------------------------------------------------------------------
         */
+            'media' => [
+                'nullable',
+                'array',
+                'max:10',
+            ],
+
+            'media.*' => [
+                'file',
+                'mimes:jpg,jpeg,png,webp,mp4,mov,webm',
+                'max:20480',
+            ],
+        ]);
 
         $user = Auth::user();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Find / Create Customer
+    |--------------------------------------------------------------------------
+    */
 
         $customer = Customer::firstOrCreate(
             [
@@ -218,67 +269,190 @@ class OpportunityController extends Controller
             ]
         );
 
-        /*
+        $storedMediaPaths = [];
+
+        try {
+            $opportunity = DB::transaction(function () use (
+                $validated,
+                $customer,
+                $request,
+                &$storedMediaPaths
+            ) {
+                /*
+            |--------------------------------------------------------------------------
+            | Create Opportunity
+            |--------------------------------------------------------------------------
+            */
+
+                $opportunity = Opportunity::create([
+                    'customer_id' => $customer->id,
+
+                    'contact_id' => null,
+                    'assigned_to' => null,
+
+                    'title' => $validated['title'],
+
+                    'opportunity_type' =>
+                    $validated['opportunity_type'],
+
+                    'category' =>
+                    $validated['category'] ?? null,
+
+                    'description' =>
+                    $validated['description'],
+
+                    'cargo_type' =>
+                    $validated['cargo_type'] ?? null,
+
+                    'container_type' =>
+                    $validated['container_type'] ?? null,
+
+                    'origin_port_id' =>
+                    $validated['origin_port_id'] ?? null,
+
+                    'destination_port_id' =>
+                    $validated['destination_port_id'] ?? null,
+
+                    'country' =>
+                    $validated['country'] ?? null,
+
+                    'city' =>
+                    $validated['city'] ?? null,
+
+                    'estimated_value' =>
+                    $validated['estimated_value'] ?? null,
+
+                    'required_capital' =>
+                    $validated['required_capital'] ?? null,
+
+                    'min_investment' =>
+                    $validated['min_investment'] ?? null,
+
+                    'currency' =>
+                    strtoupper($validated['currency']),
+
+                    'commission_type' =>
+                    $validated['commission_type'],
+
+                    'commission_rate' =>
+                    $validated['commission_rate'] ?? null,
+
+                    /*
+                |--------------------------------------------------------------------------
+                | Pipeline
+                |--------------------------------------------------------------------------
+                */
+
+                    'stage' => 'new',
+
+                    'probability' => 0,
+
+                    /*
+                |--------------------------------------------------------------------------
+                | Marketplace Protection
+                |--------------------------------------------------------------------------
+                */
+
+                    'visibility' => 'private',
+
+                    'verification_status' => 'pending',
+
+                    'expected_close_date' =>
+                    $validated['expected_close_date'] ?? null,
+
+                    'published_at' => null,
+
+                    'expires_at' =>
+                    $validated['expires_at'] ?? null,
+
+                    'notes' =>
+                    $validated['notes'] ?? null,
+                ]);
+
+                /*
+            |--------------------------------------------------------------------------
+            | Store Media
+            |--------------------------------------------------------------------------
+            */
+
+                if ($request->hasFile('media')) {
+                    $sortOrder = 0;
+                    $primarySet = false;
+
+                    foreach ($request->file('media') as $file) {
+                        if (!$file->isValid()) {
+                            continue;
+                        }
+
+                        $mimeType = $file->getMimeType();
+
+                        $type = str_starts_with($mimeType, 'video/')
+                            ? 'video'
+                            : 'image';
+
+                        $path = $file->store(
+                            "opportunities/{$opportunity->id}",
+                            'public'
+                        );
+
+                        $storedMediaPaths[] = $path;
+
+                        OpportunityMedia::create([
+                            'opportunity_id' => $opportunity->id,
+
+                            'type' => $type,
+
+                            'path' => $path,
+
+                            'mime_type' => $mimeType,
+
+                            'size' => $file->getSize(),
+
+                            'original_name' =>
+                            $file->getClientOriginalName(),
+
+                            'sort_order' => $sortOrder++,
+
+                            /*
+                        |--------------------------------------------------------------------------
+                        | First image becomes primary
+                        |--------------------------------------------------------------------------
+                        */
+
+                            'is_primary' =>
+                            $type === 'image' && !$primarySet,
+                        ]);
+
+                        if ($type === 'image' && !$primarySet) {
+                            $primarySet = true;
+                        }
+                    }
+                }
+
+                return $opportunity;
+            });
+        } catch (\Throwable $e) {
+
+            /*
         |--------------------------------------------------------------------------
-        | Create Opportunity
+        | Cleanup uploaded files if transaction fails
         |--------------------------------------------------------------------------
         */
 
-        $opportunity = Opportunity::create([
-            'customer_id' => $customer->id,
+            foreach ($storedMediaPaths as $path) {
+                Storage::disk('public')->delete($path);
+            }
 
-            'contact_id' => null,
-            'assigned_to' => null,
-
-            'title' => $request->title,
-
-            'opportunity_type' => $request->opportunity_type,
-            'category' => $request->category,
-            'description' => $request->description,
-
-            'cargo_type' => $request->cargo_type,
-            'container_type' => $request->container_type,
-
-            'origin_port_id' => $request->origin_port_id,
-            'destination_port_id' => $request->destination_port_id,
-
-            'country' => $request->country,
-            'city' => $request->city,
-
-            'estimated_value' => $request->estimated_value,
-            'required_capital' => $request->required_capital,
-            'min_investment' => $request->min_investment,
-
-            'currency' => strtoupper($request->currency),
-
-            'commission_type' => $request->commission_type,
-            'commission_rate' => $request->commission_rate,
-
-            'stage' => 'new',
-            'probability' => 0,
-
-            /*
-             * User submissions are never published immediately.
-             */
-            'visibility' => 'private',
-            'verification_status' => 'pending',
-
-            'expected_close_date' => $request->expected_close_date,
-
-            'published_at' => null,
-
-            'expires_at' => $request->expires_at,
-
-            'notes' => $request->notes,
-        ]);
+            throw $e;
+        }
 
         return redirect()
-            ->route('opportunities.show', $opportunity)
+            ->route('opportunities.index')
             ->with(
                 'success',
                 app()->getLocale() === 'ar'
-                    ? 'تم إرسال الفرصة بنجاح، وستتم مراجعتها من فريق HAG Brokers.'
-                    : 'Your opportunity has been submitted and will be reviewed by HAG Brokers.'
+                    ? 'تم إرسال الفرصة بنجاح، وستتم مراجعتها من فريق HAG Brokers قبل نشرها.'
+                    : 'Your opportunity has been submitted successfully and will be reviewed by HAG Brokers before publication.'
             );
     }
 
@@ -307,9 +481,15 @@ class OpportunityController extends Controller
         $opportunity->load([
             'originPort',
             'destinationPort',
+            'media' => function ($query) {
+                $query->orderBy('sort_order');
+            },
         ]);
 
-        return view('opportunities.show', compact('opportunity'));
+        return view(
+            'opportunities.show',
+            compact('opportunity')
+        );
     }
 
     /**
@@ -331,6 +511,7 @@ class OpportunityController extends Controller
         $opportunity->load([
             'originPort',
             'destinationPort',
+            'media',
         ]);
 
         $existingInterest = OpportunityInterest::where(
@@ -340,10 +521,13 @@ class OpportunityController extends Controller
             ->where('user_id', Auth::id())
             ->first();
 
-        return view('opportunities.interest', compact(
-            'opportunity',
-            'existingInterest'
-        ));
+        return view(
+            'opportunities.interest',
+            compact(
+                'opportunity',
+                'existingInterest'
+            )
+        );
     }
 
     /**
@@ -392,10 +576,10 @@ class OpportunityController extends Controller
         ]);
 
         /*
-    |--------------------------------------------------------------------------
-    | Prevent duplicate interest
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Prevent duplicate interest
+        |--------------------------------------------------------------------------
+        */
 
         $existingInterest = OpportunityInterest::where(
             'opportunity_id',
@@ -406,7 +590,10 @@ class OpportunityController extends Controller
 
         if ($existingInterest) {
             return redirect()
-                ->route('opportunities.show', $opportunity)
+                ->route(
+                    'opportunities.show',
+                    $opportunity
+                )
                 ->with(
                     'info',
                     app()->getLocale() === 'ar'
@@ -417,6 +604,7 @@ class OpportunityController extends Controller
 
         OpportunityInterest::create([
             'opportunity_id' => $opportunity->id,
+
             'user_id' => Auth::id(),
 
             'role' => $validated['role'],
@@ -424,18 +612,24 @@ class OpportunityController extends Controller
             'available_capital' =>
             $validated['available_capital'] ?? null,
 
-            'currency' => strtoupper($validated['currency']),
+            'currency' =>
+            strtoupper($validated['currency']),
 
-            'message' => $validated['message'],
+            'message' =>
+            $validated['message'],
 
             'status' => 'pending',
 
             'reviewed_at' => null,
+
             'reviewed_by' => null,
         ]);
 
         return redirect()
-            ->route('opportunities.show', $opportunity)
+            ->route(
+                'opportunities.show',
+                $opportunity
+            )
             ->with(
                 'success',
                 app()->getLocale() === 'ar'

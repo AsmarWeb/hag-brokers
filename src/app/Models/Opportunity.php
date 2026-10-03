@@ -153,4 +153,11 @@ class Opportunity extends Model
     {
         return $this->hasMany(OpportunityInterest::class);
     }
+
+    public function media(): HasMany
+    {
+        return $this->hasMany(
+            OpportunityMedia::class
+        )->orderBy('sort_order');
+    }
 }
