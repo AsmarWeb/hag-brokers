@@ -24,6 +24,8 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 
+use App\Http\Controllers\OpportunityController;
+
 /*
 |--------------------------------------------------------------------------
 | Language
@@ -199,6 +201,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'destroy',
     ])->name('profile.destroy');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Opportunities
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/opportunities', [
+    OpportunityController::class,
+    'index',
+])->name('opportunities.index');
+
+Route::get('/opportunities/create', [
+    OpportunityController::class,
+    'create',
+])->middleware('auth')->name('opportunities.create');
+
+Route::post('/opportunities', [
+    OpportunityController::class,
+    'store',
+])->middleware('auth')->name('opportunities.store');
+
+Route::get('/opportunities/{opportunity}', [
+    OpportunityController::class,
+    'show',
+])->name('opportunities.show');
+
+Route::get('/opportunities/{opportunity}/interest', [
+    OpportunityController::class,
+    'interest',
+])->middleware('auth')->name('opportunities.interest');
+
+Route::post('/opportunities/{opportunity}/interest', [
+    OpportunityController::class,
+    'storeInterest',
+])->middleware('auth')->name('opportunities.interest.store');
 
 
 // ======================================================

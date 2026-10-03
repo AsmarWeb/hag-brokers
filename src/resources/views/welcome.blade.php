@@ -339,8 +339,23 @@
                 </div>
 
                 @auth
+
+                    {{-- Add Opportunity --}}
+                    <a href="{{ route('opportunities.create') }}"
+                        class="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-300">
+
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+
+                        <span>
+                            {{ $isAr ? 'أضف فرصة' : 'Add Opportunity' }}
+                        </span>
+                    </a>
+
+                    {{-- Dashboard --}}
                     <a href="{{ url('/dashboard') }}"
-                        class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/5">
+                        class="rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/5">
                         {{ $isAr ? 'لوحة التحكم' : 'Dashboard' }}
                     </a>
                 @else
@@ -355,6 +370,7 @@
                             {{ $isAr ? 'إنشاء حساب' : 'Create Account' }}
                         </a>
                     @endif
+
                 @endauth
 
             </div>
@@ -412,25 +428,46 @@
                     </a>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 pt-2">
+                <div class="space-y-2 pt-2">
+
                     @auth
+
+                        {{-- Add Opportunity --}}
+                        <a href="{{ route('opportunities.create') }}"
+                            class="flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 py-3 text-center text-sm font-bold text-slate-950">
+
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 4v16m8-8H4" />
+                            </svg>
+
+                            {{ $isAr ? 'إضافة فرصة جديدة' : 'Add New Opportunity' }}
+                        </a>
+
+                        {{-- Dashboard --}}
                         <a href="{{ url('/dashboard') }}"
-                            class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-white">
+                            class="block rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-white">
                             {{ $isAr ? 'لوحة التحكم' : 'Dashboard' }}
                         </a>
                     @else
-                        <a href="{{ route('login') }}"
-                            class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-white">
-                            {{ $isAr ? 'دخول' : 'Login' }}
-                        </a>
+                        <div class="grid grid-cols-2 gap-2">
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}"
-                                class="rounded-xl bg-cyan-400 px-4 py-3 text-center text-sm font-bold text-slate-950">
-                                {{ $isAr ? 'حساب جديد' : 'Register' }}
+                            <a href="{{ route('login') }}"
+                                class="rounded-xl border border-white/10 px-4 py-3 text-center text-sm text-white">
+                                {{ $isAr ? 'دخول' : 'Login' }}
                             </a>
-                        @endif
+
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}"
+                                    class="rounded-xl bg-cyan-400 px-4 py-3 text-center text-sm font-bold text-slate-950">
+                                    {{ $isAr ? 'حساب جديد' : 'Register' }}
+                                </a>
+                            @endif
+
+                        </div>
+
                     @endauth
+
                 </div>
 
             </div>
@@ -1345,10 +1382,10 @@
 
     <script>
         /*
-                                                            |--------------------------------------------------------------------------
-                                                            | Language menu
-                                                            |--------------------------------------------------------------------------
-                                                            */
+                                                                                    |--------------------------------------------------------------------------
+                                                                                    | Language menu
+                                                                                    |--------------------------------------------------------------------------
+                                                                                    */
 
         function toggleLanguageMenu() {
             const dropdown = document.getElementById('language-dropdown');

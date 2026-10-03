@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('opportunities', function (Blueprint $table) {
+
+            // =====================================================
+            // CRM Relationships
+            // =====================================================
+
             $table->id();
+
             $table->foreignId('customer_id')
                 ->constrained('customers')
                 ->cascadeOnDelete();
@@ -27,10 +33,34 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
+
+            // =====================================================
+            // Basic Opportunity Information
+            // =====================================================
+
             $table->string('title');
 
-            $table->string('cargo_type')->nullable();
-            $table->string('container_type')->nullable();
+            $table->string('opportunity_type')
+                ->default('business')
+                ->index();
+
+            $table->string('category')
+                ->nullable()
+                ->index();
+
+            $table->text('description')
+                ->nullable();
+
+
+            // =====================================================
+            // Freight / Cargo Information
+            // =====================================================
+
+            $table->string('cargo_type')
+                ->nullable();
+
+            $table->string('container_type')
+                ->nullable();
 
             $table->foreignId('origin_port_id')
                 ->nullable()
@@ -42,22 +72,116 @@ return new class extends Migration
                 ->constrained('ports')
                 ->nullOnDelete();
 
-            $table->decimal('estimated_value', 15, 2)->nullable();
-            $table->string('currency', 3)->default('USD');
 
-            $table->string('stage')->default('new')->index();
+            // =====================================================
+            // Location
+            // =====================================================
+
+            $table->string('country')
+                ->nullable()
+                ->index();
+
+            $table->string('city')
+                ->nullable();
+
+
+            // =====================================================
+            // Financial Information
+            // =====================================================
+
+            $table->decimal('estimated_value', 15, 2)
+                ->nullable();
+
+            $table->decimal('required_capital', 15, 2)
+                ->nullable();
+
+            $table->decimal('min_investment', 15, 2)
+                ->nullable();
+
+            $table->string('currency', 3)
+                ->default('USD');
+
+
+            // =====================================================
+            // Commission
+            // =====================================================
+
+            $table->string('commission_type')
+                ->default('percentage');
+
+            $table->decimal('commission_rate', 8, 2)
+                ->nullable();
+
+
+            // =====================================================
+            // CRM Pipeline
+            // =====================================================
+
+            $table->string('stage')
+                ->default('new')
+                ->index();
 
             $table->unsignedTinyInteger('probability')
                 ->default(0);
 
-            $table->date('expected_close_date')->nullable()->index();
 
-            $table->text('notes')->nullable();
+            // =====================================================
+            // Marketplace Visibility & Verification
+            // =====================================================
+
+            $table->string('visibility')
+                ->default('private')
+                ->index();
+
+            $table->string('verification_status')
+                ->default('pending')
+                ->index();
+
+
+            // =====================================================
+            // Dates
+            // =====================================================
+
+            $table->date('expected_close_date')
+                ->nullable()
+                ->index();
+
+            $table->timestamp('published_at')
+                ->nullable();
+
+            $table->timestamp('expires_at')
+                ->nullable()
+                ->index();
+
+
+            // =====================================================
+            // Notes
+            // =====================================================
+
+            $table->text('notes')
+                ->nullable();
+
+
+            // =====================================================
+            // Timestamps
+            // =====================================================
 
             $table->timestamps();
 
-            $table->index(['customer_id', 'stage']);
-            $table->index(['assigned_to', 'stage']);
+
+            // =====================================================
+            // Additional Indexes
+            // =====================================================
+
+            $table->index([
+                'customer_id',
+                'stage'
+            ]);
+
+            $table->index([
+                'assigned_to',
+                'stage'
+            ]);
         });
     }
 

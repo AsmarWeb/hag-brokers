@@ -39,6 +39,10 @@ class AdminOpportunityController extends Controller
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('cargo_type', 'like', "%{$search}%")
                     ->orWhere('container_type', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
                     ->orWhere('notes', 'like', "%{$search}%")
 
                     ->orWhereHas('customer', function ($customer) use ($search) {
@@ -83,6 +87,42 @@ class AdminOpportunityController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Opportunity Type Filter
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('opportunity_type')) {
+            $query->where(
+                'opportunity_type',
+                $request->string('opportunity_type')->toString()
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Verification Filter
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('verification_status')) {
+            $query->where(
+                'verification_status',
+                $request->string('verification_status')->toString()
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Visibility Filter
+        |--------------------------------------------------------------------------
+        */
+        if ($request->filled('visibility')) {
+            $query->where(
+                'visibility',
+                $request->string('visibility')->toString()
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Opportunities
         |--------------------------------------------------------------------------
         */
@@ -105,6 +145,7 @@ class AdminOpportunityController extends Controller
             'customers'
         ));
     }
+
 
     /**
      * Show the form for creating a new opportunity.
@@ -135,12 +176,18 @@ class AdminOpportunityController extends Controller
         ));
     }
 
+
     /**
      * Store a newly created opportunity.
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
+
+            // =====================================================
+            // CRM Relationships
+            // =====================================================
+
             'customer_id' => [
                 'required',
                 'exists:customers,id',
@@ -156,11 +203,38 @@ class AdminOpportunityController extends Controller
                 'exists:users,id',
             ],
 
+
+            // =====================================================
+            // Basic Opportunity Information
+            // =====================================================
+
             'title' => [
                 'required',
                 'string',
                 'max:255',
             ],
+
+            'opportunity_type' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'category' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'description' => [
+                'nullable',
+                'string',
+            ],
+
+
+            // =====================================================
+            // Freight
+            // =====================================================
 
             'cargo_type' => [
                 'nullable',
@@ -184,7 +258,41 @@ class AdminOpportunityController extends Controller
                 'exists:ports,id',
             ],
 
+
+            // =====================================================
+            // Location
+            // =====================================================
+
+            'country' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'city' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+
+            // =====================================================
+            // Financial Information
+            // =====================================================
+
             'estimated_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'required_capital' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'min_investment' => [
                 'nullable',
                 'numeric',
                 'min:0',
@@ -195,6 +303,28 @@ class AdminOpportunityController extends Controller
                 'string',
                 'size:3',
             ],
+
+
+            // =====================================================
+            // Commission
+            // =====================================================
+
+            'commission_type' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'commission_rate' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+
+            // =====================================================
+            // CRM Pipeline
+            // =====================================================
 
             'stage' => [
                 'required',
@@ -209,10 +339,46 @@ class AdminOpportunityController extends Controller
                 'max:100',
             ],
 
+
+            // =====================================================
+            // Marketplace
+            // =====================================================
+
+            'visibility' => [
+                'required',
+                'in:private,public,invite_only',
+            ],
+
+            'verification_status' => [
+                'required',
+                'in:pending,under_review,verified,rejected',
+            ],
+
+
+            // =====================================================
+            // Dates
+            // =====================================================
+
             'expected_close_date' => [
                 'nullable',
                 'date',
             ],
+
+            'published_at' => [
+                'nullable',
+                'date',
+            ],
+
+            'expires_at' => [
+                'nullable',
+                'date',
+                'after_or_equal:published_at',
+            ],
+
+
+            // =====================================================
+            // Notes
+            // =====================================================
 
             'notes' => [
                 'nullable',
@@ -220,7 +386,27 @@ class AdminOpportunityController extends Controller
             ],
         ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Automatically set published_at
+        |--------------------------------------------------------------------------
+        |
+        | When an opportunity is public and verified, we can publish it.
+        |
+        */
+
+        if (
+            $validated['visibility'] === 'public'
+            && $validated['verification_status'] === 'verified'
+            && empty($validated['published_at'])
+        ) {
+            $validated['published_at'] = now();
+        }
+
+
         Opportunity::create($validated);
+
 
         return redirect()
             ->route('admin.opportunities.index')
@@ -229,6 +415,7 @@ class AdminOpportunityController extends Controller
                 'Opportunity created successfully.'
             );
     }
+
 
     /**
      * Display the specified opportunity.
@@ -241,6 +428,8 @@ class AdminOpportunityController extends Controller
             'assignedTo',
             'originPort',
             'destinationPort',
+            'interests.user',
+            'interests.reviewer',
         ]);
 
         return view(
@@ -248,6 +437,7 @@ class AdminOpportunityController extends Controller
             compact('opportunity')
         );
     }
+
 
     /**
      * Show the form for editing the specified opportunity.
@@ -287,6 +477,7 @@ class AdminOpportunityController extends Controller
         ));
     }
 
+
     /**
      * Update the specified opportunity.
      */
@@ -294,7 +485,13 @@ class AdminOpportunityController extends Controller
         Request $request,
         Opportunity $opportunity
     ): RedirectResponse {
+
         $validated = $request->validate([
+
+            // =====================================================
+            // CRM Relationships
+            // =====================================================
+
             'customer_id' => [
                 'required',
                 'exists:customers,id',
@@ -310,11 +507,38 @@ class AdminOpportunityController extends Controller
                 'exists:users,id',
             ],
 
+
+            // =====================================================
+            // Basic Opportunity Information
+            // =====================================================
+
             'title' => [
                 'required',
                 'string',
                 'max:255',
             ],
+
+            'opportunity_type' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'category' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'description' => [
+                'nullable',
+                'string',
+            ],
+
+
+            // =====================================================
+            // Freight
+            // =====================================================
 
             'cargo_type' => [
                 'nullable',
@@ -338,7 +562,41 @@ class AdminOpportunityController extends Controller
                 'exists:ports,id',
             ],
 
+
+            // =====================================================
+            // Location
+            // =====================================================
+
+            'country' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'city' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+
+            // =====================================================
+            // Financial Information
+            // =====================================================
+
             'estimated_value' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'required_capital' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+            'min_investment' => [
                 'nullable',
                 'numeric',
                 'min:0',
@@ -349,6 +607,28 @@ class AdminOpportunityController extends Controller
                 'string',
                 'size:3',
             ],
+
+
+            // =====================================================
+            // Commission
+            // =====================================================
+
+            'commission_type' => [
+                'required',
+                'string',
+                'max:50',
+            ],
+
+            'commission_rate' => [
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
+
+
+            // =====================================================
+            // CRM Pipeline
+            // =====================================================
 
             'stage' => [
                 'required',
@@ -363,10 +643,46 @@ class AdminOpportunityController extends Controller
                 'max:100',
             ],
 
+
+            // =====================================================
+            // Marketplace
+            // =====================================================
+
+            'visibility' => [
+                'required',
+                'in:private,public,invite_only',
+            ],
+
+            'verification_status' => [
+                'required',
+                'in:pending,under_review,verified,rejected',
+            ],
+
+
+            // =====================================================
+            // Dates
+            // =====================================================
+
             'expected_close_date' => [
                 'nullable',
                 'date',
             ],
+
+            'published_at' => [
+                'nullable',
+                'date',
+            ],
+
+            'expires_at' => [
+                'nullable',
+                'date',
+                'after_or_equal:published_at',
+            ],
+
+
+            // =====================================================
+            // Notes
+            // =====================================================
 
             'notes' => [
                 'nullable',
@@ -374,7 +690,37 @@ class AdminOpportunityController extends Controller
             ],
         ]);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Automatically manage published_at
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $validated['visibility'] === 'public'
+            && $validated['verification_status'] === 'verified'
+            && empty($validated['published_at'])
+        ) {
+            $validated['published_at'] = now();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove publication date when no longer public/verified
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $validated['visibility'] !== 'public'
+            || $validated['verification_status'] !== 'verified'
+        ) {
+            $validated['published_at'] = null;
+        }
+
+
         $opportunity->update($validated);
+
 
         return redirect()
             ->route(
@@ -386,6 +732,7 @@ class AdminOpportunityController extends Controller
                 'Opportunity updated successfully.'
             );
     }
+
 
     /**
      * Remove the specified opportunity.
