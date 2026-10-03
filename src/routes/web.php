@@ -269,15 +269,13 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
 
         // Users
-        Route::get('/users', [
-            AdminUserController::class,
-            'index',
-        ])->name('users.index');
+        Route::resource('users', AdminUserController::class)
+            ->names('users');
 
-        Route::patch('/users/{user}/customer', [
-            AdminUserController::class,
-            'updateCustomer',
-        ])->name('users.customer');
+        Route::patch(
+            '/users/{user}/customer',
+            [AdminUserController::class, 'updateCustomer']
+        )->name('users.customer');
 
         Route::get('/documents', [
             AdminDocumentController::class,

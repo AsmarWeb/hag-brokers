@@ -15,6 +15,7 @@ class AdminContactController extends Controller
     {
         $query = Contact::with('customer');
 
+        // Search
         if ($request->filled('search')) {
             $search = $request->string('search');
 
@@ -29,12 +30,29 @@ class AdminContactController extends Controller
             });
         }
 
+        // Filter by customer
+        if ($request->filled('customer_id')) {
+            $query->where(
+                'customer_id',
+                $request->integer('customer_id')
+            );
+        }
+
+        // Contacts
         $contacts = $query
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.contacts.index', compact('contacts'));
+        // Customers for filter dropdown
+        $customers = Customer::where('is_active', true)
+            ->orderBy('company_name')
+            ->get();
+
+        return view('admin.contacts.index', compact(
+            'contacts',
+            'customers'
+        ));
     }
 
     public function create(): View
@@ -65,14 +83,20 @@ class AdminContactController extends Controller
 
         return redirect()
             ->route('admin.contacts.index')
-            ->with('success', 'Contact created successfully.');
+            ->with(
+                'success',
+                'Contact created successfully.'
+            );
     }
 
     public function show(Contact $contact): View
     {
         $contact->load('customer');
 
-        return view('admin.contacts.show', compact('contact'));
+        return view(
+            'admin.contacts.show',
+            compact('contact')
+        );
     }
 
     public function edit(Contact $contact): View
@@ -81,11 +105,16 @@ class AdminContactController extends Controller
             ->orderBy('company_name')
             ->get();
 
-        return view('admin.contacts.edit', compact('contact', 'customers'));
+        return view(
+            'admin.contacts.edit',
+            compact('contact', 'customers')
+        );
     }
 
-    public function update(Request $request, Contact $contact): RedirectResponse
-    {
+    public function update(
+        Request $request,
+        Contact $contact
+    ): RedirectResponse {
         $validated = $request->validate([
             'customer_id' => ['required', 'exists:customers,id'],
             'name' => ['required', 'string', 'max:255'],
@@ -103,7 +132,10 @@ class AdminContactController extends Controller
 
         return redirect()
             ->route('admin.contacts.show', $contact)
-            ->with('success', 'Contact updated successfully.');
+            ->with(
+                'success',
+                'Contact updated successfully.'
+            );
     }
 
     public function destroy(Contact $contact): RedirectResponse
@@ -112,6 +144,9 @@ class AdminContactController extends Controller
 
         return redirect()
             ->route('admin.contacts.index')
-            ->with('success', 'Contact deleted successfully.');
+            ->with(
+                'success',
+                'Contact deleted successfully.'
+            );
     }
 }
