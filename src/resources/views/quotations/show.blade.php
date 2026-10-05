@@ -1,20 +1,66 @@
+@php
+    $isAr = app()->getLocale() === 'ar';
+    $dir = $isAr ? 'rtl' : 'ltr';
+
+    $t = [
+        'quotation_details' => $isAr ? 'تفاصيل عرض السعر' : 'Quotation Details',
+        'sea_freight_quotation' => $isAr ? 'طلب عرض سعر للشحن البحري' : 'Sea Freight Quotation Request',
+        'request_id' => $isAr ? 'رقم الطلب' : 'Request ID',
+
+        'shipping_route' => $isAr ? 'مسار الشحن' : 'Shipping Route',
+        'origin_port' => $isAr ? 'ميناء الانطلاق' : 'Origin Port',
+        'destination_port' => $isAr ? 'ميناء الوصول' : 'Destination Port',
+        'not_available' => $isAr ? 'غير متوفر' : 'Not available',
+
+        'cargo_details' => $isAr ? 'تفاصيل الشحنة' : 'Cargo Details',
+        'cargo_details_description' => $isAr
+            ? 'المعلومات التي تم إرسالها مع طلب عرض السعر.'
+            : 'Information submitted with this quotation request.',
+
+        'cargo_type' => $isAr ? 'نوع الشحنة' : 'Cargo Type',
+        'container_type' => $isAr ? 'نوع الحاوية' : 'Container Type',
+        'quantity' => $isAr ? 'الكمية' : 'Quantity',
+        'weight' => $isAr ? 'الوزن' : 'Weight',
+        'preferred_shipping_date' => $isAr ? 'تاريخ الشحن المفضل' : 'Preferred Shipping Date',
+
+        'not_specified' => $isAr ? 'غير محدد' : 'Not specified',
+
+        'request_summary' => $isAr ? 'ملخص الطلب' : 'Request Summary',
+        'reference' => $isAr ? 'المرجع' : 'Reference',
+        'submitted' => $isAr ? 'تاريخ الإرسال' : 'Submitted',
+        'last_updated' => $isAr ? 'آخر تحديث' : 'Last Updated',
+
+        'review_message' => $isAr
+            ? 'يمكن لفريقنا مراجعة متطلبات الشحنة المرسلة وتزويدك بالخطوات التالية.'
+            : 'Our team can review the submitted shipment requirements and provide the next steps.',
+
+        'back_to_quotations' => $isAr ? 'العودة إلى عروض الأسعار' : 'Back to Quotations',
+        'new_quote_request' => $isAr ? 'طلب عرض سعر جديد' : 'New Quote Request',
+    ];
+@endphp
+
 <x-app-layout>
 
     <x-slot name="header">
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3" dir="{{ $dir }}">
 
             <a href="{{ route('quotations.index') }}"
                 class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-400 hover:text-cyan-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                <svg class="h-5 w-5 {{ $isAr ? 'rotate-180' : '' }}" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+
                 </svg>
+
             </a>
 
             <div>
 
                 <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">
-                    Quotation Details
+                    {{ $t['quotation_details'] }}
                 </h2>
 
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -30,7 +76,7 @@
 
     <div class="min-h-screen bg-slate-50 py-8 dark:bg-slate-950">
 
-        <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8" dir="{{ $dir }}">
 
 
             {{-- Hero --}}
@@ -54,7 +100,7 @@
                             </h1>
 
                             <p class="mt-2 text-sm text-slate-400">
-                                Sea Freight Quotation Request
+                                {{ $t['sea_freight_quotation'] }}
                             </p>
 
                         </div>
@@ -62,7 +108,7 @@
                         <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                Request ID
+                                {{ $t['request_id'] }}
                             </div>
 
                             <div class="mt-1 font-extrabold text-white">
@@ -84,7 +130,9 @@
                     class="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300">
 
                     <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+
                     </svg>
 
                     {{ session('success') }}
@@ -99,7 +147,7 @@
                 <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
 
                     <h2 class="font-extrabold text-slate-950 dark:text-white">
-                        Shipping Route
+                        {{ $t['shipping_route'] }}
                     </h2>
 
                 </div>
@@ -110,11 +158,11 @@
                     <div class="rounded-2xl bg-slate-50 p-5 dark:bg-slate-950">
 
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Origin Port
+                            {{ $t['origin_port'] }}
                         </div>
 
                         <div class="mt-2 text-xl font-black text-slate-950 dark:text-white">
-                            {{ $quotation->originPort->name ?? 'Not available' }}
+                            {{ $quotation->originPort->name ?? $t['not_available'] }}
                         </div>
 
                     </div>
@@ -122,8 +170,11 @@
 
                     <div class="flex justify-center text-cyan-400">
 
-                        <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-7 w-7 {{ $isAr ? 'rotate-180' : '' }}" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+
                             <path stroke-linecap="round" stroke-width="2" d="M5 12h14m-6-6l6 6-6 6" />
+
                         </svg>
 
                     </div>
@@ -132,11 +183,11 @@
                     <div class="rounded-2xl bg-slate-50 p-5 dark:bg-slate-950">
 
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                            Destination Port
+                            {{ $t['destination_port'] }}
                         </div>
 
                         <div class="mt-2 text-xl font-black text-slate-950 dark:text-white">
-                            {{ $quotation->destinationPort->name ?? 'Not available' }}
+                            {{ $quotation->destinationPort->name ?? $t['not_available'] }}
                         </div>
 
                     </div>
@@ -152,16 +203,16 @@
 
                 {{-- Cargo details --}}
                 <div
-                    class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:col-span-2">
 
                     <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
 
                         <h2 class="font-extrabold text-slate-950 dark:text-white">
-                            Cargo Details
+                            {{ $t['cargo_details'] }}
                         </h2>
 
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Information submitted with this quotation request.
+                            {{ $t['cargo_details_description'] }}
                         </p>
 
                     </div>
@@ -172,7 +223,7 @@
                         <div class="bg-white p-6 dark:bg-slate-900">
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Cargo Type
+                                {{ $t['cargo_type'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -185,7 +236,7 @@
                         <div class="bg-white p-6 dark:bg-slate-900">
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Container Type
+                                {{ $t['container_type'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -198,7 +249,7 @@
                         <div class="bg-white p-6 dark:bg-slate-900">
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Quantity
+                                {{ $t['quantity'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -211,11 +262,11 @@
                         <div class="bg-white p-6 dark:bg-slate-900">
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Weight
+                                {{ $t['weight'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
-                                {{ $quotation->weight !== null ? $quotation->weight : 'Not specified' }}
+                                {{ $quotation->weight !== null ? $quotation->weight : $t['not_specified'] }}
                             </div>
 
                         </div>
@@ -224,13 +275,15 @@
                         <div class="bg-white p-6 dark:bg-slate-900 sm:col-span-2">
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Preferred Shipping Date
+                                {{ $t['preferred_shipping_date'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
+
                                 {{ $quotation->preferred_date
                                     ? \Carbon\Carbon::parse($quotation->preferred_date)->format('d M Y')
-                                    : 'Not specified' }}
+                                    : $t['not_specified'] }}
+
                             </div>
 
                         </div>
@@ -247,7 +300,7 @@
                     <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
 
                         <h2 class="font-extrabold text-slate-950 dark:text-white">
-                            Request Summary
+                            {{ $t['request_summary'] }}
                         </h2>
 
                     </div>
@@ -258,7 +311,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Reference
+                                {{ $t['reference'] }}
                             </div>
 
                             <div class="mt-1 font-bold text-slate-950 dark:text-white">
@@ -271,7 +324,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Submitted
+                                {{ $t['submitted'] }}
                             </div>
 
                             <div class="mt-1 font-bold text-slate-950 dark:text-white">
@@ -284,7 +337,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Last Updated
+                                {{ $t['last_updated'] }}
                             </div>
 
                             <div class="mt-1 font-bold text-slate-950 dark:text-white">
@@ -300,12 +353,14 @@
 
                                 <svg class="mt-0.5 h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-400" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
+
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13 16h-1v-4h-1m1-8h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+
                                 </svg>
 
                                 <p class="text-xs leading-5 text-cyan-800 dark:text-cyan-300">
-                                    Our team can review the submitted shipment requirements and provide the next steps.
+                                    {{ $t['review_message'] }}
                                 </p>
 
                             </div>
@@ -324,15 +379,23 @@
 
                 <a href="{{ route('quotations.index') }}"
                     class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
-                    ← Back to Quotations
+
+                    <span class="{{ $isAr ? 'order-2' : 'order-1' }}">
+                        {{ $t['back_to_quotations'] }}
+                    </span>
+
                 </a>
+
 
                 <a href="{{ route('quotations.create') }}"
                     class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300">
-                    New Quote Request
+
+                    {{ $t['new_quote_request'] }}
 
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+
                     </svg>
 
                 </a>

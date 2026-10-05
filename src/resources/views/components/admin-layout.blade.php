@@ -1114,7 +1114,7 @@
                     {{-- Notifications --}}
 
                     @if ($canViewNotifications)
-                        <a href="{{ route('notifications.index') }}"
+                        <a href="{{ route('admin.notifications.index') }}"
                             class="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-300 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
                             aria-label="{{ $t['notifications'] }}">
 

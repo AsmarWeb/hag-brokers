@@ -338,6 +338,17 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'index',
         ])->name('notifications.index');
 
+        Route::patch('/notifications/read-all', [
+            AdminNotificationController::class,
+            'markAllRead',
+        ])->name('notifications.markAllRead');
+
+        Route::patch('/notifications/{notification}/read', [
+            AdminNotificationController::class,
+            'markRead',
+        ])->name('notifications.markRead');
+
+
         Route::get('/reports', [
             AdminReportController::class,
             'index',

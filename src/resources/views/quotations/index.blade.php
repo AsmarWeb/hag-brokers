@@ -1,5 +1,51 @@
 <x-app-layout>
 
+    @php
+        $isAr = app()->getLocale() === 'ar';
+        $dir = $isAr ? 'rtl' : 'ltr';
+
+        $t = [
+            'quotations' => $isAr ? 'طلبات عروض الأسعار' : 'Quotations',
+            'manage_description' => $isAr
+                ? 'إدارة طلبات عروض أسعار الشحن البحري الخاصة بك.'
+                : 'Manage your sea freight quotation requests.',
+
+            'request_quote' => $isAr ? 'طلب عرض سعر' : 'Request a Quote',
+
+            'freight_quotations' => $isAr ? 'عروض أسعار الشحن' : 'Freight Quotations',
+            'hero_description' => $isAr
+                ? 'اطلب وأدر عروض أسعار الشحن البحري من خلال منصة واحدة وآمنة.'
+                : 'Request and manage sea freight quotations from one secure platform.',
+
+            'your_quotations' => $isAr ? 'عروض أسعارك' : 'Your Quotations',
+            'quotation_found' => $isAr ? 'عرض سعر' : 'quotation',
+            'quotations_found' => $isAr ? 'عروض أسعار' : 'quotations',
+            'found' => $isAr ? 'تم العثور عليها' : 'found',
+
+            'sea_freight' => $isAr ? 'شحن بحري' : 'SEA FREIGHT',
+
+            'reference' => $isAr ? 'المرجع' : 'Reference',
+            'cargo' => $isAr ? 'البضائع' : 'Cargo',
+            'container' => $isAr ? 'الحاوية' : 'Container',
+            'quantity' => $isAr ? 'الكمية' : 'Quantity',
+            'preferred_date' => $isAr ? 'التاريخ المفضل' : 'Preferred Date',
+            'action' => $isAr ? 'الإجراء' : 'Action',
+
+            'view' => $isAr ? 'عرض' : 'View',
+            'quotation' => $isAr ? 'عرض سعر' : 'Quotation',
+            'quote' => $isAr ? 'عرض سعر' : 'Quote',
+            'view_quotation' => $isAr ? 'عرض طلب السعر' : 'View Quotation',
+
+            'not_specified' => $isAr ? 'غير محدد' : 'Not specified',
+
+            'no_quotations' => $isAr ? 'لا توجد عروض أسعار بعد' : 'No quotations yet',
+            'no_quotations_description' => $isAr
+                ? 'ابدأ بطلب عرض سعر جديد لإرسال متطلبات الشحن البحري الخاصة بك ومعالجتها.'
+                : 'Start a new quotation request to get your sea freight requirements processed.',
+        ];
+    @endphp
+
+
     <x-slot name="header">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -12,11 +58,11 @@
 
                 <div>
                     <h2 class="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                        Quotations
+                        {{ $t['quotations'] }}
                     </h2>
 
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Manage your sea freight quotation requests.
+                        {{ $t['manage_description'] }}
                     </p>
                 </div>
 
@@ -24,11 +70,18 @@
 
             <a href="{{ route('quotations.create') }}"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-400/20 transition hover:bg-cyan-300">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
 
-                Request a Quote
+                @if ($isAr)
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                @else
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                @endif
+
+                {{ $t['request_quote'] }}
             </a>
 
         </div>
@@ -52,11 +105,11 @@
                     </div>
 
                     <h1 class="mt-3 max-w-2xl text-3xl font-black tracking-tight text-white sm:text-4xl">
-                        Freight Quotations
+                        {{ $t['freight_quotations'] }}
                     </h1>
 
                     <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-                        Request and manage sea freight quotations from one secure platform.
+                        {{ $t['hero_description'] }}
                     </p>
 
                 </div>
@@ -91,19 +144,23 @@
 
                         <div>
                             <h2 class="text-lg font-extrabold text-slate-950 dark:text-white">
-                                Your Quotations
+                                {{ $t['your_quotations'] }}
                             </h2>
 
                             <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+
                                 {{ $quotations->total() }}
-                                quotation{{ $quotations->total() == 1 ? '' : 's' }}
-                                found
+
+                                {{ $quotations->total() == 1 ? $t['quotation_found'] : $t['quotations_found'] }}
+
+                                {{ $t['found'] }}
+
                             </p>
                         </div>
 
                         <div
                             class="hidden rounded-xl bg-cyan-50 px-3 py-2 text-xs font-bold text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-400 sm:block">
-                            SEA FREIGHT
+                            {{ $t['sea_freight'] }}
                         </div>
 
                     </div>
@@ -116,40 +173,41 @@
                     {{-- Desktop --}}
                     <div class="hidden overflow-x-auto lg:block">
 
-                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800"
+                            dir="{{ $dir }}">
 
                             <thead class="bg-slate-50 dark:bg-slate-950/50">
 
                                 <tr>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Reference
+                                        class="px-6 py-4 text-{{ $isAr ? 'right' : 'left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['reference'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Cargo
+                                        class="px-6 py-4 text-{{ $isAr ? 'right' : 'left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['cargo'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Container
+                                        class="px-6 py-4 text-{{ $isAr ? 'right' : 'left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['container'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Quantity
+                                        class="px-6 py-4 text-{{ $isAr ? 'right' : 'left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['quantity'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Preferred Date
+                                        class="px-6 py-4 text-{{ $isAr ? 'right' : 'left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['preferred_date'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Action
+                                        class="px-6 py-4 text-{{ $isAr ? 'left' : 'right' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['action'] }}
                                     </th>
 
                                 </tr>
@@ -206,19 +264,20 @@
 
                                             {{ $quotation->preferred_date
                                                 ? \Carbon\Carbon::parse($quotation->preferred_date)->format('d M Y')
-                                                : 'Not specified' }}
+                                                : $t['not_specified'] }}
 
                                         </td>
 
 
-                                        <td class="px-6 py-5 text-right">
+                                        <td class="px-6 py-5 text-{{ $isAr ? 'left' : 'right' }}">
 
                                             <a href="{{ route('quotations.show', $quotation) }}"
                                                 class="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-cyan-400 hover:text-slate-950 dark:bg-white dark:text-slate-950 dark:hover:bg-cyan-400">
-                                                View
 
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
+                                                {{ $t['view'] }}
+
+                                                <svg class="h-4 w-4 {{ $isAr ? 'rotate-180' : '' }}" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2" d="M9 5l7 7-7 7" />
                                                 </svg>
@@ -248,7 +307,7 @@
                                     <div>
 
                                         <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                            Quotation
+                                            {{ $t['quotation'] }}
                                         </div>
 
                                         <h3 class="mt-1 font-extrabold text-slate-950 dark:text-white">
@@ -259,7 +318,7 @@
 
                                     <span
                                         class="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-bold text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-400">
-                                        Quote
+                                        {{ $t['quote'] }}
                                     </span>
 
                                 </div>
@@ -268,43 +327,56 @@
                                 <div class="mt-5 grid grid-cols-2 gap-4">
 
                                     <div>
+
                                         <div class="text-xs text-slate-400">
-                                            Cargo
+                                            {{ $t['cargo'] }}
                                         </div>
 
                                         <div class="mt-1 text-sm font-bold text-slate-900 dark:text-white">
                                             {{ $quotation->cargo_type }}
                                         </div>
+
                                     </div>
 
+
                                     <div>
+
                                         <div class="text-xs text-slate-400">
-                                            Container
+                                            {{ $t['container'] }}
                                         </div>
 
                                         <div class="mt-1 text-sm font-bold text-slate-900 dark:text-white">
                                             {{ $quotation->container_type }}
                                         </div>
+
                                     </div>
 
+
                                     <div>
+
                                         <div class="text-xs text-slate-400">
-                                            Quantity
+                                            {{ $t['quantity'] }}
                                         </div>
 
                                         <div class="mt-1 text-sm font-bold text-slate-900 dark:text-white">
                                             {{ $quotation->quantity }}
                                         </div>
+
                                     </div>
 
+
                                     <div>
+
                                         <div class="text-xs text-slate-400">
-                                            Preferred Date
+                                            {{ $t['preferred_date'] }}
                                         </div>
 
                                         <div class="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+
                                             {{ $quotation->preferred_date ? \Carbon\Carbon::parse($quotation->preferred_date)->format('d M Y') : '—' }}
+
                                         </div>
+
                                     </div>
 
                                 </div>
@@ -312,7 +384,9 @@
 
                                 <a href="{{ route('quotations.show', $quotation) }}"
                                     class="mt-5 flex w-full items-center justify-center rounded-xl bg-cyan-400 px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300">
-                                    View Quotation
+
+                                    {{ $t['view_quotation'] }}
+
                                 </a>
 
                             </div>
@@ -333,16 +407,18 @@
                         </div>
 
                         <h3 class="mt-5 text-lg font-extrabold text-slate-950 dark:text-white">
-                            No quotations yet
+                            {{ $t['no_quotations'] }}
                         </h3>
 
                         <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-                            Start a new quotation request to get your sea freight requirements processed.
+                            {{ $t['no_quotations_description'] }}
                         </p>
 
                         <a href="{{ route('quotations.create') }}"
                             class="mt-6 inline-flex rounded-xl bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300">
-                            Request a Quote
+
+                            {{ $t['request_quote'] }}
+
                         </a>
 
                     </div>
@@ -352,7 +428,9 @@
 
                 @if ($quotations->hasPages())
                     <div class="border-t border-slate-200 px-6 py-5 dark:border-slate-800">
+
                         {{ $quotations->links() }}
+
                     </div>
                 @endif
 

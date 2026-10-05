@@ -1,21 +1,95 @@
+@php
+    $isAr = app()->getLocale() === 'ar';
+    $dir = $isAr ? 'rtl' : 'ltr';
+
+    $t = [
+        'shipment_details' => $isAr ? 'تفاصيل الشحنة' : 'Shipment Details',
+        'back' => $isAr ? 'العودة' : 'Back',
+        'track_shipment' => $isAr ? 'تتبع الشحنة' : 'Track Shipment',
+        'documents' => $isAr ? 'المستندات' : 'Documents',
+
+        'sea_freight_shipment' => $isAr ? 'شحنة بحرية' : 'Sea Freight Shipment',
+
+        'origin' => $isAr ? 'ميناء الانطلاق' : 'Origin',
+        'destination' => $isAr ? 'ميناء الوصول' : 'Destination',
+        'not_available' => $isAr ? 'غير متوفر' : 'Not available',
+
+        'delivered' => $isAr ? 'تم التسليم' : 'Delivered',
+        'in_transit' => $isAr ? 'قيد النقل' : 'In Transit',
+        'pending' => $isAr ? 'قيد الانتظار' : 'Pending',
+        'status_unknown' => $isAr ? 'غير معروف' : 'Unknown',
+
+        'vessel' => $isAr ? 'السفينة' : 'Vessel',
+        'not_assigned' => $isAr ? 'غير معينة' : 'Not assigned',
+        'shipment_type' => $isAr ? 'نوع الشحنة' : 'Shipment Type',
+        'sea_freight' => $isAr ? 'شحن بحري' : 'Sea Freight',
+        'created' => $isAr ? 'تاريخ الإنشاء' : 'Created',
+        'last_updated' => $isAr ? 'آخر تحديث' : 'Last Updated',
+
+        'shipment_information' => $isAr ? 'معلومات الشحنة' : 'Shipment Information',
+        'shipment_information_desc' => $isAr
+            ? 'معلومات تفصيلية عن هذه الشحنة.'
+            : 'Detailed information about this shipment.',
+
+        'reference_number' => $isAr ? 'رقم المرجع' : 'Reference Number',
+        'status' => $isAr ? 'الحالة' : 'Status',
+        'origin_port' => $isAr ? 'ميناء الانطلاق' : 'Origin Port',
+        'destination_port' => $isAr ? 'ميناء الوصول' : 'Destination Port',
+        'shipment_id' => $isAr ? 'رقم الشحنة' : 'Shipment ID',
+
+        'shipment_actions' => $isAr ? 'إجراءات الشحنة' : 'Shipment Actions',
+        'view_movement' => $isAr ? 'عرض حركة الشحنة' : 'View shipment movement',
+        'view_documents' => $isAr ? 'عرض مستندات الشحنة' : 'View shipment documents',
+
+        'containers' => $isAr ? 'الحاويات' : 'Containers',
+        'containers_desc' => $isAr ? 'الحاويات المرتبطة بهذه الشحنة.' : 'Containers associated with this shipment.',
+        'container' => $isAr ? 'الحاوية' : 'Container',
+        'type' => $isAr ? 'النوع' : 'Type',
+
+        'shipment_activity' => $isAr ? 'نشاط الشحنة' : 'Shipment Activity',
+        'shipment_update' => $isAr ? 'تحديث الشحنة' : 'Shipment update',
+        'imo' => 'IMO',
+
+        'previous' => $isAr ? 'السابق' : 'Previous',
+        'next' => $isAr ? 'التالي' : 'Next',
+    ];
+
+    $status = $shipment->status;
+
+    $statusClasses = match ($status) {
+        'delivered' => 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/20',
+        'in_transit' => 'bg-cyan-400/15 text-cyan-300 ring-cyan-400/20',
+        'pending' => 'bg-amber-400/15 text-amber-300 ring-amber-400/20',
+        default => 'bg-white/10 text-slate-300 ring-white/10',
+    };
+
+    $statusLabel = match ($status) {
+        'delivered' => $t['delivered'],
+        'in_transit' => $t['in_transit'],
+        'pending' => $t['pending'],
+        default => $status ? str($status)->replace('_', ' ')->title() : $t['status_unknown'],
+    };
+@endphp
+
 <x-app-layout>
 
     <x-slot name="header">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div dir="{{ $dir }}" class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
                 <div class="flex items-center gap-3">
 
-                    <a href="{{ route('shipments.index') }}"
+                    <a href="{{ route('shipments.index') }}" aria-label="{{ $t['back'] }}"
                         class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-400 hover:text-cyan-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-5 w-5 {{ $isAr ? 'rotate-180' : '' }}" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </a>
 
-                    <div>
+                    <div class="{{ $isAr ? 'text-right' : 'text-left' }}">
                         <h2 class="text-xl font-extrabold text-slate-900 dark:text-white">
-                            Shipment Details
+                            {{ $t['shipment_details'] }}
                         </h2>
 
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -35,7 +109,7 @@
                             d="M9 20l-5-5 5-5M4 15h11a4 4 0 004-4V4" />
                     </svg>
 
-                    Track Shipment
+                    {{ $t['track_shipment'] }}
                 </a>
 
                 <a href="{{ route('shipments.documents.index', $shipment) }}"
@@ -45,7 +119,7 @@
                             d="M7 7h10M7 11h10M7 15h6M5 3h10l4 4v14H5V3z" />
                     </svg>
 
-                    Documents
+                    {{ $t['documents'] }}
                 </a>
 
             </div>
@@ -53,7 +127,7 @@
     </x-slot>
 
 
-    <div class="min-h-screen bg-slate-50 py-8 dark:bg-slate-950">
+    <div dir="{{ $dir }}" class="min-h-screen bg-slate-50 py-8 dark:bg-slate-950">
 
         <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
 
@@ -67,7 +141,7 @@
 
                     <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
-                        <div>
+                        <div class="{{ $isAr ? 'text-right' : 'text-left' }}">
                             <div
                                 class="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-400">
                                 <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
@@ -79,57 +153,52 @@
                             </h1>
 
                             <p class="mt-2 text-sm text-slate-400">
-                                Sea Freight Shipment
+                                {{ $t['sea_freight_shipment'] }}
                             </p>
                         </div>
-
-                        @php
-                            $status = $shipment->status;
-
-                            $statusClasses = match ($status) {
-                                'delivered' => 'bg-emerald-400/15 text-emerald-300 ring-emerald-400/20',
-                                'in_transit' => 'bg-cyan-400/15 text-cyan-300 ring-cyan-400/20',
-                                'pending' => 'bg-amber-400/15 text-amber-300 ring-amber-400/20',
-                                default => 'bg-white/10 text-slate-300 ring-white/10',
-                            };
-                        @endphp
 
                         <div>
                             <span
                                 class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 ring-inset {{ $statusClasses }}">
                                 <span class="h-2 w-2 rounded-full bg-current"></span>
-                                {{ str($status)->replace('_', ' ')->title() }}
+                                {{ $statusLabel }}
                             </span>
                         </div>
 
                     </div>
 
+
                     {{-- Route --}}
                     <div class="mt-8 grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-center">
 
-                        <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                        <div
+                            class="rounded-2xl border border-white/10 bg-white/5 p-5 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                Origin
+                                {{ $t['origin'] }}
                             </div>
 
                             <div class="mt-2 text-xl font-black text-white">
-                                {{ $shipment->originPort->name ?? 'Not available' }}
+                                {{ $shipment->originPort->name ?? $t['not_available'] }}
                             </div>
                         </div>
 
+
                         <div class="hidden text-cyan-400 md:block">
-                            <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="h-7 w-7 {{ $isAr ? 'rotate-180' : '' }}" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-width="2" d="M5 12h14m-6-6l6 6-6 6" />
                             </svg>
                         </div>
 
-                        <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+
+                        <div
+                            class="rounded-2xl border border-white/10 bg-white/5 p-5 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                Destination
+                                {{ $t['destination'] }}
                             </div>
 
                             <div class="mt-2 text-xl font-black text-white">
-                                {{ $shipment->destinationPort->name ?? 'Not available' }}
+                                {{ $shipment->destinationPort->name ?? $t['not_available'] }}
                             </div>
                         </div>
 
@@ -145,35 +214,37 @@
                 <div
                     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Vessel
+                        {{ $t['vessel'] }}
                     </div>
 
                     <div class="mt-2 font-extrabold text-slate-950 dark:text-white">
-                        {{ $shipment->vessel->name ?? 'Not assigned' }}
+                        {{ $shipment->vessel->name ?? $t['not_assigned'] }}
                     </div>
 
                     @if ($shipment->vessel && isset($shipment->vessel->imo))
                         <div class="mt-1 text-xs text-slate-400">
-                            IMO {{ $shipment->vessel->imo }}
+                            {{ $t['imo'] }} {{ $shipment->vessel->imo }}
                         </div>
                     @endif
                 </div>
 
+
                 <div
                     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Shipment Type
+                        {{ $t['shipment_type'] }}
                     </div>
 
                     <div class="mt-2 font-extrabold text-slate-950 dark:text-white">
-                        {{ $shipment->type ?? 'Sea Freight' }}
+                        {{ $shipment->type ?? $t['sea_freight'] }}
                     </div>
                 </div>
+
 
                 <div
                     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Created
+                        {{ $t['created'] }}
                     </div>
 
                     <div class="mt-2 font-extrabold text-slate-950 dark:text-white">
@@ -181,10 +252,11 @@
                     </div>
                 </div>
 
+
                 <div
                     class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                        Last Updated
+                        {{ $t['last_updated'] }}
                     </div>
 
                     <div class="mt-2 font-extrabold text-slate-950 dark:text-white">
@@ -200,23 +272,25 @@
 
                 {{-- Shipment details --}}
                 <div
-                    class="lg:col-span-2 rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                    class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:col-span-2">
 
-                    <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+                    <div
+                        class="border-b border-slate-200 px-6 py-5 dark:border-slate-800 {{ $isAr ? 'text-right' : 'text-left' }}">
                         <h2 class="font-extrabold text-slate-950 dark:text-white">
-                            Shipment Information
+                            {{ $t['shipment_information'] }}
                         </h2>
 
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Detailed information about this shipment.
+                            {{ $t['shipment_information_desc'] }}
                         </p>
                     </div>
 
+
                     <div class="grid gap-px bg-slate-200 dark:bg-slate-800 sm:grid-cols-2">
 
-                        <div class="bg-white p-6 dark:bg-slate-900">
+                        <div class="bg-white p-6 dark:bg-slate-900 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Reference Number
+                                {{ $t['reference_number'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -224,19 +298,21 @@
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 dark:bg-slate-900">
+
+                        <div class="bg-white p-6 dark:bg-slate-900 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Status
+                                {{ $t['status'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
-                                {{ str($shipment->status)->replace('_', ' ')->title() }}
+                                {{ $statusLabel }}
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 dark:bg-slate-900">
+
+                        <div class="bg-white p-6 dark:bg-slate-900 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Origin Port
+                                {{ $t['origin_port'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -244,9 +320,10 @@
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 dark:bg-slate-900">
+
+                        <div class="bg-white p-6 dark:bg-slate-900 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Destination Port
+                                {{ $t['destination_port'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -254,9 +331,10 @@
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 dark:bg-slate-900">
+
+                        <div class="bg-white p-6 dark:bg-slate-900 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Vessel
+                                {{ $t['vessel'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -264,9 +342,10 @@
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 dark:bg-slate-900">
+
+                        <div class="bg-white p-6 dark:bg-slate-900 {{ $isAr ? 'text-right' : 'text-left' }}">
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-400">
-                                Shipment ID
+                                {{ $t['shipment_id'] }}
                             </div>
 
                             <div class="mt-2 font-bold text-slate-950 dark:text-white">
@@ -283,31 +362,33 @@
                 <div
                     class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
-                    <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+                    <div
+                        class="border-b border-slate-200 px-6 py-5 dark:border-slate-800 {{ $isAr ? 'text-right' : 'text-left' }}">
                         <h2 class="font-extrabold text-slate-950 dark:text-white">
-                            Shipment Actions
+                            {{ $t['shipment_actions'] }}
                         </h2>
                     </div>
+
 
                     <div class="space-y-3 p-6">
 
                         <a href="{{ route('shipments.tracking', $shipment) }}"
                             class="flex items-center gap-4 rounded-2xl border border-slate-200 p-4 transition hover:border-cyan-400 hover:bg-cyan-50/50 dark:border-slate-800 dark:hover:bg-cyan-400/5">
                             <div
-                                class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-cyan-400/10 dark:text-cyan-400">
+                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 dark:bg-cyan-400/10 dark:text-cyan-400">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 20l-5-5 5-5M4 15h11a4 4 0 004-4V4" />
                                 </svg>
                             </div>
 
-                            <div>
+                            <div class="{{ $isAr ? 'text-right' : 'text-left' }}">
                                 <div class="font-bold text-slate-950 dark:text-white">
-                                    Track Shipment
+                                    {{ $t['track_shipment'] }}
                                 </div>
 
                                 <div class="mt-1 text-xs text-slate-500">
-                                    View shipment movement
+                                    {{ $t['view_movement'] }}
                                 </div>
                             </div>
                         </a>
@@ -316,20 +397,20 @@
                         <a href="{{ route('shipments.documents.index', $shipment) }}"
                             class="flex items-center gap-4 rounded-2xl border border-slate-200 p-4 transition hover:border-cyan-400 hover:bg-cyan-50/50 dark:border-slate-800 dark:hover:bg-cyan-400/5">
                             <div
-                                class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 7h10M7 11h10M7 15h6M5 3h10l4 4v14H5V3z" />
                                 </svg>
                             </div>
 
-                            <div>
+                            <div class="{{ $isAr ? 'text-right' : 'text-left' }}">
                                 <div class="font-bold text-slate-950 dark:text-white">
-                                    Documents
+                                    {{ $t['documents'] }}
                                 </div>
 
                                 <div class="mt-1 text-xs text-slate-500">
-                                    View shipment documents
+                                    {{ $t['view_documents'] }}
                                 </div>
                             </div>
                         </a>
@@ -346,53 +427,64 @@
                 <div
                     class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
-                    <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+                    <div
+                        class="border-b border-slate-200 px-6 py-5 dark:border-slate-800 {{ $isAr ? 'text-right' : 'text-left' }}">
                         <h2 class="font-extrabold text-slate-950 dark:text-white">
-                            Containers
+                            {{ $t['containers'] }}
                         </h2>
 
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Containers associated with this shipment.
+                            {{ $t['containers_desc'] }}
                         </p>
                     </div>
 
+
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800"
+                            dir="{{ $dir }}">
 
                             <thead class="bg-slate-50 dark:bg-slate-950/50">
                                 <tr>
+
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Container
+                                        class="px-6 py-4 {{ $isAr ? 'text-right' : 'text-left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['container'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Type
+                                        class="px-6 py-4 {{ $isAr ? 'text-right' : 'text-left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['type'] }}
                                     </th>
 
                                     <th
-                                        class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
-                                        Status
+                                        class="px-6 py-4 {{ $isAr ? 'text-right' : 'text-left' }} text-xs font-bold uppercase tracking-wider text-slate-500">
+                                        {{ $t['status'] }}
                                     </th>
+
                                 </tr>
                             </thead>
+
 
                             <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
 
                                 @foreach ($shipment->containers as $container)
                                     <tr>
-                                        <td class="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+
+                                        <td
+                                            class="px-6 py-4 font-semibold text-slate-900 dark:text-white {{ $isAr ? 'text-right' : 'text-left' }}">
                                             {{ $container->container_no ?? ($container->number ?? '—') }}
                                         </td>
 
-                                        <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                                        <td
+                                            class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 {{ $isAr ? 'text-right' : 'text-left' }}">
                                             {{ $container->type ?? '—' }}
                                         </td>
 
-                                        <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                                        <td
+                                            class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400 {{ $isAr ? 'text-right' : 'text-left' }}">
                                             {{ isset($container->status) ? str($container->status)->replace('_', ' ')->title() : '—' }}
                                         </td>
+
                                     </tr>
                                 @endforeach
 
@@ -412,20 +504,22 @@
                 <div
                     class="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
-                    <div class="border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+                    <div
+                        class="border-b border-slate-200 px-6 py-5 dark:border-slate-800 {{ $isAr ? 'text-right' : 'text-left' }}">
                         <h2 class="font-extrabold text-slate-950 dark:text-white">
-                            Shipment Activity
+                            {{ $t['shipment_activity'] }}
                         </h2>
                     </div>
+
 
                     <div class="p-6">
 
                         <div class="space-y-6">
 
                             @foreach ($shipment->events->sortByDesc('event_date') as $event)
-                                <div class="relative flex gap-4">
+                                <div class="relative flex gap-4 {{ $isAr ? 'flex-row-reverse' : '' }}">
 
-                                    <div class="relative flex w-6 justify-center">
+                                    <div class="relative flex w-6 shrink-0 justify-center">
                                         <span
                                             class="mt-1.5 h-3 w-3 rounded-full bg-cyan-400 ring-4 ring-cyan-400/10"></span>
 
@@ -434,14 +528,17 @@
                                         @endunless
                                     </div>
 
-                                    <div class="pb-2">
+
+                                    <div class="pb-2 {{ $isAr ? 'text-right' : 'text-left' }}">
                                         <div class="font-bold text-slate-950 dark:text-white">
-                                            {{ $event->event_type ?? ($event->status ?? 'Shipment update') }}
+                                            {{ $event->event_type ?? ($event->status ?? $t['shipment_update']) }}
                                         </div>
 
-                                        <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                            {{ $event->description ?? '' }}
-                                        </div>
+                                        @if ($event->description)
+                                            <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                {{ $event->description }}
+                                            </div>
+                                        @endif
 
                                         @if ($event->event_date)
                                             <div class="mt-2 text-xs font-semibold text-cyan-600 dark:text-cyan-400">
