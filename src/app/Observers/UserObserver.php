@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\User;
+use App\Notifications\AdminPlatformNotification;
 use App\Services\NotificationService;
 
 class UserObserver
@@ -12,6 +13,11 @@ class UserObserver
      */
     public function created(User $user): void
     {
+        /*
+         * =====================================================
+         * ADMIN NOTIFICATION
+         * =====================================================
+         */
         NotificationService::admins(
             type: 'user.created',
             title: 'New User Registered',
@@ -28,6 +34,27 @@ class UserObserver
                     'admin.users.index'
                 ),
             ]
+        );
+
+        /*
+         * =====================================================
+         * USER WELCOME NOTIFICATION
+         * =====================================================
+         */
+        $user->notify(
+            new AdminPlatformNotification(
+                type: 'welcome',
+                title: 'Welcome to HAG Brokers 👋',
+                message: sprintf(
+                    'Welcome %s! Your HAG Brokers account has been created successfully.',
+                    $user->name ?: 'to HAG Brokers'
+                ),
+                url: route('dashboard'),
+                extra: [
+                    'user_id' => $user->id,
+                    'action' => 'complete_profile',
+                ]
+            )
         );
     }
 }

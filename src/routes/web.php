@@ -149,35 +149,36 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ])->name('quotations.show');
 
 
+
     /*
-    |--------------------------------------------------------------------------
-    | Notifications
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| Notifications
+|--------------------------------------------------------------------------
+*/
 
     Route::get('/notifications', [
         NotificationController::class,
-        'index'
+        'index',
     ])->name('notifications.index');
+
+    Route::patch('/notifications/read-all', [
+        NotificationController::class,
+        'markAllRead',
+    ])->name('notifications.markAllRead');
 
     Route::get('/notifications/{notification}', [
         NotificationController::class,
-        'show'
+        'show',
     ])->name('notifications.show');
 
     Route::patch('/notifications/{notification}/read', [
         NotificationController::class,
-        'markRead'
+        'markRead',
     ])->name('notifications.markRead');
-
-    Route::patch('/notifications/read-all', [
-        NotificationController::class,
-        'markAllRead'
-    ])->name('notifications.markAllRead');
 
     Route::delete('/notifications/{notification}', [
         NotificationController::class,
-        'destroy'
+        'destroy',
     ])->name('notifications.destroy');
 
 
@@ -337,6 +338,16 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             AdminNotificationController::class,
             'index',
         ])->name('notifications.index');
+
+        Route::get('/notifications/create', [
+            AdminNotificationController::class,
+            'create',
+        ])->name('notifications.create');
+
+        Route::post('/notifications', [
+            AdminNotificationController::class,
+            'store',
+        ])->name('notifications.store');
 
         Route::patch('/notifications/read-all', [
             AdminNotificationController::class,

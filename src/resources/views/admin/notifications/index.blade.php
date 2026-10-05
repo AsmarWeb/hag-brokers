@@ -37,6 +37,8 @@
 
         'mark_all_read' => $isAr ? 'تحديد الكل كمقروء' : 'Mark all as read',
 
+        'create_notification' => $isAr ? 'إنشاء إشعار' : 'Create Notification',
+
         'view' => $isAr ? 'عرض' : 'View',
 
         'total' => $isAr ? 'الإجمالي' : 'Total',
@@ -121,34 +123,63 @@
             </div>
 
 
-            {{-- Mark all as read --}}
+            {{-- Header Actions --}}
 
-            @if ($unreadCount > 0)
-                <form method="POST" action="{{ route('admin.notifications.markAllRead') }}">
+            <div class="flex flex-wrap items-center gap-2">
 
-                    @csrf
-                    @method('PATCH')
+                {{-- Create Notification --}}
+                <a href="{{ route('admin.notifications.create') }}"
+                    class="inline-flex items-center justify-center rounded-xl
+                    bg-cyan-500 px-4 py-2.5
+                    text-sm font-black text-slate-950
+                    shadow-lg shadow-cyan-500/20
+                    transition hover:bg-cyan-400
+                    focus:outline-none focus:ring-2
+                    focus:ring-cyan-400
+                    focus:ring-offset-2
+                    dark:focus:ring-offset-slate-950">
 
-                    <button type="submit"
-                        class="inline-flex items-center justify-center rounded-xl
-                    border border-cyan-200 bg-white px-4 py-2.5
-                    text-sm font-bold text-cyan-700 shadow-sm
-                    transition hover:border-cyan-400 hover:bg-cyan-50
-                    dark:border-cyan-900/50 dark:bg-slate-900
-                    dark:text-cyan-400 dark:hover:border-cyan-600
-                    dark:hover:bg-cyan-950/30">
+                    <svg class="me-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
-                        <svg class="me-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M5 13l4 4L19 7" />
-                        </svg>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14" />
 
-                        {{ $t['mark_all_read'] }}
+                    </svg>
 
-                    </button>
+                    {{ $t['create_notification'] }}
 
-                </form>
-            @endif
+                </a>
+
+                {{-- Mark all as read --}}
+                @if ($unreadCount > 0)
+                    <form method="POST" action="{{ route('admin.notifications.markAllRead') }}">
+
+                        @csrf
+                        @method('PATCH')
+
+                        <button type="submit"
+                            class="inline-flex items-center justify-center rounded-xl
+                            border border-cyan-200 bg-white px-4 py-2.5
+                            text-sm font-bold text-cyan-700 shadow-sm
+                            transition hover:border-cyan-400 hover:bg-cyan-50
+                            dark:border-cyan-900/50 dark:bg-slate-900
+                            dark:text-cyan-400 dark:hover:border-cyan-600
+                            dark:hover:bg-cyan-950/30">
+
+                            <svg class="me-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M5 13l4 4L19 7" />
+
+                            </svg>
+
+                            {{ $t['mark_all_read'] }}
+
+                        </button>
+
+                    </form>
+                @endif
+
+            </div>
 
         </div>
 
@@ -420,12 +451,14 @@
                                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h6l4 4v12a2 2 0 01-2 2z" />
                                         </svg>
                                     @elseif (str_contains($type, 'shipment'))
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                                 d="M3 7h11v10H3zM14 10h4l3 3v4h-7zM6 19a2 2 0 100-4 2 2 0 000 4zm12 0a2 2 0 100-4 2 2 0 000 4z" />
                                         </svg>
                                     @elseif (str_contains($type, 'user'))
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
                                                 d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m6-10a4 4 0 100-8 4 4 0 000 8zm8 4v6m3-3h-6" />
                                         </svg>

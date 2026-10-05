@@ -2,57 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Notification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
+    /**
+     * Display the authenticated user's notifications.
+     */
     public function index(Request $request): View
     {
-        $notifications = Notification::query()
-            ->where('user_id', $request->user()->id)
+        $user = $request->user();
+
+        $notifications = $user
+            ->notifications()
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
+
+        $unreadCount = $user
+            ->unreadNotifications()
+            ->count();
 
         return view('notifications.index', [
             'notifications' => $notifications,
+            'unreadCount' => $unreadCount,
         ]);
     }
 
+    /**
+     * Display one notification and mark it as read.
+     */
     public function show(
         Request $request,
-        Notification $notification
+        string $notification
     ): View {
-        abort_unless(
-            $notification->user_id === $request->user()->id,
-            403
-        );
+        $user = $request->user();
 
-        if (! $notification->is_read) {
-            $notification->update([
-                'is_read' => true,
-            ]);
+        $item = $user
+            ->notifications()
+            ->findOrFail($notification);
+
+        if ($item->unread()) {
+            $item->markAsRead();
         }
 
         return view('notifications.show', [
-            'notification' => $notification,
+            'notification' => $item,
         ]);
     }
 
+    /**
+     * Mark one notification as read.
+     */
     public function markRead(
         Request $request,
-        Notification $notification
+        string $notification
     ): RedirectResponse {
-        abort_unless(
-            $notification->user_id === $request->user()->id,
-            403
-        );
+        $user = $request->user();
 
-        $notification->update([
-            'is_read' => true,
-        ]);
+        $item = $user
+            ->notifications()
+            ->findOrFail($notification);
+
+        $item->markAsRead();
 
         return back()->with(
             'success',
@@ -60,15 +75,17 @@ class NotificationController extends Controller
         );
     }
 
+    /**
+     * Mark all notifications as read.
+     */
     public function markAllRead(
         Request $request
     ): RedirectResponse {
-        Notification::query()
-            ->where('user_id', $request->user()->id)
-            ->where('is_read', false)
-            ->update([
-                'is_read' => true,
-            ]);
+        $user = $request->user();
+
+        $user
+            ->unreadNotifications
+            ->markAsRead();
 
         return back()->with(
             'success',
@@ -76,16 +93,20 @@ class NotificationController extends Controller
         );
     }
 
+    /**
+     * Delete one notification.
+     */
     public function destroy(
         Request $request,
-        Notification $notification
+        string $notification
     ): RedirectResponse {
-        abort_unless(
-            $notification->user_id === $request->user()->id,
-            403
-        );
+        $user = $request->user();
 
-        $notification->delete();
+        $item = $user
+            ->notifications()
+            ->findOrFail($notification);
+
+        $item->delete();
 
         return back()->with(
             'success',
