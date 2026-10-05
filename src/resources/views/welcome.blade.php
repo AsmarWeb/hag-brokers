@@ -510,20 +510,30 @@
                                 : 'Share your shipment details and we coordinate freight options, quotations, booking steps and shipment visibility with available carriers and logistics partners.' }}
                         </p>
 
+
                         <div
                             class="mt-9 flex flex-col gap-3 sm:flex-row {{ $isAr ? 'sm:flex-row-reverse lg:justify-end' : '' }}">
 
-                            <a href="#tracking"
-                                class="cyan-glow inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 hover:bg-cyan-300">
-                                {{ $isAr ? 'تتبع شحنة' : 'Track Shipment' }}
+                            {{-- Discover Opportunities --}}
+                            <a href="{{ route('opportunities.index') }}"
+                                class="cyan-glow inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-400 px-7 py-4 font-bold text-slate-950 transition hover:bg-cyan-300">
+
+                                {{ $isAr ? 'اكتشف الفرص' : 'Discover Opportunities' }}
+
                                 <span>{{ $isAr ? '←' : '→' }}</span>
                             </a>
 
-                            <a href="#contact"
-                                class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-7 py-4 font-semibold text-white hover:bg-white/10">
-                                {{ $isAr ? 'اطلب عرض شحن' : 'Request Freight Quote' }}
+                            {{-- Bring a Deal --}}
+                            <a href="{{ route('leads.create') }}"
+                                class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-white/5 px-7 py-4 font-semibold text-white transition hover:border-cyan-400/60 hover:bg-cyan-400/10">
+
+                                {{ $isAr ? 'لديك صفقة؟' : 'Have a Deal?' }}
+
+                                <span class="text-cyan-300">{{ $isAr ? '←' : '→' }}</span>
                             </a>
+
                         </div>
+
 
                         <div class="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4">
 
@@ -2163,10 +2173,10 @@
 
     <script>
         /*
-                                                                                                                                        |--------------------------------------------------------------------------
-                                                                                                                                        | Language menu
-                                                                                                                                        |--------------------------------------------------------------------------
-                                                                                                                                        */
+                                                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                                                | Language menu
+                                                                                                                                                |--------------------------------------------------------------------------
+                                                                                                                                                */
 
         function toggleLanguageMenu() {
             const dropdown = document.getElementById('language-dropdown');

@@ -22,6 +22,7 @@ use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 
@@ -237,6 +238,13 @@ Route::post('/opportunities/{opportunity}/interest', [
     OpportunityController::class,
     'storeInterest',
 ])->middleware('auth')->name('opportunities.interest.store');
+
+
+Route::get('/bring-a-deal', [LeadController::class, 'create'])
+    ->name('leads.create');
+
+Route::post('/bring-a-deal', [LeadController::class, 'store'])
+    ->name('leads.store');
 
 
 // ======================================================
