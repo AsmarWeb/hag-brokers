@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Port;
 use App\Models\Quotation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class QuotationController extends Controller
@@ -33,14 +33,7 @@ class QuotationController extends Controller
      */
     public function create(): View
     {
-        $ports = Port::where('is_active', true)
-            ->orderBy('country')
-            ->orderBy('name')
-            ->get();
-
-        return view('quotations.create', [
-            'ports' => $ports,
-        ]);
+        return view('quotations.create');
     }
 
     /**
@@ -51,16 +44,12 @@ class QuotationController extends Controller
         $data = $request->validate([
             'origin_port_id' => [
                 'required',
-                'integer',
                 'exists:ports,id',
-                'different:destination_port_id',
             ],
 
             'destination_port_id' => [
                 'required',
-                'integer',
                 'exists:ports,id',
-                'different:origin_port_id',
             ],
 
             'cargo_type' => [
@@ -95,13 +84,7 @@ class QuotationController extends Controller
 
         $data['customer_id'] = $request->user()->customer_id;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Generate quotation reference
-        |--------------------------------------------------------------------------
-        */
-
-        $nextId = ((int) Quotation::max('id')) + 1;
+        $nextId = (int) Quotation::max('id') + 1;
 
         $data['reference_no'] =
             'QT-' .
@@ -113,12 +96,6 @@ class QuotationController extends Controller
                 '0',
                 STR_PAD_LEFT
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create quotation
-        |--------------------------------------------------------------------------
-        */
 
         $quotation = Quotation::create($data);
 
@@ -142,13 +119,6 @@ class QuotationController extends Controller
                 $request->user()->customer_id,
             403
         );
-
-        $quotation->load([
-            'originPort',
-            'destinationPort',
-            'offers.carrier',
-            'offers.vessel',
-        ]);
 
         return view('quotations.show', [
             'quotation' => $quotation,
