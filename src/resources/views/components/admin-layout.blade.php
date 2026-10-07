@@ -684,6 +684,49 @@
                         </a>
                     @endif
 
+                    @if (Route::has('admin.document-templates.index'))
+                        <a href="{{ route('admin.document-templates.index') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+        {{ request()->routeIs('admin.document-templates.*')
+            ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+            : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                            <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M7 3.75h7.5L19 8.25v12A1.75 1.75 0 0117.25 22h-10.5A1.75 1.75 0 015 20.25V5.5A1.75 1.75 0 016.75 3.75H7z" />
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M14 3.75v5h5" />
+
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M8.5 14h7M8.5 17h5" />
+                            </svg>
+
+                            <span>
+                                {{ $isAr ? 'قوالب المستندات' : 'Document Templates' }}
+                            </span>
+
+                        </a>
+                    @endif
+
+                    @if (Route::has('admin.company.edit'))
+                        <a href="{{ route('admin.company.edit') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+        {{ request()->routeIs('admin.company.*')
+            ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+            : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 21h18M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16M15 21V9a2 2 0 012-2h2a2 2 0 012 2v12M9 7h2M9 11h2M9 15h2" />
+                            </svg>
+
+                            <span>
+                                {{ $isAr ? 'إعدادات الشركة' : 'Company Settings' }}
+                            </span>
+                        </a>
+                    @endif
+
 
                     {{-- Quotations --}}
 

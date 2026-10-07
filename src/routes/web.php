@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminPortController;
 use App\Http\Controllers\Admin\AdminCarrierController;
+use App\Http\Controllers\Admin\AdminCompanySettingController;
 use App\Http\Controllers\Admin\AdminVesselController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminSettingController;
@@ -257,6 +258,16 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
     ->name('admin.')
     ->group(function () {
 
+        Route::get(
+            '/company',
+            [AdminCompanySettingController::class, 'edit']
+        )->name('company.edit');
+
+        Route::put(
+            '/company',
+            [AdminCompanySettingController::class, 'update']
+        )->name('company.update');
+
         // Dashboard
         Route::get('/dashboard', [
             AdminDashboardController::class,
@@ -324,10 +335,73 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             [AdminUserController::class, 'updateCustomer']
         )->name('users.customer');
 
-        Route::get('/documents', [
-            AdminDocumentController::class,
-            'index',
-        ])->name('documents.index');
+        /*
+|--------------------------------------------------------------------------
+| Document Center
+|--------------------------------------------------------------------------
+*/
+
+        Route::get('/documents', [AdminDocumentController::class, 'index'])
+            ->name('documents.index');
+
+        Route::get('/documents/create', [AdminDocumentController::class, 'create'])
+            ->name('documents.create');
+
+        Route::post('/documents', [AdminDocumentController::class, 'store'])
+            ->name('documents.store');
+
+        Route::get('/documents/generate-pdf', [AdminDocumentController::class, 'pdfCreate'])
+            ->name('documents.pdf.create');
+
+        Route::post(
+            '/documents/preview-pdf',
+            [AdminDocumentController::class, 'previewPdf']
+        )->name('documents.pdf.preview');
+
+        Route::post('/documents/generate-pdf', [AdminDocumentController::class, 'generatePdf'])
+            ->name('documents.pdf.generate');
+
+        Route::get('/documents/{document}/edit', [AdminDocumentController::class, 'edit'])
+            ->name('documents.edit');
+
+        Route::put('/documents/{document}', [AdminDocumentController::class, 'update'])
+            ->name('documents.update');
+
+        Route::get('/documents/{document}/versions', [AdminDocumentController::class, 'versions'])
+            ->name('documents.versions');
+
+        Route::get('/documents/{document}/download', [AdminDocumentController::class, 'download'])
+            ->name('documents.download');
+
+        Route::get('/documents/{document}/preview', [AdminDocumentController::class, 'preview'])
+            ->name('documents.preview');
+
+        Route::delete('/documents/{document}', [AdminDocumentController::class, 'destroy'])
+            ->name('documents.destroy');
+
+        // ============================================================
+        // DOCUMENT VERSIONS
+        // ============================================================
+
+        Route::get(
+            '/documents/{document}/versions/{version}/download',
+            [AdminDocumentController::class, 'downloadVersion']
+        )->name('documents.versions.download');
+
+        Route::get(
+            '/documents/{document}/versions/{version}/preview',
+            [AdminDocumentController::class, 'previewVersion']
+        )->name('documents.versions.preview');
+
+
+        // ============================================================
+        // DOCUMENT TEMPLATES
+        // ============================================================
+
+        Route::resource(
+            'document-templates',
+            \App\Http\Controllers\Admin\AdminDocumentTemplateController::class
+        )->except(['show']);
 
         Route::get('/quotations', [
             AdminQuotationController::class,
