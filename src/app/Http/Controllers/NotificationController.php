@@ -3,63 +3,115 @@
 namespace App\Http\Controllers;
 
 use App\Models\Notification;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the user's notifications.
      */
-    public function index()
+    public function index(Request $request): View
     {
-        //
+        $notifications = Notification::query()
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        $unreadCount = Notification::query()
+            ->where('user_id', $request->user()->id)
+            ->where('is_read', false)
+            ->count();
+
+        return view('notifications.index', [
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount,
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a single notification.
      */
-    public function create()
-    {
-        //
+    public function show(
+        Request $request,
+        Notification $notification
+    ): View {
+        abort_unless(
+            $notification->user_id === $request->user()->id,
+            403
+        );
+
+        if (!$notification->is_read) {
+            $notification->update([
+                'is_read' => true,
+            ]);
+        }
+
+        return view('notifications.show', [
+            'notification' => $notification->fresh(),
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Mark a notification as read.
      */
-    public function store(Request $request)
-    {
-        //
+    public function markRead(
+        Request $request,
+        Notification $notification
+    ): RedirectResponse {
+        abort_unless(
+            $notification->user_id === $request->user()->id,
+            403
+        );
+
+        $notification->update([
+            'is_read' => true,
+        ]);
+
+        return back()->with(
+            'success',
+            'Notification marked as read.'
+        );
     }
 
     /**
-     * Display the specified resource.
+     * Mark all user's notifications as read.
      */
-    public function show(Notification $notification)
-    {
-        //
+    public function markAllRead(
+        Request $request
+    ): RedirectResponse {
+        Notification::query()
+            ->where('user_id', $request->user()->id)
+            ->where('is_read', false)
+            ->update([
+                'is_read' => true,
+            ]);
+
+        return back()->with(
+            'success',
+            'All notifications marked as read.'
+        );
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Delete a notification.
      */
-    public function edit(Notification $notification)
-    {
-        //
-    }
+    public function destroy(
+        Request $request,
+        Notification $notification
+    ): RedirectResponse {
+        abort_unless(
+            $notification->user_id === $request->user()->id,
+            403
+        );
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Notification $notification)
-    {
-        //
-    }
+        $notification->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Notification $notification)
-    {
-        //
+        return back()->with(
+            'success',
+            'Notification deleted successfully.'
+        );
     }
 }

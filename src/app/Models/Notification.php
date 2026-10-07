@@ -1,4 +1,11 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model;
-class Notification extends Model {protected $guarded=[];protected $casts=['is_read'=>'boolean','data'=>'array'];}
+
+class Notification extends Model
+{
+    protected $guarded = [];
+    protected $casts = ['is_read' => 'boolean', 'data' => 'array'];
+}

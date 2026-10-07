@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Port;
 use App\Models\Quotation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,7 +34,13 @@ class QuotationController extends Controller
      */
     public function create(): View
     {
-        return view('quotations.create');
+        $ports = Port::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('quotations.create', [
+            'ports' => $ports,
+        ]);
     }
 
     /**
