@@ -1,61 +1,38 @@
-# Trans Marine — Laravel Docker Environment
+# Trans Marine Backend
 
-Docker-first Laravel API environment for the Trans Marine mobile application.
+Laravel backend for the Trans Marine sea freight operations platform.
 
-## Services
+This project powers the customer-facing freight operations workflow, including:
+- customer and user management
+- shipments and tracking
+- quotations
+- notifications
+- vessel and port data
+- document management
+- admin operations dashboard
 
-- PHP 8.4 + Laravel 12
-- Nginx
-- MySQL 8.4
-- Redis 7
-- Queue worker
-- Scheduler
-- Mailpit
+## Tech stack
+- PHP 8.2
+- Laravel 12
+- MySQL / SQLite for local development
 - Laravel Sanctum
+- Laravel Breeze
+- Laratrust
+- Docker + Docker Compose
+- Vite + Tailwind CSS
 
-## Start
+## Repository layout
+- src/ - main Laravel application
+- docker/ - PHP and Nginx container config
+- flutter/ - client/mobile app assets and structure
+- docs/ - project documentation (to be extended)
 
+## Local development
+
+### Prerequisites
+- Docker
+- Docker Compose
+
+### Start the app
 ```bash
 docker compose up --build
-```
-
-The first boot creates a fresh Laravel 12 application in `./src`, installs Sanctum/API support, overlays the Trans Marine models/controllers/routes/migrations, generates the app key, and runs migrations.
-
-API base URL:
-
-```text
-http://localhost:8080/api/v1
-```
-
-Mailpit:
-
-```text
-http://localhost:8025
-```
-
-MySQL from the host:
-
-```text
-127.0.0.1:3307
-```
-
-## Useful commands
-
-```bash
-docker compose logs -f app
-docker compose exec app php artisan migrate
-docker compose exec app php artisan route:list
-docker compose exec app php artisan test
-docker compose down
-docker compose down -v   # deletes MySQL/Redis volumes
-```
-
-## Production notes
-
-This package is Docker-ready and is the base for Phase 2B production hardening. Before production deployment, set real secrets, use managed/secured MySQL and Redis where appropriate, configure object storage for documents, enable TLS, restrict CORS, add rate limiting, configure broadcasting/WebSockets, and complete the remaining authorization, validation, resources, services, audit logging, and automated tests.
-# trans-marine-backend
-# trans-marine-backend
-# trans-marine-backend
-# trans-marine-backend
-# trans-marine-backend
-# trans-marine-backend
