@@ -116,6 +116,7 @@
                 </div>
 
 
+
                 {{-- Content --}}
 
                 <div class="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.03] p-6">
@@ -132,7 +133,8 @@
 
                     <textarea name="content" rows="18" required
                         class="w-full rounded-xl border border-white/10 bg-slate-950 p-5 font-mono text-sm leading-7 text-slate-200 outline-none focus:border-cyan-400"
-                        placeholder="<h1>Commercial Invoice</h1>
+                        placeholder="@verbatim
+<h1>Commercial Invoice</h1>
 
 <p>Customer: {{ customer . company_name }}</p>
 
@@ -140,7 +142,7 @@
 
 <p>Quotation: {{ quotation . reference_no }}</p>
 
-<p>Total: {{ quotation . total_charge }}</p>">{{ old('content') }}</textarea>
+<p>Total: {{ quotation . total_charge }}</p> @endverbatim">{{ old('content') }}</textarea>
 
                 </div>
 
@@ -153,11 +155,28 @@
                         {{ $isAr ? 'المتغيرات المتاحة' : 'Available Variables' }}
                     </h2>
 
+                    @php
+                        $variables = [
+                            'company.name',
+                            'company.email',
+                            'company.phone',
+                            'company.logo',
+                            'company.tax_number',
+                            'customer.company_name',
+                            'customer.email',
+                            'shipment.shipment_no',
+                            'shipment.booking_no',
+                            'shipment.cargo_type',
+                            'quotation.reference_no',
+                            'quotation.total_charge',
+                        ];
+                    @endphp
+
                     <div class="flex flex-wrap gap-2">
 
-                        @foreach (['{{ company . name }}', '{{ company . email }}', '{{ company . phone }}', '{{ company . logo }}', '{{ company . tax_number }}', '{{ customer . company_name }}', '{{ customer . email }}', '{{ shipment . shipment_no }}', '{{ shipment . booking_no }}', '{{ shipment . cargo_type }}', '{{ quotation . reference_no }}', '{{ quotation . total_charge }}'] as $variable)
+                        @foreach ($variables as $variable)
                             <code class="rounded-lg bg-slate-900 px-3 py-2 text-xs text-cyan-300">
-                                {{ $variable }}
+                                @{{ $variable }}
                             </code>
                         @endforeach
 
