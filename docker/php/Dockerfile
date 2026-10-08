@@ -20,6 +20,7 @@ RUN apt-get update \
         libjpeg62-turbo-dev \
         libfreetype6-dev \
         libxml2-dev \
+        libsqlite3-dev \
     \
     # Node.js 22 LTS
     && mkdir -p /etc/apt/keyrings \
@@ -35,7 +36,9 @@ RUN apt-get update \
         --with-freetype \
         --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
+        pdo \
         pdo_mysql \
+        pdo_sqlite \
         mbstring \
         bcmath \
         intl \
@@ -75,12 +78,20 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-trans-marine.ini
 COPY src /opt/transmarine
 
 # -------------------------------------------------------
-# Permissions
+# Runtime directory
 # -------------------------------------------------------
 
-RUN chmod +x /usr/local/bin/bootstrap.sh \
-    && mkdir -p /var/www/html \
-    && chown -R www-data:www-data /var/www/html /opt/transmarine
+RUN mkdir -p \
+        /var/www/html \
+        /var/www/html/database \
+        /var/www/html/storage \
+        /var/www/html/bootstrap/cache \
+    \
+    && chmod +x /usr/local/bin/bootstrap.sh \
+    \
+    && chown -R www-data:www-data \
+        /var/www/html \
+        /opt/transmarine
 
 WORKDIR /var/www/html
 

@@ -10,25 +10,15 @@ use Illuminate\View\View;
 class NotificationController extends Controller
 {
     /**
-     * Display the user's notifications.
+     * Display user's notifications.
      */
     public function index(Request $request): View
     {
-        $notifications = Notification::query()
-            ->where('user_id', $request->user()->id)
+        $notifications = Notification::where('user_id', $request->user()->id)
             ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->paginate(20);
 
-        $unreadCount = Notification::query()
-            ->where('user_id', $request->user()->id)
-            ->where('is_read', false)
-            ->count();
-
-        return view('notifications.index', [
-            'notifications' => $notifications,
-            'unreadCount' => $unreadCount,
-        ]);
+        return view('notifications.index', compact('notifications'));
     }
 
     /**
@@ -43,15 +33,13 @@ class NotificationController extends Controller
             403
         );
 
-        if (!$notification->is_read) {
+        if (! $notification->is_read) {
             $notification->update([
                 'is_read' => true,
             ]);
         }
 
-        return view('notifications.show', [
-            'notification' => $notification->fresh(),
-        ]);
+        return view('notifications.show', compact('notification'));
     }
 
     /**
@@ -79,11 +67,9 @@ class NotificationController extends Controller
     /**
      * Mark all user's notifications as read.
      */
-    public function markAllRead(
-        Request $request
-    ): RedirectResponse {
-        Notification::query()
-            ->where('user_id', $request->user()->id)
+    public function markAllRead(Request $request): RedirectResponse
+    {
+        Notification::where('user_id', $request->user()->id)
             ->where('is_read', false)
             ->update([
                 'is_read' => true,

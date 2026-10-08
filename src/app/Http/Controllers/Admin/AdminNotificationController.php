@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
@@ -20,20 +21,23 @@ class AdminNotificationController extends Controller
 
         $search = $request->string('search')->trim()->toString();
 
-        $notifications = $user
-            ->notifications()
+        $notifications = Notification::query()
+            ->where('user_id', $user->id)
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('type', 'like', "%{$search}%")
-                        ->orWhere('data->title', 'like', "%{$search}%")
-                        ->orWhere('data->message', 'like', "%{$search}%");
+                        ->orWhere('title', 'like', "%{$search}%")
+                        ->orWhere('message', 'like', "%{$search}%");
                 });
             })
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        $unreadCount = $user->unreadNotifications()->count();
+        $unreadCount = Notification::query()
+            ->where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
 
         return view('admin.notifications.index', [
             'notifications' => $notifications,
@@ -70,16 +74,19 @@ class AdminNotificationController extends Controller
                 'integer',
                 'exists:users,id',
             ],
+
             'title' => [
                 'required',
                 'string',
                 'max:255',
             ],
+
             'message' => [
                 'required',
                 'string',
                 'max:5000',
             ],
+
             'url' => [
                 'nullable',
                 'string',
@@ -106,35 +113,49 @@ class AdminNotificationController extends Controller
             ->route('admin.notifications.create')
             ->with(
                 'success',
-                'Notification sent successfully to ' . ($user->name ?: $user->email) . '.'
+                'Notification sent successfully to ' .
+                    ($user->name ?: $user->email) .
+                    '.'
             );
     }
 
     /**
-     * Mark one admin notification as read.
+     * Mark one notification as read.
      */
     public function markRead(string $notification): RedirectResponse
     {
         $user = request()->user();
 
-        $item = $user
-            ->notifications()
-            ->findOrFail($notification);
+        $item = Notification::query()
+            ->where('id', $notification)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
 
-        $item->markAsRead();
+        $item->update([
+            'is_read' => true,
+        ]);
 
-        return back();
+        return back()->with(
+            'success',
+            'Notification marked as read.'
+        );
     }
 
     /**
-     * Mark all admin notifications as read.
+     * Mark all notifications as read.
      */
     public function markAllRead(): RedirectResponse
     {
-        request()->user()
-            ->unreadNotifications
-            ->markAsRead();
+        Notification::query()
+            ->where('user_id', request()->user()->id)
+            ->where('is_read', false)
+            ->update([
+                'is_read' => true,
+            ]);
 
-        return back();
+        return back()->with(
+            'success',
+            'All notifications marked as read.'
+        );
     }
 }

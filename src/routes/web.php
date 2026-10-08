@@ -60,10 +60,6 @@ Route::middleware('maintenance.check')->group(function () {
         ->name('home');
 });
 
-
-Route::post('/register', [AuthController::class, 'register'])
-    ->name('register');
-
 /*
 |--------------------------------------------------------------------------
 | Authenticated
