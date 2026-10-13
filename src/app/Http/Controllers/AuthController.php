@@ -94,6 +94,8 @@ class AuthController extends Controller
             return $user;
         });
 
+        event(new \Illuminate\Auth\Events\Registered($user));
+
         /*
          * 3. Login user automatically
          */
