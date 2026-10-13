@@ -10,118 +10,69 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
-    /**
-     * Display the customer's quotations.
-     */
+    private function customerId(Request $request): int
+    {
+        $customerId = $request->user()?->customer_id;
+
+        abort_if($customerId === null, 403, 'A company account is required.');
+
+        return (int) $customerId;
+    }
+
     public function index(Request $request): View
     {
-        $quotations = Quotation::where(
-            'customer_id',
-            $request->user()->customer_id
-        )
+        $customerId = $this->customerId($request);
+
+        $quotations = Quotation::query()
+            ->where('customer_id', $customerId)
             ->latest()
             ->paginate(20)
             ->withQueryString();
 
-        return view('quotations.index', [
-            'quotations' => $quotations,
-        ]);
+        return view('quotations.index', compact('quotations'));
     }
 
-    /**
-     * Show the quotation request form.
-     */
-    public function create(): View
+    public function create(Request $request): View
     {
+        $this->customerId($request);
+
         return view('quotations.create');
     }
 
-    /**
-     * Store a new quotation request.
-     */
     public function store(Request $request): RedirectResponse
     {
+        $customerId = $this->customerId($request);
+
         $data = $request->validate([
-            'origin_port_id' => [
-                'required',
-                'exists:ports,id',
-            ],
-
-            'destination_port_id' => [
-                'required',
-                'exists:ports,id',
-            ],
-
-            'cargo_type' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'container_type' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'quantity' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
-
-            'weight' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            'preferred_date' => [
-                'nullable',
-                'date',
-            ],
+            'origin_port_id' => ['required', 'exists:ports,id'],
+            'destination_port_id' => ['required', 'exists:ports,id', 'different:origin_port_id'],
+            'cargo_type' => ['required', 'string', 'max:255'],
+            'container_type' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'weight' => ['nullable', 'numeric', 'min:0'],
+            'preferred_date' => ['nullable', 'date'],
         ]);
 
-        $data['customer_id'] = $request->user()->customer_id;
+        $data['customer_id'] = $customerId;
 
-        $nextId = (int) Quotation::max('id') + 1;
-
-        $data['reference_no'] =
-            'QT-' .
-            now()->format('Y') .
-            '-' .
-            str_pad(
-                (string) $nextId,
-                5,
-                '0',
-                STR_PAD_LEFT
-            );
+        // UUID-based reference: no MAX(id) race; the database UNIQUE constraint
+        // remains the final safeguard against any accidental collision.
+        $data['reference_no'] = 'QT-' . now()->format('Y') . '-'
+            . Str::upper(Str::replace('-', '', (string) Str::uuid()));
 
         $quotation = Quotation::create($data);
 
         return redirect()
             ->route('quotations.show', $quotation)
-            ->with(
-                'success',
-                'Quotation request submitted successfully.'
-            );
+            ->with('success', 'Quotation request submitted successfully.');
     }
 
-    /**
-     * Display a single quotation.
-     */
-    public function show(
-        Request $request,
-        Quotation $quotation
-    ): View {
-        abort_unless(
-            $quotation->customer_id ===
-                $request->user()->customer_id,
-            403
-        );
+    public function show(Request $request, Quotation $quotation): View
+    {
+        $customerId = $this->customerId($request);
 
-        return view('quotations.show', [
-            'quotation' => $quotation,
-        ]);
+        abort_unless((int) $quotation->customer_id === $customerId, 403);
+
+        return view('quotations.show', compact('quotation'));
     }
 }
