@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Port;
 use App\Models\Quotation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class QuotationController extends Controller
@@ -15,11 +15,10 @@ class QuotationController extends Controller
      */
     public function index(Request $request): View
     {
-        $customerId = $request->user()->customer_id;
-
-        abort_unless($customerId, 403);
-
-        $quotations = Quotation::where('customer_id', $customerId)
+        $quotations = Quotation::where(
+            'customer_id',
+            $request->user()->customer_id
+        )
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -34,18 +33,7 @@ class QuotationController extends Controller
      */
     public function create(): View
     {
-        $ports = Port::where('is_active', true)
-            ->orderBy('name')
-            ->get([
-                'id',
-                'name',
-                'country',
-                'unlocode',
-            ]);
-
-        return view('quotations.create', [
-            'ports' => $ports,
-        ]);
+        return view('quotations.create');
     }
 
     /**
@@ -53,15 +41,10 @@ class QuotationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $customerId = $request->user()->customer_id;
-
-        abort_unless($customerId, 403);
-
         $data = $request->validate([
             'origin_port_id' => [
                 'required',
                 'exists:ports,id',
-                'different:destination_port_id',
             ],
 
             'destination_port_id' => [
@@ -97,23 +80,11 @@ class QuotationController extends Controller
                 'nullable',
                 'date',
             ],
-
-            'notes' => [
-                'nullable',
-                'string',
-                'max:5000',
-            ],
         ]);
 
-        $data['customer_id'] = $customerId;
+        $data['customer_id'] = $request->user()->customer_id;
 
-        /*
-        |--------------------------------------------------------------------------
-        | Generate quotation reference
-        |--------------------------------------------------------------------------
-        */
-
-        $nextId = ((int) Quotation::max('id')) + 1;
+        $nextId = (int) Quotation::max('id') + 1;
 
         $data['reference_no'] =
             'QT-' .
@@ -125,14 +96,6 @@ class QuotationController extends Controller
                 '0',
                 STR_PAD_LEFT
             );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Default quotation status
-        |--------------------------------------------------------------------------
-        */
-
-        $data['status'] = 'pending';
 
         $quotation = Quotation::create($data);
 

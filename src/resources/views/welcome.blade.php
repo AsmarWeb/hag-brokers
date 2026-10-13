@@ -14,6 +14,7 @@
         $siteName = 'HAG Brokers';
         $siteUrl = rtrim(config('app.url', url('/')), '/');
         $canonicalUrl = url()->current();
+        $isDemo = true; // Set false only after connecting verified live operational statistics.
         $faviconUrl = asset('storage/favicon.png');
         $logoUrl = asset('storage/favicon.png');
         $ogImage = asset('storage/hag-brokers-og.png');
@@ -36,11 +37,12 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <meta name="theme-color" content="#050d18">
+    <meta name="color-scheme" content="dark light">
+    <meta name="application-name" content="HAG Brokers">
     <link rel="canonical" href="{{ $canonicalUrl }}">
 
-    <link rel="alternate" hreflang="en-AE" href="{{ route('language.switch', 'en') }}">
-    <link rel="alternate" hreflang="ar-AE" href="{{ route('language.switch', 'ar') }}">
-    <link rel="alternate" hreflang="x-default" href="{{ url('/') }}">
+    {{-- Only publish hreflang when permanent, indexable localized URLs are available.
+         Language-switch actions backed by sessions are not suitable hreflang destinations. --}}
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="64x64" href="{{ $faviconUrl }}?v=2">
@@ -75,6 +77,7 @@
     {!! json_encode([
         '@context' => 'https://schema.org',
         '@type' => 'Organization',
+        '@id' => $siteUrl . '/#organization',
         'name' => $siteName,
         'url' => $siteUrl,
         'logo' => $logoUrl,
@@ -101,6 +104,30 @@
         'description' => $seoDescription,
         'inLanguage' => $isAr ? 'ar-AE' : 'en-AE'
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+    </script>
+
+    <script type="application/ld+json">
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Service',
+        '@id' => $siteUrl . '/#sea-freight-brokerage',
+        'name' => $isAr ? 'وساطة وتنسيق الشحن البحري' : 'Sea Freight Brokerage & Coordination',
+        'description' => $seoDescription,
+        'serviceType' => 'Sea freight brokerage',
+        'provider' => ['@id' => $siteUrl . '/#organization'],
+        'areaServed' => ['@type' => 'Place', 'name' => 'Gulf Cooperation Council'],
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+
+    <script>
+        // Apply the saved theme before rendering to avoid a flash of the wrong theme.
+        (() => {
+            try {
+                const stored = localStorage.getItem('hag-theme');
+                const light = stored === 'light' || (!stored && matchMedia('(prefers-color-scheme: light)').matches);
+                document.documentElement.classList.toggle('theme-light', light);
+            } catch (error) { /* Storage may be unavailable in privacy mode. */ }
+        })();
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -266,6 +293,40 @@
             direction: ltr;
             unicode-bidi: isolate;
         }
+
+        /* HAG light theme: preserve existing Tailwind dark styling without removing sections. */
+        html.theme-light { color-scheme: light; }
+        html.theme-light body { background: #f3f7fb !important; color: #10243a; }
+        html.theme-light #navbar, html.theme-light #mobile-menu { background: rgba(255,255,255,.95) !important; border-color: #dbe5ef !important; }
+        html.theme-light .glass { background: rgba(255,255,255,.92); border-color: #dce7f0; box-shadow: 0 12px 36px rgba(15,35,60,.07); }
+        html.theme-light .glass-light { background: rgba(255,255,255,.78); border-color: #dbe5ef; }
+        html.theme-light .gradient-text { background-image: linear-gradient(90deg,#0369a1,#0891b2); }
+        html.theme-light .hero-grid { background-image: linear-gradient(rgba(10,70,100,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(10,70,100,.05) 1px,transparent 1px); }
+        html.theme-light .bg-\[\#06101d\], html.theme-light .bg-\[\#050d18\], html.theme-light .bg-\[\#040a12\] { background-color: #edf4fa !important; }
+        html.theme-light .bg-\[\#07111f\] { background-color: #fff !important; }
+        html.theme-light .bg-\[\#0b1b2e\] { background-color: #fff !important; }
+        html.theme-light .text-white, html.theme-light .text-slate-200, html.theme-light .text-slate-300 { color: #18334b !important; }
+        html.theme-light .bg-cyan-400, html.theme-light .bg-cyan-300 { color: #082334 !important; }
+        html.theme-light .text-slate-400, html.theme-light .text-slate-500, html.theme-light .text-slate-600 { color: #526a80 !important; }
+        html.theme-light .text-cyan-300, html.theme-light .text-cyan-200 { color: #087f9b !important; }
+        html.theme-light .bg-white\/5, html.theme-light .bg-white\/10, html.theme-light .bg-white\/\[\.03\], html.theme-light .bg-white\/\[0\.035\], html.theme-light .bg-white\/\[0\.025\] { background-color: rgba(255,255,255,.83) !important; }
+        html.theme-light .border-white\/10, html.theme-light .border-white\/5 { border-color: #d5e1eb !important; }
+        html.theme-light .opportunity-card { background: #fff !important; border-color: #dce7f0 !important; }
+        html.theme-light .opportunity-card .bg-slate-950\/70, html.theme-light .opportunity-card .bg-slate-950\/75 { background: rgba(7,20,36,.8) !important; }
+        html.theme-light .opportunity-card .bg-slate-950\/70 *, html.theme-light .opportunity-card .bg-slate-950\/75 * { color: #fff !important; }
+        html.theme-light .opportunity-card .bg-gradient-to-t { pointer-events: none; }
+        html.theme-light input, html.theme-light select, html.theme-light textarea { color: #18334b !important; background-color: #fff !important; border-color: #cbdce9 !important; }
+        html.theme-light input::placeholder, html.theme-light textarea::placeholder { color: #64748b !important; }
+        html.theme-light .leaflet-popup-content-wrapper, html.theme-light .leaflet-popup-tip { background: #fff; color: #10243a; }
+        html.theme-light #gulf-map .leaflet-control-zoom a { background: #fff !important; color: #12334b !important; }
+        html.theme-light #gulf-map .leaflet-control-attribution { background: rgba(255,255,255,.88); color: #425466; }
+        html.theme-light #language-dropdown { background: #fff !important; }
+        html.theme-light #language-dropdown a { color: #18334b !important; }
+        html.theme-light .hag-theme-toggle { background: #fff; color: #17334b; border-color: #cbdce9; }
+        html:not(.theme-light) .hag-theme-toggle { background: rgba(255,255,255,.05); color: #e2e8f0; border-color: rgba(255,255,255,.12); }
+        .hag-theme-toggle { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; min-height:42px; padding:.6rem .8rem; border:1px solid; border-radius:.8rem; cursor:pointer; }
+        .hag-theme-toggle:focus-visible { outline:3px solid #06b6d4; outline-offset:3px; }
+        @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } .pulse-dot { animation:none; } }
     </style>
 </head>
 
@@ -311,6 +372,11 @@
             </nav>
 
             <div class="hidden items-center gap-3 lg:flex">
+
+                <button id="theme-toggle" type="button" class="hag-theme-toggle" aria-label="{{ $isAr ? 'تغيير المظهر' : 'Toggle color theme' }}" aria-pressed="false" title="{{ $isAr ? 'الوضع الليلي والنهاري' : 'Dark / light mode' }}">
+                    <svg class="hag-icon-sun h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                    <svg class="hag-icon-moon hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+                </button>
 
                 <div class="relative" id="language-menu">
                     <button type="button" onclick="toggleLanguageMenu()"
@@ -413,6 +479,12 @@
                 <a href="#partners" class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
                     {{ $isAr ? 'الشركاء' : 'Partners' }}
                 </a>
+
+                <button id="theme-toggle-mobile" type="button" class="hag-theme-toggle w-full" aria-pressed="false">
+                    <svg class="hag-icon-sun h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path stroke-linecap="round" d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>
+                    <svg class="hag-icon-moon hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+                    <span class="hag-theme-label">{{ $isAr ? 'تغيير المظهر' : 'Toggle theme' }}</span>
+                </button>
 
                 <div class="my-4 h-px bg-white/10"></div>
 
@@ -523,8 +595,12 @@
                                 <span>{{ $isAr ? '←' : '→' }}</span>
                             </a>
 
+                            <a href="#quote-request" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 px-6 py-4 font-bold text-cyan-300 hover:bg-cyan-300/10">
+                                {{ $isAr ? 'اطلب عرض شحن' : 'Request Freight Quote' }}
+                            </a>
+
                             {{-- Bring a Deal --}}
-                            <a href="{{ route('leads.create') }}"
+                            <a href="{{ (Route::has('leads.create') ? route('leads.create') : '#contact') }}"
                                 class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-white/5 px-7 py-4 font-semibold text-white transition hover:border-cyan-400/60 hover:bg-cyan-400/10">
 
                                 {{ $isAr ? 'لديك صفقة؟' : 'Have a Deal?' }}
@@ -535,31 +611,32 @@
                         </div>
 
 
-                        <div class="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        <p class="mt-7 text-xs text-slate-400">{{ $isAr ? 'المؤشرات التشغيلية ستظهر بعد ربط البيانات الفعلية المعتمدة.' : 'Operational indicators will appear once verified live data is connected.' }}</p>
+                        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
 
                             <div class="glass-light rounded-2xl p-4">
-                                <p class="text-2xl font-black ltr-number">138</p>
+                                <p class="text-2xl font-black ltr-number">—</p>
                                 <p class="mt-1 text-[10px] text-slate-500">
                                     {{ $isAr ? 'شحنة نشطة' : 'Active Shipments' }}
                                 </p>
                             </div>
 
                             <div class="glass-light rounded-2xl p-4">
-                                <p class="text-2xl font-black ltr-number">24</p>
+                                <p class="text-2xl font-black ltr-number">—</p>
                                 <p class="mt-1 text-[10px] text-slate-500">
                                     {{ $isAr ? 'سفينة' : 'Vessels' }}
                                 </p>
                             </div>
 
                             <div class="glass-light rounded-2xl p-4">
-                                <p class="text-2xl font-black ltr-number">18</p>
+                                <p class="text-2xl font-black ltr-number">—</p>
                                 <p class="mt-1 text-[10px] text-slate-500">
                                     {{ $isAr ? 'ميناء' : 'Ports' }}
                                 </p>
                             </div>
 
                             <div class="glass-light rounded-2xl p-4">
-                                <p class="text-2xl font-black ltr-number">67</p>
+                                <p class="text-2xl font-black ltr-number">—</p>
                                 <p class="mt-1 text-[10px] text-slate-500">
                                     {{ $isAr ? 'عرض شحن' : 'Freight Offers' }}
                                 </p>
@@ -589,7 +666,7 @@
                                 <span
                                     class="flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs text-emerald-300">
                                     <span class="pulse-dot h-2 w-2 rounded-full bg-emerald-400"></span>
-                                    {{ $isAr ? 'الشبكة نشطة' : 'Network Active' }}
+                                    {{ $isAr ? 'عرض توضيحي' : 'Illustrative Preview' }}
                                 </span>
 
                             </div>
@@ -646,7 +723,7 @@
                                         {{ $isAr ? 'آخر تحديث' : 'Last Update' }}
                                     </p>
                                     <p class="mt-2 text-sm font-bold">
-                                        {{ $isAr ? 'الآن' : 'Just now' }}
+                                        {{ $isAr ? 'مثال' : 'Example' }}
                                     </p>
                                 </div>
 
@@ -655,7 +732,7 @@
                                         {{ $isAr ? 'الحالة' : 'Status' }}
                                     </p>
                                     <p class="mt-2 text-sm font-bold text-emerald-300">
-                                        {{ $isAr ? 'قيد النقل' : 'In Transit' }}
+                                        {{ $isAr ? 'حالة توضيحية' : 'Sample Status' }}
                                     </p>
                                 </div>
 
@@ -950,7 +1027,7 @@
 
                         @foreach ($homeOpportunities as $opportunity)
                             @php
-                                $media = $opportunity->media ?? collect();
+                                $media = collect($opportunity->media ?? []);
 
                                 $primaryMedia = $media->firstWhere('is_primary', true) ?? $media->first();
 
@@ -1068,7 +1145,8 @@
                                     </div>
 
 
-                                    {{-- Reviewed --}}
+                                    {{-- Show verification only when explicitly approved in the database. --}}
+                                    @if ((bool) ($opportunity->is_verified ?? false))
                                     <div class="absolute left-3 top-3">
 
                                         <span
@@ -1083,6 +1161,8 @@
 
                                     </div>
 
+
+                                    @endif
 
                                     {{-- Category --}}
                                     <div class="absolute bottom-3 {{ $isAr ? 'right-3' : 'left-3' }}">
@@ -1174,7 +1254,7 @@
                                        pt-4">
 
                                         <span class="text-[10px] text-slate-500">
-                                            {{ optional($opportunity->published_at)->diffForHumans() }}
+                                            {{ $opportunity->published_at ? \Illuminate\Support\Carbon::parse($opportunity->published_at)->diffForHumans() : '' }}
                                         </span>
 
 
@@ -1984,6 +2064,39 @@
             </div>
         </section>
 
+        {{-- QUOTE REQUEST & BUSINESS OPPORTUNITY CONVERSION --}}
+        <section id="quote-request" class="scroll-mt-24 py-20 lg:py-24">
+            <div class="mx-auto max-w-7xl px-5 lg:px-8">
+                <div class="grid gap-5 lg:grid-cols-2">
+                    <div class="glass rounded-[2rem] p-7 sm:p-10">
+                        <p class="text-xs font-bold uppercase tracking-widest text-cyan-300">{{ $isAr ? 'وساطة الشحن البحري' : 'SEA FREIGHT BROKERAGE' }}</p>
+                        <h2 class="mt-4 text-2xl font-black sm:text-3xl">{{ $isAr ? 'اطلب عرض سعر لشحنتك' : 'Request a Freight Quotation' }}</h2>
+                        <p class="mt-4 leading-7 text-slate-400">{{ $isAr ? 'شاركنا ميناء الانطلاق والوصول ونوع البضاعة والحاوية. سنساعدك في تنسيق خيارات الناقلين المتاحة.' : 'Share your origin, destination, cargo and container requirements. We can coordinate available carrier options.' }}</p>
+                        <a href="#contact" class="mt-7 inline-flex rounded-xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 hover:bg-cyan-300">{{ $isAr ? 'ابدأ طلب الشحن' : 'Start Freight Request' }}</a>
+                        <p class="mt-3 text-xs text-slate-500">{{ $isAr ? 'سيتم توجيهك إلى خيارات التواصل والتسجيل الحالية؛ لم يُفعّل نموذج إرسال مباشر بعد.' : 'Uses existing contact and registration options; no direct quote submission is enabled yet.' }}</p>
+                    </div>
+                    <div class="glass rounded-[2rem] p-7 sm:p-10">
+                        <p class="text-xs font-bold uppercase tracking-widest text-cyan-300">{{ $isAr ? 'سوق الفرص' : 'BUSINESS OPPORTUNITIES' }}</p>
+                        <h2 class="mt-4 text-2xl font-black sm:text-3xl">{{ $isAr ? 'لديك فرصة أو صفقة تجارية؟' : 'Have a Business Opportunity?' }}</h2>
+                        <p class="mt-4 leading-7 text-slate-400">{{ $isAr ? 'أضف فرصة تجارية أو ابدأ التواصل مع فريق HAG. تخضع شارات التوثيق للمراجعة الفعلية.' : 'Publish an opportunity or contact the HAG team. Verification badges are shown only for reviewed opportunities.' }}</p>
+                        <a href="{{ Route::has('opportunities.create') ? route('opportunities.create') : '#contact' }}" class="mt-7 inline-flex rounded-xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 hover:bg-cyan-300">{{ $isAr ? 'إضافة فرصة تجارية' : 'Publish an Opportunity' }}</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {{-- FREQUENTLY ASKED QUESTIONS --}}
+        <section id="faq" class="scroll-mt-24 py-16">
+            <div class="mx-auto max-w-4xl px-5 lg:px-8">
+                <h2 class="mb-7 text-3xl font-black">{{ $isAr ? 'الأسئلة الشائعة' : 'Frequently Asked Questions' }}</h2>
+                <div class="space-y-3">
+                    <details class="glass rounded-2xl p-5"><summary class="cursor-pointer font-bold">{{ $isAr ? 'هل HAG Brokers شركة ملاحة بحرية؟' : 'Is HAG Brokers a shipping line?' }}</summary><p class="mt-3 leading-7 text-slate-400">{{ $isAr ? 'لا. HAG Brokers وسيط تجاري ينسق خيارات الشحن مع الناقلين والشركاء المتاحين.' : 'No. HAG Brokers is a commercial freight broker coordinating options with available carriers and partners.' }}</p></details>
+                    <details class="glass rounded-2xl p-5"><summary class="cursor-pointer font-bold">{{ $isAr ? 'كيف أطلب عرض سعر؟' : 'How do I request a quote?' }}</summary><p class="mt-3 leading-7 text-slate-400">{{ $isAr ? 'ابدأ من قسم طلب عرض الشحن وشارك تفاصيل البضاعة والمسار المطلوب.' : 'Use the freight request section and share your cargo and route requirements.' }}</p></details>
+                    <details class="glass rounded-2xl p-5"><summary class="cursor-pointer font-bold">{{ $isAr ? 'هل تتوفر بيانات تتبع مباشرة؟' : 'Is real-time tracking available?' }}</summary><p class="mt-3 leading-7 text-slate-400">{{ $isAr ? 'تعتمد التحديثات على البيانات التي توفرها أنظمة المنصة والشركاء، ولا تُعرض الخريطة التوضيحية كتتبع مباشر.' : 'Tracking updates depend on available platform and partner data. The illustrative map is not live vessel tracking.' }}</p></details>
+                </div>
+            </div>
+        </section>
+
         {{-- CONTACT --}}
         <section id="contact" class="scroll-mt-24 pb-24 lg:pb-32">
 
@@ -2167,6 +2280,30 @@
 
         </div>
     </footer>
+
+    <script>
+        (() => {
+            const root = document.documentElement;
+            const buttons = [document.getElementById('theme-toggle'), document.getElementById('theme-toggle-mobile')].filter(Boolean);
+            const isArabic = @json($isAr);
+            function update() {
+                const light = root.classList.contains('theme-light');
+                document.querySelectorAll('.hag-icon-sun').forEach(el => el.classList.toggle('hidden', light));
+                document.querySelectorAll('.hag-icon-moon').forEach(el => el.classList.toggle('hidden', !light));
+                document.querySelectorAll('.hag-theme-label').forEach(el => el.textContent = light ? (isArabic ? 'الوضع الداكن' : 'Dark mode') : (isArabic ? 'الوضع الفاتح' : 'Light mode'));
+                buttons.forEach(el => {
+                    el.setAttribute('aria-pressed', String(light));
+                    el.setAttribute('aria-label', light ? (isArabic ? 'تفعيل الوضع الداكن' : 'Switch to dark mode') : (isArabic ? 'تفعيل الوضع الفاتح' : 'Switch to light mode'));
+                });
+            }
+            buttons.forEach(button => button.addEventListener('click', () => {
+                const light = root.classList.toggle('theme-light');
+                try { localStorage.setItem('hag-theme', light ? 'light' : 'dark'); } catch (error) {}
+                update();
+            }));
+            update();
+        })();
+    </script>
 
     {{-- Leaflet JS --}}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

@@ -445,29 +445,28 @@ return new class extends Migration
         |--------------------------------------------------------------------------
         */
 
-
-        Schema::create('notifications', fn(Blueprint $t) => [
-            $t->id(),
+        Schema::create('notifications', function (Blueprint $t) {
+            $t->id();
 
             $t->foreignId('user_id')
                 ->constrained('users')
-                ->cascadeOnDelete(),
+                ->cascadeOnDelete();
 
-            $t->string('type')->index(),
+            $t->string('type');
 
-            $t->string('title'),
+            $t->string('title');
 
-            $t->text('message'),
+            $t->text('message');
 
             $t->boolean('is_read')
                 ->default(false)
-                ->index(),
+                ->index();
 
             $t->json('data')
-                ->nullable(),
+                ->nullable();
 
-            $t->timestamps(),
-        ]);
+            $t->timestamps();
+        });
     }
 
 
