@@ -84,18 +84,11 @@ class QuotationController extends Controller
 
         $data['customer_id'] = $request->user()->customer_id;
 
-        $nextId = (int) Quotation::max('id') + 1;
-
         $data['reference_no'] =
             'QT-' .
             now()->format('Y') .
             '-' .
-            str_pad(
-                (string) $nextId,
-                5,
-                '0',
-                STR_PAD_LEFT
-            );
+            strtoupper(str_replace('-', '', (string) \Illuminate\Support\Str::uuid()));
 
         $quotation = Quotation::create($data);
 

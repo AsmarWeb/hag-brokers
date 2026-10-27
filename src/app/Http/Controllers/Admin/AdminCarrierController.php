@@ -77,7 +77,7 @@ class AdminCarrierController extends Controller
             ],
 
             'code' => [
-                'nullable',
+                'required',
                 'string',
                 'max:255',
                 'unique:carriers,code',
@@ -167,7 +167,7 @@ class AdminCarrierController extends Controller
             ],
 
             'code' => [
-                'nullable',
+                'required',
                 'string',
                 'max:255',
                 Rule::unique('carriers', 'code')
