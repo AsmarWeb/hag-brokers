@@ -31,7 +31,7 @@ class AdminShipmentController extends Controller
             $search = $request->string('search')->toString();
 
             $query->where(function ($q) use ($search) {
-                $q->where('reference_no', 'like', "%{$search}%")
+                $q->where('booking_no', 'like', "%{$search}%")
                     ->orWhere('shipment_no', 'like', "%{$search}%");
             });
         }
