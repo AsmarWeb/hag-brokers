@@ -34,3 +34,8 @@ Thumbs.db
 *.pem
 *.key
 *.crt
+
+# Local database backups
+/backups/
+
+/src/database/seeders/LaratrustSeeder.php.bak

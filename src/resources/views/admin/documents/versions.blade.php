@@ -4,12 +4,14 @@
         $isAr = app()->getLocale() === 'ar';
         $versions = $document->versions->sortByDesc('version');
 
-        $documentType = class_basename($document->documentable_type);
+        $documentType = $document->documentable_type
+            ? strtolower(class_basename($document->documentable_type))
+            : '';
 
         $entityName = match ($documentType) {
-            'Customer' => $document->documentable?->company_name,
-            'Shipment' => $document->documentable?->shipment_no,
-            'Quotation' => $document->documentable?->reference_no,
+            'customer' => $document->documentable?->company_name,
+            'shipment' => $document->documentable?->shipment_no,
+            'quotation' => $document->documentable?->reference_no,
             default => null,
         };
     @endphp
@@ -228,6 +230,66 @@
 
             </div>
 
+
+
+            {{-- Upload New Version --}}
+            <div class="mb-8 rounded-2xl border border-cyan-400/20 bg-white/[0.03] p-6">
+                <div class="mb-5">
+                    <h2 class="text-lg font-black text-white">
+                        {{ $isAr ? 'رفع إصدار جديد' : 'Upload New Version' }}
+                    </h2>
+                    <p class="mt-2 text-sm text-slate-400">
+                        {{ $isAr
+                            ? 'سيصبح الملف الجديد هو الإصدار الحالي، مع الاحتفاظ بجميع الإصدارات السابقة.'
+                            : 'The new file becomes the current version while all previous versions remain available.' }}
+                    </p>
+                </div>
+
+                @if (session('success'))
+                    <div role="status" class="mb-4 rounded-xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-300">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <form
+                    action="{{ route('admin.documents.versions.store', $document) }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="flex flex-col gap-4 lg:flex-row lg:items-end"
+                >
+                    @csrf
+
+                    <div class="min-w-0 flex-1">
+                        <label for="version-file" class="mb-2 block text-sm font-bold text-slate-200">
+                            {{ $isAr ? 'اختر الملف الجديد' : 'Choose New File' }}
+                        </label>
+
+                        <input
+                            id="version-file"
+                            type="file"
+                            name="file"
+                            required
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.jpg,.jpeg,.png,.webp"
+                            class="block w-full rounded-xl border border-white/10 bg-slate-900 p-3 text-sm text-slate-200 file:me-4 file:rounded-lg file:border-0 file:bg-cyan-400 file:px-4 file:py-2 file:font-bold file:text-slate-950"
+                        >
+
+                        <p class="mt-2 text-xs text-slate-500">
+                            {{ $isAr ? 'الحد الأقصى: 10 ميجابايت' : 'Maximum file size: 10 MB' }}
+                        </p>
+
+                        @error('file')
+                            <p role="alert" class="mt-2 text-sm text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-black text-slate-950 transition hover:bg-cyan-300"
+                    >
+                        {{ $isAr ? 'رفع الإصدار الجديد' : 'Upload New Version' }}
+                    </button>
+                </form>
+            </div>
 
             {{-- ===================================================== --}}
             {{-- VERSION TIMELINE --}}

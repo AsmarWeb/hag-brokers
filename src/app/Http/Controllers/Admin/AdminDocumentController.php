@@ -4,7 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\Customer;
+use App\Models\Shipment;
+use App\Models\Quotation;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AdminDocumentController extends Controller
@@ -41,4 +50,495 @@ class AdminDocumentController extends Controller
             'documents' => $documents,
         ]);
     }
+
+    public function create(): View
+    {
+        return view('admin.documents.create', [
+            'customers' => Customer::query()
+                ->select('id', 'company_name', 'contact_person')
+                ->orderBy('company_name')
+                ->get(),
+
+            'shipments' => Shipment::query()
+                ->select('id', 'shipment_no', 'booking_no')
+                ->orderByDesc('id')
+                ->get(),
+
+            'quotations' => Quotation::query()
+                ->select('id', 'reference_no')
+                ->orderByDesc('id')
+                ->get(),
+
+            'types' => Document::query()
+                ->distinct()
+                ->pluck('type'),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string', 'max:100'],
+            'status' => ['nullable', Rule::in(['active', 'draft', 'archived'])],
+            'documentable_type' => [
+                'required',
+                Rule::in(['customer', 'shipment', 'quotation']),
+            ],
+            'documentable_id' => ['required', 'integer', 'min:1'],
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                'mimes:pdf,doc,docx,xls,xlsx,csv,jpg,jpeg,png,webp',
+            ],
+        ]);
+
+        $models = [
+            'customer' => Customer::class,
+            'shipment' => Shipment::class,
+            'quotation' => Quotation::class,
+        ];
+
+        $modelClass = $models[$validated['documentable_type']];
+
+        $related = $modelClass::query()
+            ->find($validated['documentable_id']);
+
+        if (! $related) {
+            throw ValidationException::withMessages([
+                'documentable_id' => 'The selected record does not exist.',
+            ]);
+        }
+
+        $file = $request->file('file');
+
+        $path = $file->store('documents', 'local');
+
+        if ($path === false) {
+            throw ValidationException::withMessages([
+                'file' => 'Unable to store the uploaded file.',
+            ]);
+        }
+
+        try {
+            DB::transaction(function () use (
+                $validated,
+                $related,
+                $file,
+                $path,
+                $request
+            ) {
+                $document = Document::create([
+                    'name' => $validated['name'],
+                    'type' => $validated['type'],
+                    'status' => $validated['status'] ?? 'active',
+                    'documentable_type' => $validated['documentable_type'],
+                    'documentable_id' => $related->getKey(),
+                    'shipment_id' => $related instanceof Shipment
+                        ? $related->getKey()
+                        : null,
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'uploaded_by' => $request->user()->getAuthIdentifier(),
+                ]);
+
+                $document->versions()->create([
+                    'version' => 1,
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                    'uploaded_by' => $request->user()->getAuthIdentifier(),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($path);
+
+            throw $exception;
+        }
+
+        return redirect()
+            ->route('admin.documents.index')
+            ->with('success', 'Document uploaded successfully.');
+    }
+
+
+    public function edit(Document $document): View
+    {
+        $document->load(['documentable', 'uploadedBy']);
+
+        return view('admin.documents.edit', [
+            'document' => $document,
+            'customers' => Customer::query()
+                ->select('id', 'company_name', 'contact_person')
+                ->orderBy('company_name')
+                ->get(),
+            'shipments' => Shipment::query()
+                ->select('id', 'shipment_no', 'booking_no')
+                ->orderByDesc('id')
+                ->get(),
+            'quotations' => Quotation::query()
+                ->select('id', 'reference_no')
+                ->orderByDesc('id')
+                ->get(),
+        ]);
+    }
+
+    public function update(
+        Request $request,
+        Document $document
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string', 'max:100'],
+            'status' => ['required', Rule::in(['active', 'draft', 'archived'])],
+            'documentable_type' => [
+                'required',
+                Rule::in(['customer', 'shipment', 'quotation']),
+            ],
+            'documentable_id' => ['required', 'integer', 'min:1'],
+            'file' => [
+                'nullable',
+                'file',
+                'max:10240',
+                'mimes:pdf,doc,docx,xls,xlsx,csv,jpg,jpeg,png,webp',
+            ],
+        ]);
+
+        $models = [
+            'customer' => Customer::class,
+            'shipment' => Shipment::class,
+            'quotation' => Quotation::class,
+        ];
+
+        $modelClass = $models[$validated['documentable_type']];
+
+        $related = $modelClass::query()
+            ->find($validated['documentable_id']);
+
+        if (! $related) {
+            throw ValidationException::withMessages([
+                'documentable_id' => 'The selected record does not exist.',
+            ]);
+        }
+
+        $file = $request->file('file');
+        $path = null;
+
+        if ($file) {
+            $path = $file->store('documents', 'local');
+
+            if ($path === false) {
+                throw ValidationException::withMessages([
+                    'file' => 'Unable to store the uploaded file.',
+                ]);
+            }
+        }
+
+        try {
+            DB::transaction(function () use (
+                $document,
+                $validated,
+                $related,
+                $file,
+                $path,
+                $request
+            ) {
+                $lockedDocument = Document::query()
+                    ->whereKey($document->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $attributes = [
+                    'name' => $validated['name'],
+                    'type' => $validated['type'],
+                    'status' => $validated['status'],
+                    'documentable_type' => $validated['documentable_type'],
+                    'documentable_id' => $related->getKey(),
+                    'shipment_id' => $related instanceof Shipment
+                        ? $related->getKey()
+                        : null,
+                ];
+
+                if ($file) {
+                    $latestVersion = (int) $lockedDocument
+                        ->versions()
+                        ->max('version');
+
+                    $lockedDocument->versions()->create([
+                        'version' => $latestVersion + 1,
+                        'file_path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'mime_type' => $file->getMimeType(),
+                        'file_size' => $file->getSize(),
+                        'uploaded_by' => $request->user()->getAuthIdentifier(),
+                    ]);
+
+                    $attributes['file_path'] = $path;
+                    $attributes['original_name'] = $file->getClientOriginalName();
+                    $attributes['uploaded_by'] = $request->user()->getAuthIdentifier();
+                }
+
+                $lockedDocument->update($attributes);
+            }, 3);
+        } catch (\Throwable $exception) {
+            if ($path !== null) {
+                Storage::disk('local')->delete($path);
+            }
+
+            if ($exception instanceof \Illuminate\Database\UniqueConstraintViolationException) {
+                throw ValidationException::withMessages([
+                    'file' => 'Another version was uploaded at the same time. Please try again.',
+                ]);
+            }
+
+            throw $exception;
+        }
+
+        return redirect()
+            ->route('admin.documents.edit', $document)
+            ->with('success', 'Document updated successfully.');
+    }
+
+    public function download(Document $document): StreamedResponse
+    {
+        $path = $document->file_path;
+
+        abort_unless(
+            is_string($path)
+                && preg_match(
+                    '~\Adocuments/[A-Za-z0-9/_-]+\.[A-Za-z0-9]+\z~D',
+                    $path
+                )
+                && ! str_contains($path, '//')
+                && ! str_contains($path, '..'),
+            404
+        );
+
+        $disk = Storage::disk('local');
+
+        abort_unless($disk->exists($path), 404);
+
+        $filename = $document->original_name
+            ?: basename($path);
+
+        return $disk->download($path, $filename);
+    }
+
+
+    public function preview(Document $document): StreamedResponse
+    {
+        $path = $document->file_path;
+
+        abort_unless(
+            is_string($path)
+                && preg_match(
+                    '~\Adocuments/[A-Za-z0-9/_-]+\.[A-Za-z0-9]+\z~D',
+                    $path
+                )
+                && ! str_contains($path, '//')
+                && ! str_contains($path, '..'),
+            404
+        );
+
+        $disk = Storage::disk('local');
+
+        abort_unless($disk->exists($path), 404);
+
+        $mime = $disk->mimeType($path);
+
+        abort_unless(
+            in_array($mime, [
+                'application/pdf',
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ], true),
+            415,
+            'Preview is not supported for this file type.'
+        );
+
+        $filename = $document->original_name
+            ?: basename($path);
+
+        $response = $disk->response(
+            $path,
+            $filename,
+            [
+                'Content-Type' => $mime,
+                'X-Content-Type-Options' => 'nosniff',
+                'Content-Security-Policy' => "sandbox",
+                'Cache-Control' => 'private, no-store',
+            ],
+            'inline'
+        );
+
+        return $response;
+    }
+
+
+    public function versions(Document $document): View
+    {
+        $document->load([
+            'documentable',
+            'versions.uploadedBy',
+        ]);
+
+        return view('admin.documents.versions', [
+            'document' => $document,
+        ]);
+    }
+
+
+    public function downloadVersion(
+        Document $document,
+        int $version
+    ): StreamedResponse {
+        $documentVersion = $document->versions()
+            ->whereKey($version)
+            ->firstOrFail();
+
+        $path = $documentVersion->file_path;
+
+        abort_unless(
+            is_string($path)
+                && preg_match(
+                    '~\Adocuments/[A-Za-z0-9/_-]+\.[A-Za-z0-9]+\z~D',
+                    $path
+                )
+                && ! str_contains($path, '//')
+                && ! str_contains($path, '..'),
+            404
+        );
+
+        $disk = Storage::disk('local');
+
+        abort_unless($disk->exists($path), 404);
+
+        return $disk->download(
+            $path,
+            $documentVersion->original_name ?: basename($path)
+        );
+    }
+
+
+    public function previewVersion(
+        Document $document,
+        int $version
+    ): StreamedResponse {
+        $documentVersion = $document->versions()
+            ->whereKey($version)
+            ->firstOrFail();
+
+        $path = $documentVersion->file_path;
+
+        abort_unless(
+            is_string($path)
+                && preg_match(
+                    '~\Adocuments/[A-Za-z0-9/_-]+\.[A-Za-z0-9]+\z~D',
+                    $path
+                )
+                && ! str_contains($path, '//')
+                && ! str_contains($path, '..'),
+            404
+        );
+
+        $disk = Storage::disk('local');
+
+        abort_unless($disk->exists($path), 404);
+
+        $mime = $disk->mimeType($path);
+
+        abort_unless(
+            in_array($mime, [
+                'application/pdf',
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+            ], true),
+            415,
+            'Preview is not supported for this file type.'
+        );
+
+        return $disk->response(
+            $path,
+            $documentVersion->original_name ?: basename($path),
+            [
+                'Content-Type' => $mime,
+                'X-Content-Type-Options' => 'nosniff',
+                'Content-Security-Policy' => 'sandbox',
+                'Cache-Control' => 'private, no-store',
+            ],
+            'inline'
+        );
+    }
+
+
+    public function uploadVersion(
+        Request $request,
+        Document $document
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'max:10240',
+                'mimes:pdf,doc,docx,xls,xlsx,csv,jpg,jpeg,png,webp',
+            ],
+        ]);
+
+        $file = $validated['file'];
+
+        $path = $file->store('documents', 'local');
+
+        if ($path === false) {
+            throw ValidationException::withMessages([
+                'file' => 'Unable to store the uploaded file.',
+            ]);
+        }
+
+        try {
+            DB::transaction(function () use ($document, $file, $path, $request) {
+                $lockedDocument = Document::query()
+                    ->whereKey($document->getKey())
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $latestVersion = (int) $lockedDocument
+                    ->versions()
+                    ->max('version');
+
+                $lockedDocument->versions()->create([
+                    'version' => $latestVersion + 1,
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'file_size' => $file->getSize(),
+                    'uploaded_by' => $request->user()->getAuthIdentifier(),
+                ]);
+
+                $lockedDocument->update([
+                    'file_path' => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'uploaded_by' => $request->user()->getAuthIdentifier(),
+                ]);
+            }, 3);
+        } catch (\Throwable $exception) {
+            Storage::disk('local')->delete($path);
+
+            if ($exception instanceof \Illuminate\Database\UniqueConstraintViolationException) {
+                throw ValidationException::withMessages([
+                    'file' => 'Another version was uploaded at the same time. Please try again.',
+                ]);
+            }
+
+            throw $exception;
+        }
+
+        return redirect()
+            ->route('admin.documents.versions', $document)
+            ->with('success', 'New document version uploaded successfully.');
+    }
+
 }
