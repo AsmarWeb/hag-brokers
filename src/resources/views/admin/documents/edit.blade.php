@@ -20,11 +20,11 @@
             'other' => $isAr ? 'مستند آخر' : 'Other',
         ];
 
-        $currentType = class_basename($document->documentable_type ?? '');
+        $currentType = strtolower(class_basename($document->documentable_type ?? ''));
         $currentEntity = match ($currentType) {
-            'Customer' => 'customer',
-            'Shipment' => 'shipment',
-            'Quotation' => 'quotation',
+            'customer' => 'customer',
+            'shipment' => 'shipment',
+            'quotation' => 'quotation',
             default => '',
         };
 

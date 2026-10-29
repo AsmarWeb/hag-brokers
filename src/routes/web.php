@@ -366,6 +366,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         Route::get('/documents/{document}/versions', [AdminDocumentController::class, 'versions'])
             ->name('documents.versions');
 
+        Route::post('/documents/{document}/versions', [AdminDocumentController::class, 'uploadVersion'])
+            ->name('documents.versions.store');
+
         Route::get('/documents/{document}/download', [AdminDocumentController::class, 'download'])
             ->name('documents.download');
 
