@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quotation;
+use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -67,13 +69,41 @@ class AdminQuotationController extends Controller
             'status' => [
                 'required',
                 'string',
-                'max:50',
+                'in:pending,processing,approved,rejected,completed',
             ],
         ]);
+
+        $previousStatus = $quotation->status;
 
         $quotation->update([
             'status' => $data['status'],
         ]);
+
+        if ($previousStatus !== $data['status']) {
+            $customerUsers = User::query()
+                ->where('customer_id', $quotation->customer_id)
+                ->get();
+
+            foreach ($customerUsers as $customerUser) {
+                try {
+                    NotificationService::user(
+                        user: $customerUser,
+                        type: 'quotation.status_changed',
+                        title: 'Quotation status updated',
+                        message: 'Quotation ' . $quotation->reference_no
+                            . ' is now ' . $data['status'] . '.',
+                        model: $quotation,
+                        data: [
+                            'url' => route('quotations.show', $quotation),
+                            'previous_status' => $previousStatus,
+                            'new_status' => $data['status'],
+                        ]
+                    );
+                } catch (\Throwable $exception) {
+                    report($exception);
+                }
+            }
+        }
 
         return back()->with(
             'success',

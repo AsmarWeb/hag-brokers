@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quotation;
+use App\Models\Customer;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -53,6 +55,7 @@ class QuotationController extends Controller
 
             'destination_port_id' => [
                 'required',
+                'different:origin_port_id',
                 'exists:ports,id',
             ],
 
@@ -86,7 +89,15 @@ class QuotationController extends Controller
             ],
         ]);
 
-        $data['customer_id'] = $request->user()->customer_id;
+        $customerId = $request->user()->customer_id;
+
+        if (! $customerId || ! Customer::whereKey($customerId)->exists()) {
+            return back()->withInput()->withErrors([
+                'customer' => 'Please complete your customer profile before submitting a quotation.',
+            ]);
+        }
+
+        $data['customer_id'] = $customerId;
 
         $data['reference_no'] =
             'QT-' .
@@ -95,6 +106,20 @@ class QuotationController extends Controller
             strtoupper(str_replace('-', '', (string) \Illuminate\Support\Str::uuid()));
 
         $quotation = Quotation::create($data);
+
+        try {
+            NotificationService::admins(
+                type: 'quotation.created',
+                title: 'New quotation request',
+                message: 'New quotation ' . $quotation->reference_no . ' requires review.',
+                model: $quotation,
+                data: [
+                    'url' => route('admin.quotations.show', $quotation),
+                ]
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return redirect()
             ->route('quotations.show', $quotation)

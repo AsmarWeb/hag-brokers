@@ -165,4 +165,34 @@ class QuotationFeatureTest extends TestCase
             return in_array($own->id, $ids, true) && ! in_array($foreign->id, $ids, true);
         });
     }
+
+    public function test_same_origin_and_destination_is_rejected(): void
+    {
+        $user = $this->customerUser('same-port');
+        $payload = $this->validPayload();
+        $payload['destination_port_id'] = $payload['origin_port_id'];
+
+        $this->actingAs($user)
+            ->post(route('quotations.store'), $payload)
+            ->assertSessionHasErrors('destination_port_id');
+
+        $this->assertDatabaseCount('quotations', 0);
+    }
+
+    public function test_user_without_customer_cannot_submit_quotation(): void
+    {
+        $user = User::factory()->create([
+            'customer_id' => null,
+        ]);
+
+        $payload = $this->validPayload();
+
+        $this->actingAs($user)
+            ->post(route('quotations.store'), $payload)
+            ->assertSessionHasErrors('customer');
+
+        $this->assertDatabaseCount('quotations', 0);
+    }
+
+
 }
