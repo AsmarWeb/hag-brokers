@@ -314,6 +314,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'store',
         ])->name('quotations.offers.store');
 
+        Route::patch('/quotations/{quotation}/offers/{offer}/approve', [
+            \App\Http\Controllers\Admin\AdminQuotationOfferController::class,
+            'approve',
+        ])->name('quotations.offers.approve');
+
 
 
         Route::get('/settings', [AdminSettingController::class, 'edit'])

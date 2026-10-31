@@ -174,6 +174,48 @@
         </div>
 
 
+
+        @if ($quotation->approved_offer_id !== null)
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
+                <h2 class="mb-3 text-lg font-bold text-emerald-900">
+                    Internally Approved Carrier Offer
+                </h2>
+
+                <p class="text-sm text-emerald-800">
+                    Offer #{{ $quotation->approved_offer_id }}
+                    — Approved {{ $quotation->offer_approved_at }}
+                </p>
+
+                <div class="mt-4 grid gap-3 sm:grid-cols-3">
+                    <div>
+                        <p class="text-xs text-emerald-700">Carrier Cost</p>
+                        <p class="font-bold">
+                            {{ $quotation->approved_currency }}
+                            {{ number_format((float) $quotation->approved_carrier_amount, 2) }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-emerald-700">Customer Price</p>
+                        <p class="font-bold">
+                            {{ $quotation->approved_currency }}
+                            {{ number_format((float) $quotation->approved_customer_amount, 2) }}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-emerald-700">Brokerage Margin</p>
+                        <p class="font-bold">
+                            {{ $quotation->approved_currency }}
+                            {{ number_format((float) $quotation->approved_margin, 2) }}
+                        </p>
+                    </div>
+                </div>
+
+                <p class="mt-4 text-xs text-emerald-800">
+                    Internal approval only. Not published to the customer.
+                </p>
+            </div>
+        @endif
+
         {{-- Carrier Offers --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="mb-2 text-lg font-bold text-slate-900">Carrier Offers</h2>
@@ -209,7 +251,29 @@
                                         (float) $offer->carrier_amount, 2
                                     ) }}
                                 </td>
-                                <td class="p-3">{{ ucfirst($offer->status) }}</td>
+                                <td class="p-3">
+                                    <span>{{ ucfirst($offer->status) }}</span>
+
+                                    @if (
+                                        $quotation->approved_offer_id === null
+                                        && $offer->status === 'pending'
+                                    )
+                                        <form method="POST"
+                                              action="{{ route(
+                                                  'admin.quotations.offers.approve',
+                                                  [$quotation, $offer]
+                                              ) }}"
+                                              class="mt-2">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                    onclick="return confirm('Approve this carrier offer?')"
+                                                    class="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white">
+                                                Approve
+                                            </button>
+                                        </form>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -223,6 +287,7 @@
             </div>
         </div>
 
+        @if ($quotation->approved_offer_id === null)
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="mb-4 text-lg font-bold text-slate-900">
                 Add Carrier Offer
@@ -316,6 +381,12 @@
                 </div>
             </form>
         </div>
+
+        @endif
+
+        @error('offer')
+            <p class="text-sm text-red-600">{{ $message }}</p>
+        @enderror
 
         {{-- Status Update --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
