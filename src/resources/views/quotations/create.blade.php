@@ -168,86 +168,201 @@
                     </div>
 
 
-                    <div class="grid gap-6 p-6 md:grid-cols-2">
+
+                    {{-- HAG SMART PORT PICKER --}}
+                    <div
+                        x-data="{
+                            origin: @js((string) old('origin_port_id', '')),
+                            destination: @js((string) old('destination_port_id', '')),
+                            originSearch: '',
+                            destinationSearch: '',
+                            showOrigin: true,
+                            showDestination: true,
+                            ports: @js($ports->map(fn ($port) => [
+                                'id' => (string) $port->id,
+                                'name' => $port->name,
+                                'country' => $port->country,
+                                'code' => $port->unlocode ?? '',
+                            ])->values()->all()),
+
+                            filteredPorts(field) {
+                                const term = (
+                                    field === 'origin'
+                                        ? this.originSearch
+                                        : this.destinationSearch
+                                ).toLocaleLowerCase().trim();
+
+                                const other = field === 'origin'
+                                    ? this.destination
+                                    : this.origin;
+
+                                return this.ports.filter(port => {
+                                    if (port.id === other) return false;
+
+                                    if (!term) return true;
+
+                                    return [
+                                        port.name,
+                                        port.country,
+                                        port.code
+                                    ].some(value =>
+                                        String(value || '')
+                                            .toLocaleLowerCase()
+                                            .includes(term)
+                                    );
+                                });
+                            },
+
+                            selectedPort(field) {
+                                const id = field === 'origin'
+                                    ? this.origin
+                                    : this.destination;
+
+                                return this.ports.find(port => port.id === id);
+                            }
+                        }"
+                        class="space-y-7 p-6">
 
                         <div>
+                            <div class="mb-4 flex items-center gap-3">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400 font-black text-slate-950">
+                                    1
+                                </span>
+                                <h3 class="font-bold text-slate-900 dark:text-white">
+                                    {{ $t['origin_port'] }}
+                                </h3>
+                            </div>
 
-                            <label for="origin_port_id"
-                                class="block text-sm font-bold text-slate-700 dark:text-slate-300">
-                                {{ $t['origin_port'] }}
-                            </label>
+                            <input type="hidden"
+                                name="origin_port_id"
+                                :value="origin">
 
-                            <select id="origin_port_id" name="origin_port_id" required
-                                class="mt-2 block w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-cyan-400 focus:ring-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                            <input type="search"
+                                x-model="originSearch"
+                                placeholder="{{ $isAr ? 'ابحث باسم الميناء أو الدولة أو الرمز...' : 'Search port, country or code...' }}"
+                                class="mb-4 w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
 
-                                <option value="">
-                                    {{ $t['select_origin'] }}
-                                </option>
+                            <div class="grid max-h-72 grid-cols-2 gap-3 overflow-y-auto p-1 sm:grid-cols-3">
+                                <template x-for="port in filteredPorts('origin')" :key="port.id">
+                                    <button type="button"
+                                        @click="origin = port.id"
+                                        :aria-pressed="origin === port.id"
+                                        :class="origin === port.id
+                                            ? 'scale-[1.02] border-cyan-400 bg-cyan-400/15 shadow-lg shadow-cyan-400/10'
+                                            : 'border-slate-200 bg-slate-50 hover:border-cyan-400 dark:border-slate-700 dark:bg-slate-800'"
+                                        class="relative min-h-28 rounded-2xl border p-4 text-center transition-all">
 
-                                @foreach ($ports as $port)
-                                    <option value="{{ $port->id }}" @selected(old('origin_port_id') == $port->id)>
+                                        <span class="mb-2 block text-2xl">⚓</span>
 
-                                        {{ $port->name }}
-                                        — {{ $port->country }}
+                                        <span class="block text-sm font-bold text-slate-900 dark:text-white"
+                                            x-text="port.name"></span>
 
-                                        @if ($port->unlocode)
-                                            ({{ $port->unlocode }})
-                                        @endif
+                                        <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400"
+                                            x-text="port.country"></span>
 
-                                    </option>
-                                @endforeach
+                                        <span class="mt-1 block text-xs font-semibold text-cyan-600 dark:text-cyan-400"
+                                            x-text="port.code"></span>
 
-                            </select>
+                                        <span x-show="origin === port.id"
+                                            class="absolute end-2 top-2 font-bold text-cyan-500">
+                                            ✓
+                                        </span>
+                                    </button>
+                                </template>
+                            </div>
+
+                            <p x-show="filteredPorts('origin').length === 0"
+                                class="mt-3 text-sm text-slate-500">
+                                {{ $isAr ? 'لا توجد موانئ مطابقة.' : 'No matching ports.' }}
+                            </p>
+
+                            <div x-show="selectedPort('origin')" x-cloak
+                                class="mt-4 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-3 text-sm text-slate-800 dark:text-cyan-100">
+                                <span class="font-bold">
+                                    {{ $isAr ? 'ميناء الانطلاق المحدد:' : 'Selected origin:' }}
+                                </span>
+                                <span x-text="selectedPort('origin')?.name"></span>
+                            </div>
 
                             @error('origin_port_id')
-                                <p class="mt-2 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-
                         </div>
 
+                        <div class="border-t border-slate-200 pt-6 dark:border-slate-800">
+                            <div class="mb-4 flex items-center gap-3">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400 font-black text-slate-950">
+                                    2
+                                </span>
+                                <h3 class="font-bold text-slate-900 dark:text-white">
+                                    {{ $t['destination_port'] }}
+                                </h3>
+                            </div>
 
-                        <div>
+                            <input type="hidden"
+                                name="destination_port_id"
+                                :value="destination">
 
-                            <label for="destination_port_id"
-                                class="block text-sm font-bold text-slate-700 dark:text-slate-300">
-                                {{ $t['destination_port'] }}
-                            </label>
+                            <input type="search"
+                                x-model="destinationSearch"
+                                placeholder="{{ $isAr ? 'ابحث عن ميناء الوصول...' : 'Search destination port...' }}"
+                                class="mb-4 w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
 
-                            <select id="destination_port_id" name="destination_port_id" required
-                                class="mt-2 block w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-cyan-400 focus:ring-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
+                            <div class="grid max-h-72 grid-cols-2 gap-3 overflow-y-auto p-1 sm:grid-cols-3">
+                                <template x-for="port in filteredPorts('destination')" :key="port.id">
+                                    <button type="button"
+                                        @click="destination = port.id"
+                                        :aria-pressed="destination === port.id"
+                                        :class="destination === port.id
+                                            ? 'scale-[1.02] border-cyan-400 bg-cyan-400/15 shadow-lg shadow-cyan-400/10'
+                                            : 'border-slate-200 bg-slate-50 hover:border-cyan-400 dark:border-slate-700 dark:bg-slate-800'"
+                                        class="relative min-h-28 rounded-2xl border p-4 text-center transition-all">
 
-                                <option value="">
-                                    {{ $t['select_destination'] }}
-                                </option>
+                                        <span class="mb-2 block text-2xl">🚢</span>
 
-                                @foreach ($ports as $port)
-                                    <option value="{{ $port->id }}" @selected(old('destination_port_id') == $port->id)>
+                                        <span class="block text-sm font-bold text-slate-900 dark:text-white"
+                                            x-text="port.name"></span>
 
-                                        {{ $port->name }}
-                                        — {{ $port->country }}
+                                        <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400"
+                                            x-text="port.country"></span>
 
-                                        @if ($port->unlocode)
-                                            ({{ $port->unlocode }})
-                                        @endif
+                                        <span class="mt-1 block text-xs font-semibold text-cyan-600 dark:text-cyan-400"
+                                            x-text="port.code"></span>
 
-                                    </option>
-                                @endforeach
+                                        <span x-show="destination === port.id"
+                                            class="absolute end-2 top-2 font-bold text-cyan-500">
+                                            ✓
+                                        </span>
+                                    </button>
+                                </template>
+                            </div>
 
-                            </select>
+                            <p x-show="filteredPorts('destination').length === 0"
+                                class="mt-3 text-sm text-slate-500">
+                                {{ $isAr ? 'لا توجد موانئ مطابقة.' : 'No matching ports.' }}
+                            </p>
+
+                            <div x-show="selectedPort('destination')" x-cloak
+                                class="mt-4 rounded-xl border border-cyan-400/30 bg-cyan-400/10 p-3 text-sm text-slate-800 dark:text-cyan-100">
+                                <span class="font-bold">
+                                    {{ $isAr ? 'ميناء الوصول المحدد:' : 'Selected destination:' }}
+                                </span>
+                                <span x-text="selectedPort('destination')?.name"></span>
+                            </div>
 
                             @error('destination_port_id')
-                                <p class="mt-2 text-sm text-red-600">
-                                    {{ $message }}
-                                </p>
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
-
                         </div>
+
+                        <p x-show="origin && destination && origin === destination"
+                            class="rounded-xl bg-red-50 p-3 text-sm text-red-600"
+                            x-cloak>
+                            {{ $isAr ? 'يجب اختيار ميناءين مختلفين.' : 'Please select two different ports.' }}
+                        </p>
 
                     </div>
 
-                </div>
 
 
                 {{-- Cargo --}}

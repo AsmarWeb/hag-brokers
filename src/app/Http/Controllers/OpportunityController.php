@@ -249,6 +249,23 @@ class OpportunityController extends Controller
             ],
         ]);
 
+
+        // Vessel brokerage validation
+        if ($request->input('opportunity_type') === 'vessel_brokerage') {
+            $vessel = $request->validate([
+                'vessel.listing_type' => 'required|in:sale,wanted,charter',
+                'vessel.vessel_category' => 'required|in:yacht,commercial_vessel,boat',
+                'vessel.vessel_type' => 'nullable|string|max:80',
+                'vessel.vessel_name' => 'nullable|string|max:255',
+                'vessel.builder' => 'nullable|string|max:255',
+                'vessel.year_built' => 'nullable|integer|between:1800,2100',
+                'vessel.length_m' => 'nullable|numeric|gt:0',
+                'vessel.imo_number' => 'nullable|digits:7',
+            ]);
+
+            $validated['vessel'] = $vessel['vessel'];
+        }
+
         $user = Auth::user();
 
         /*
@@ -427,6 +444,14 @@ class OpportunityController extends Controller
                             $primarySet = true;
                         }
                     }
+                }
+
+
+                if (
+                    $validated['opportunity_type'] === 'vessel_brokerage'
+                    && isset($validated['vessel'])
+                ) {
+                    $opportunity->vessel()->create($validated['vessel']);
                 }
 
                 return $opportunity;

@@ -12,6 +12,7 @@
             'distribution' => $isAr ? 'توزيع' : 'Distribution',
             'logistics' => $isAr ? 'لوجستيات' : 'Logistics',
             'partnership' => $isAr ? 'شراكة' : 'Partnership',
+            'vessel_brokerage' => $isAr ? 'وساطة السفن واليخوت' : 'Vessel & Yacht Brokerage',
             'other' => $isAr ? 'أخرى' : 'Other',
         ];
 
@@ -293,7 +294,6 @@
 
                         @csrf
 
-
                         {{-- =============================================
                             STEP 1
                         ============================================== --}}
@@ -364,16 +364,55 @@
                                             <span class="text-cyan-400">*</span>
                                         </label>
 
-                                        <select name="opportunity_type" x-model="form.opportunity_type" required
-                                            class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-4 text-sm text-white outline-none focus:border-cyan-400/50">
 
-                                            @foreach ($opportunityTypes as $value => $label)
-                                                <option value="{{ $value }}">
-                                                    {{ $label }}
-                                                </option>
-                                            @endforeach
+{{-- HAG OPPORTUNITY CARD SELECTOR --}}
+<div x-init="
+    form.opportunity_type = @js(old('opportunity_type', ''));
+    form.category = @js(old('category', ''));
+"></div>
+<input type="hidden" name="opportunity_type"
+    x-model="form.opportunity_type">
 
-                                        </select>
+<div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+    @foreach ($opportunityTypes as $value => $label)
+        @php
+            $icons = [
+                'business' => '💼',
+                'investment' => '📈',
+                'trade' => '📦',
+                'procurement' => '🛒',
+                'distribution' => '🚚',
+                'logistics' => '🚢',
+                'partnership' => '🤝',
+                'vessel_brokerage' => '⛵',
+                'other' => '📂',
+            ];
+        @endphp
+
+        <button type="button"
+            @click="form.opportunity_type = @js($value); form.category = ''"
+            :aria-pressed="form.opportunity_type === @js($value)"
+            :class="form.opportunity_type === @js($value)
+                ? 'scale-[1.02] border-cyan-400 bg-cyan-400/15 text-cyan-200 shadow-lg shadow-cyan-400/10'
+                : 'border-white/10 bg-[#07111f] text-slate-300 hover:border-cyan-400/40 hover:bg-white/5'"
+            class="relative min-h-28 rounded-2xl border p-4 text-center transition-all duration-200">
+
+            <span class="mb-2 block text-3xl">
+                {{ $icons[$value] ?? '📂' }}
+            </span>
+
+            <span class="block text-sm font-bold">
+                {{ $label }}
+            </span>
+
+            <span x-show="form.opportunity_type === @js($value)"
+                class="absolute end-2 top-2 text-cyan-300">
+                ✓
+            </span>
+        </button>
+    @endforeach
+</div>
+
 
                                     </div>
 
@@ -386,20 +425,53 @@
                                             {{ $isAr ? 'الفئة' : 'Category' }}
                                         </label>
 
-                                        <select name="category" x-model="form.category"
-                                            class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-4 text-sm text-white outline-none focus:border-cyan-400/50">
 
-                                            <option value="">
-                                                {{ $isAr ? 'اختر الفئة' : 'Select category' }}
-                                            </option>
+<input type="hidden" name="category" x-model="form.category">
 
-                                            @foreach ($categories as $value => $label)
-                                                <option value="{{ $value }}">
-                                                    {{ $label }}
-                                                </option>
-                                            @endforeach
+<div x-show="form.opportunity_type !== ''" x-cloak>
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        @foreach ($categories as $value => $label)
+            @php
+                $icons = [
+                    'import' => '📥',
+                    'export' => '📤',
+                    'sea_freight' => '🚢',
+                    'distribution' => '🚚',
+                    'manufacturing' => '🏭',
+                    'real_estate' => '🏢',
+                    'technology' => '💻',
+                    'services' => '🛠️',
+                    'other' => '📂',
+                ];
+            @endphp
 
-                                        </select>
+            <button type="button"
+                x-show="form.opportunity_type !== 'vessel_brokerage'
+                    || ['sea_freight','services','other'].includes(@js($value))"
+                @click="form.category = @js($value)"
+                :aria-pressed="form.category === @js($value)"
+                :class="form.category === @js($value)
+                    ? 'scale-[1.02] border-cyan-400 bg-cyan-400/15 text-cyan-200 shadow-lg shadow-cyan-400/10'
+                    : 'border-white/10 bg-[#07111f] text-slate-300 hover:border-cyan-400/40 hover:bg-white/5'"
+                class="relative min-h-24 rounded-2xl border p-4 text-center transition-all duration-200">
+
+                <span class="mb-2 block text-2xl">
+                    {{ $icons[$value] ?? '📂' }}
+                </span>
+
+                <span class="block text-sm font-bold">
+                    {{ $label }}
+                </span>
+
+                <span x-show="form.category === @js($value)"
+                    class="absolute end-2 top-2 text-cyan-300">
+                    ✓
+                </span>
+            </button>
+        @endforeach
+    </div>
+</div>
+
 
                                     </div>
 
@@ -474,6 +546,158 @@
 
                         <section x-show="step === 2" x-transition.opacity.duration.200ms
                             class="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl sm:p-7 lg:p-8">
+
+                        {{-- VESSEL BROKERAGE FIELDS --}}
+                        <div
+                            x-show="form.opportunity_type === 'vessel_brokerage'"
+                            x-cloak
+                            class="mb-8 rounded-3xl border border-cyan-400/20 bg-cyan-400/5 p-5 sm:p-7">
+
+                            <h3 class="mb-2 text-xl font-black text-cyan-300">
+                                {{ $isAr ? 'تفاصيل السفينة أو اليخت' : 'Vessel & Yacht Details' }}
+                            </h3>
+
+                            <p class="mb-6 text-sm text-slate-400">
+                                {{ $isAr ? 'اختر المواصفات المناسبة. لا تحتاج إلى كتابة كل التفاصيل.' : 'Select the relevant specifications. Only a few details need typing.' }}
+                            </p>
+
+                            <div class="grid gap-5 md:grid-cols-2">
+
+                                @foreach ([
+                                    'listing_type' => [
+                                        'label' => $isAr ? 'نوع الإعلان' : 'Listing Type',
+                                        'options' => [
+                                            'sale' => $isAr ? 'عرض للبيع' : 'For Sale',
+                                            'wanted' => $isAr ? 'مطلوب شراء' : 'Wanted',
+                                            'charter' => $isAr ? 'عرض للتأجير' : 'For Charter',
+                                        ],
+                                    ],
+                                    'vessel_category' => [
+                                        'label' => $isAr ? 'تصنيف المركب' : 'Vessel Category',
+                                        'options' => [
+                                            'yacht' => $isAr ? 'يخت' : 'Yacht',
+                                            'commercial_vessel' => $isAr ? 'سفينة تجارية' : 'Commercial Vessel',
+                                            'boat' => $isAr ? 'قارب' : 'Boat',
+                                        ],
+                                    ],
+                                    'vessel_type' => [
+                                        'label' => $isAr ? 'نوع المركب' : 'Vessel Type',
+                                        'options' => [
+                                            'motor_yacht' => $isAr ? 'يخت بمحرك' : 'Motor Yacht',
+                                            'sailing_yacht' => $isAr ? 'يخت شراعي' : 'Sailing Yacht',
+                                            'superyacht' => $isAr ? 'يخت فاخر كبير' : 'Superyacht',
+                                            'bulk_carrier' => $isAr ? 'ناقلة بضائع سائبة' : 'Bulk Carrier',
+                                            'container_ship' => $isAr ? 'سفينة حاويات' : 'Container Ship',
+                                            'tanker' => $isAr ? 'ناقلة' : 'Tanker',
+                                            'general_cargo' => $isAr ? 'سفينة بضائع عامة' : 'General Cargo',
+                                            'tugboat' => $isAr ? 'قاطرة بحرية' : 'Tugboat',
+                                            'speedboat' => $isAr ? 'قارب سريع' : 'Speedboat',
+                                            'fishing_boat' => $isAr ? 'قارب صيد' : 'Fishing Boat',
+                                            'other' => $isAr ? 'أخرى' : 'Other',
+                                        ],
+                                    ],
+                                    'condition' => [
+                                        'label' => $isAr ? 'حالة المركب' : 'Condition',
+                                        'options' => [
+                                            'new' => $isAr ? 'جديد' : 'New',
+                                            'used' => $isAr ? 'مستعمل' : 'Used',
+                                            'refurbished' => $isAr ? 'مجدد' : 'Refurbished',
+                                        ],
+                                    ],
+                                ] as $field => $config)
+
+                                    <div>
+                                        <label class="mb-2 block text-sm font-semibold text-slate-300">
+                                            {{ $config['label'] }}
+                                        </label>
+
+                                        <select
+                                            name="vessel[{{ $field }}]"
+                                            class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3.5 text-sm text-white focus:border-cyan-400/50">
+
+                                            <option value="">
+                                                {{ $isAr ? 'اختر من القائمة' : 'Select an option' }}
+                                            </option>
+
+                                            @foreach ($config['options'] as $value => $label)
+                                                <option value="{{ $value }}"
+                                                    @selected(old('vessel.' . $field) === $value)>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                @endforeach
+
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-300">
+                                        {{ $isAr ? 'سنة الصنع' : 'Year Built' }}
+                                    </label>
+
+                                    <select name="vessel[year_built]"
+                                        class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3.5 text-sm text-white">
+                                        <option value="">
+                                            {{ $isAr ? 'اختر السنة' : 'Select Year' }}
+                                        </option>
+
+                                        @for ($year = now()->year; $year >= 1950; $year--)
+                                            <option value="{{ $year }}"
+                                                @selected((string) old('vessel.year_built') === (string) $year)>
+                                                {{ $year }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-300">
+                                        {{ $isAr ? 'اسم السفينة (اختياري)' : 'Vessel Name (Optional)' }}
+                                    </label>
+
+                                    <input type="text" name="vessel[vessel_name]"
+                                        maxlength="255"
+                                        value="{{ old('vessel.vessel_name') }}"
+                                        class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3.5 text-sm text-white">
+                                </div>
+
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-300">
+                                        {{ $isAr ? 'الشركة المصنعة (اختياري)' : 'Builder (Optional)' }}
+                                    </label>
+
+                                    <input type="text" name="vessel[builder]"
+                                        maxlength="255"
+                                        value="{{ old('vessel.builder') }}"
+                                        class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3.5 text-sm text-white">
+                                </div>
+
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-300">
+                                        {{ $isAr ? 'الطول بالمتر (اختياري)' : 'Length in Meters (Optional)' }}
+                                    </label>
+
+                                    <input type="number" name="vessel[length_m]"
+                                        min="0.01" step="0.01"
+                                        value="{{ old('vessel.length_m') }}"
+                                        class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3.5 text-sm text-white">
+                                </div>
+
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-300">
+                                        {{ $isAr ? 'رقم IMO إن وجد' : 'IMO Number (If Applicable)' }}
+                                    </label>
+
+                                    <input type="text" name="vessel[imo_number]"
+                                        inputmode="numeric" maxlength="7"
+                                        value="{{ old('vessel.imo_number') }}"
+                                        class="w-full rounded-2xl border border-white/10 bg-[#07111f] px-4 py-3.5 text-sm text-white">
+                                </div>
+
+                            </div>
+
+                        </div>
+
 
                             <div class="mb-8">
 
