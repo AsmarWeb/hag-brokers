@@ -281,6 +281,24 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class);
 
 
+        // Phase 9B: approve agreement and lock commission.
+        Route::patch(
+            '/deals/{deal}/agreements/{agreement}/approve',
+            [\App\Http\Controllers\Admin\AdminDealApprovalController::class, 'approve']
+        )->middleware('can:approve-deal-agreement')->name('deals.agreements.approve');
+
+        // Phase 9B: agreement drafts (admin only).
+        Route::post(
+            '/deals/{deal}/agreements',
+            [\App\Http\Controllers\Admin\AdminDealAgreementController::class, 'store']
+        )->name('deals.agreements.store');
+
+        // Phase 9B: create a draft deal from an approved quotation.
+        Route::post(
+            '/quotations/{quotation}/deals',
+            [\App\Http\Controllers\Admin\AdminDealController::class, 'storeFromQuotation']
+        )->name('quotations.deals.store');
+
         // Shipments
         Route::resource(
             'shipments',
