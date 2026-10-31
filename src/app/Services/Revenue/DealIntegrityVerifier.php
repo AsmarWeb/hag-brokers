@@ -126,24 +126,29 @@ final class DealIntegrityVerifier
 
             // Maintain the exact field order and encoding
             // used by DealApprovalService.
-            $snapshot = json_encode([
-                'deal_id' => $deal->getKey(),
-                'agreement_id' => $agreement->getKey(),
-                'version' => $agreement->version,
-                'collection_model' => $deal->collection_model,
-                'currency' => $deal->currency,
-                'deal_amount' => $basis,
-                'supplier_cost' => $cost,
-                'fee_kind' => $kind,
-                'commission_bps' => $rate,
-                'fixed_fee' => $agreement->fixed_fee === null
-                    ? null
-                    : $calculator->fixed(
-                        (string) $agreement->fixed_fee
-                    ),
-                'terms' => $agreement->terms,
-                'commission_amount' => $amount,
-            ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $integrityVersion = (int) $agreement->integrity_version;
+
+            if (! in_array($integrityVersion, [1, 2], true)) {
+                throw new \LogicException(
+                    'Unsupported integrity version.'
+                );
+            }
+
+            $builder = new FinancialSnapshotBuilder();
+
+            $snapshot = $integrityVersion === 1
+                ? $builder->legacy(
+                    $deal,
+                    $agreement,
+                    $amount,
+                    $rate
+                )
+                : $builder->version2(
+                    $deal,
+                    $agreement,
+                    $amount,
+                    $rate
+                );
 
             $expectedHash = hash('sha256', $snapshot);
             $storedHash = (string) $agreement->content_sha256;
