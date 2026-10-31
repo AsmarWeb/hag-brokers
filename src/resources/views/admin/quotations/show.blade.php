@@ -173,6 +173,150 @@
             </div>
         </div>
 
+
+        {{-- Carrier Offers --}}
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="mb-2 text-lg font-bold text-slate-900">Carrier Offers</h2>
+            <p class="mb-5 text-sm text-slate-500">
+                Compare carrier costs, customer prices and brokerage margins.
+            </p>
+
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[650px] text-left text-sm">
+                    <thead class="border-b text-slate-500">
+                        <tr>
+                            <th class="p-3">Carrier</th>
+                            <th class="p-3">Cost</th>
+                            <th class="p-3">Customer Price</th>
+                            <th class="p-3">Margin</th>
+                            <th class="p-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($quotation->offers as $offer)
+                            <tr class="border-b border-slate-100">
+                                <td class="p-3">{{ $offer->carrier?->name ?? '—' }}</td>
+                                <td class="p-3">{{ $offer->currency }}
+                                    {{ number_format((float) $offer->carrier_amount, 2) }}
+                                </td>
+                                <td class="p-3">{{ $offer->currency }}
+                                    {{ number_format((float) $offer->customer_amount, 2) }}
+                                </td>
+                                <td class="p-3 font-semibold text-emerald-700">
+                                    {{ $offer->currency }}
+                                    {{ number_format(
+                                        (float) $offer->customer_amount -
+                                        (float) $offer->carrier_amount, 2
+                                    ) }}
+                                </td>
+                                <td class="p-3">{{ ucfirst($offer->status) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="p-5 text-slate-500">
+                                    No carrier offers added yet.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="mb-4 text-lg font-bold text-slate-900">
+                Add Carrier Offer
+            </h2>
+
+            <form method="POST"
+                  action="{{ route('admin.quotations.offers.store', $quotation) }}"
+                  class="grid gap-4 md:grid-cols-2">
+                @csrf
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Carrier</label>
+                    <select name="carrier_id" required class="w-full rounded-xl border-slate-300">
+                        <option value="">Select carrier</option>
+                        @foreach ($carriers as $carrier)
+                            <option value="{{ $carrier->id }}"
+                                @selected(old('carrier_id') == $carrier->id)>
+                                {{ $carrier->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('carrier_id')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Currency</label>
+                    <input name="currency" required maxlength="3"
+                           value="{{ old('currency', 'USD') }}"
+                           class="w-full rounded-xl border-slate-300">
+                    @error('currency')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Carrier Cost</label>
+                    <input name="carrier_amount" type="number" step="0.01"
+                           min="0" required value="{{ old('carrier_amount') }}"
+                           class="w-full rounded-xl border-slate-300">
+                    @error('carrier_amount')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Customer Price</label>
+                    <input name="customer_amount" type="number" step="0.01"
+                           min="0" required value="{{ old('customer_amount') }}"
+                           class="w-full rounded-xl border-slate-300">
+                    @error('customer_amount')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Departure</label>
+                    <input name="departure_date" type="date"
+                           value="{{ old('departure_date') }}"
+                           class="w-full rounded-xl border-slate-300">
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">ETA</label>
+                    <input name="eta" type="date" value="{{ old('eta') }}"
+                           class="w-full rounded-xl border-slate-300">
+                    @error('eta')
+                        <p class="text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Transit Days</label>
+                    <input name="transit_days" type="number" min="0"
+                           value="{{ old('transit_days') }}"
+                           class="w-full rounded-xl border-slate-300">
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-sm font-semibold">Notes</label>
+                    <textarea name="notes" rows="2"
+                              class="w-full rounded-xl border-slate-300">{{ old('notes') }}</textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <button type="submit"
+                            class="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white">
+                        Save Carrier Offer
+                    </button>
+                </div>
+            </form>
+        </div>
+
         {{-- Status Update --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 

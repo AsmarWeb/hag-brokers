@@ -309,6 +309,12 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'assign',
         ])->name('quotations.assign');
 
+        Route::post('/quotations/{quotation}/offers', [
+            \App\Http\Controllers\Admin\AdminQuotationOfferController::class,
+            'store',
+        ])->name('quotations.offers.store');
+
+
 
         Route::get('/settings', [AdminSettingController::class, 'edit'])
             ->name('settings.edit');
