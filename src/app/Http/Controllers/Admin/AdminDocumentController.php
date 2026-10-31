@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Document;
+use App\Models\DocumentTemplate;
+use App\Services\DocumentPdfService;
 use App\Models\Customer;
 use App\Models\Shipment;
 use App\Models\Quotation;
@@ -12,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -540,5 +543,229 @@ class AdminDocumentController extends Controller
             ->route('admin.documents.versions', $document)
             ->with('success', 'New document version uploaded successfully.');
     }
+
+
+    /**
+     * Archive a document without deleting its files or version history.
+     */
+    public function destroy(Document $document): RedirectResponse
+    {
+        $document->update([
+            'status' => 'archived',
+        ]);
+
+        return redirect()
+            ->route('admin.documents.index')
+            ->with('success', 'Document archived successfully.');
+    }
+
+
+
+    /**
+     * Display the PDF generation form.
+     */
+    public function pdfCreate(): View
+    {
+        return view('admin.documents.pdf-create', [
+            'templates' => DocumentTemplate::query()
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(),
+            'customers' => Customer::query()->orderBy('id')->get(),
+            'shipments' => Shipment::query()->orderBy('id')->get(),
+            'quotations' => Quotation::query()->orderBy('id')->get(),
+        ]);
+    }
+
+
+
+    /**
+     * Preview a generated PDF without persisting it.
+     */
+    public function previewPdf(
+        Request $request,
+        DocumentPdfService $pdfService
+    ): \Symfony\Component\HttpFoundation\Response {
+        $validated = $request->validate([
+            'template_id' => ['required', 'integer'],
+            'document_type' => ['required', 'string', 'max:100'],
+            'entity_type' => [
+                'required',
+                Rule::in(['customer', 'shipment', 'quotation']),
+            ],
+            'entity_id' => ['required', 'integer', 'min:1'],
+            'orientation' => [
+                'nullable',
+                Rule::in(['portrait', 'landscape']),
+            ],
+        ]);
+
+        $template = DocumentTemplate::query()
+            ->where('is_active', true)
+            ->findOrFail($validated['template_id']);
+
+        if (
+            $template->document_type !== $validated['document_type'] ||
+            $template->entity_type !== $validated['entity_type']
+        ) {
+            throw ValidationException::withMessages([
+                'template_id' => 'The template does not match the selected document and source types.',
+            ]);
+        }
+
+        $model = match ($validated['entity_type']) {
+            'customer' => Customer::class,
+            'shipment' => Shipment::class,
+            'quotation' => Quotation::class,
+        };
+
+        $entity = $model::query()->findOrFail($validated['entity_id']);
+
+        $data = [
+            $validated['entity_type'] => $entity->toArray(),
+        ];
+
+        $pdf = $pdfService->output(
+            $template,
+            $data,
+            $validated['orientation'] ?? 'portrait'
+        );
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="preview.pdf"',
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => 'sandbox',
+        ]);
+    }
+
+
+
+    /**
+     * Generate and persist a PDF document with its first version.
+     */
+    public function generatePdf(
+        Request $request,
+        DocumentPdfService $pdfService
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'template_id' => ['required', 'integer'],
+            'document_type' => ['required', 'string', 'max:100'],
+            'entity_type' => [
+                'required',
+                Rule::in(['customer', 'shipment', 'quotation']),
+            ],
+            'entity_id' => ['required', 'integer', 'min:1'],
+            'file_name' => ['nullable', 'string', 'max:150'],
+            'orientation' => [
+                'nullable',
+                Rule::in(['portrait', 'landscape']),
+            ],
+        ]);
+
+        $template = DocumentTemplate::query()
+            ->where('is_active', true)
+            ->findOrFail($validated['template_id']);
+
+        if (
+            $template->document_type !== $validated['document_type'] ||
+            $template->entity_type !== $validated['entity_type']
+        ) {
+            throw ValidationException::withMessages([
+                'template_id' => 'The template does not match the selected document and source types.',
+            ]);
+        }
+
+        $model = match ($validated['entity_type']) {
+            'customer' => Customer::class,
+            'shipment' => Shipment::class,
+            'quotation' => Quotation::class,
+        };
+
+        $entity = $model::query()->findOrFail($validated['entity_id']);
+
+        $name = trim($validated['file_name'] ?? '');
+
+        if ($name === '') {
+            $name = $template->name . '-' . now()->format('Ymd-His');
+        }
+
+        $name = preg_replace('/\.pdf$/i', '', $name);
+        $name = trim($name);
+
+        if ($name === '') {
+            throw ValidationException::withMessages([
+                'file_name' => 'Please provide a valid file name.',
+            ]);
+        }
+
+        $originalName = $name . '.pdf';
+
+        $path = 'documents/generated/' . Str::uuid() . '.pdf';
+
+        $data = [
+            $validated['entity_type'] => $entity->toArray(),
+        ];
+
+        $pdf = $pdfService->output(
+            $template,
+            $data,
+            $validated['orientation'] ?? 'portrait'
+        );
+
+        $stored = false;
+
+        try {
+            if (Storage::disk('local')->put($path, $pdf) !== true) {
+                throw new \RuntimeException('Unable to store generated PDF.');
+            }
+
+            $stored = true;
+
+            DB::transaction(function () use (
+                $validated,
+                $entity,
+                $name,
+                $originalName,
+                $path,
+                $pdf
+            ): void {
+                $document = Document::query()->create([
+                    'name' => $name,
+                    'type' => $validated['document_type'],
+                    'status' => 'active',
+                    'documentable_type' => $validated['entity_type'],
+                    'documentable_id' => $entity->getKey(),
+                    'shipment_id' => $validated['entity_type'] === 'shipment'
+                        ? $entity->getKey()
+                        : null,
+                    'file_path' => $path,
+                    'original_name' => $originalName,
+                    'uploaded_by' => auth()->id(),
+                ]);
+
+                $document->versions()->create([
+                    'version' => 1,
+                    'file_path' => $path,
+                    'original_name' => $originalName,
+                    'mime_type' => 'application/pdf',
+                    'file_size' => strlen($pdf),
+                    'uploaded_by' => auth()->id(),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            if ($stored) {
+                Storage::disk('local')->delete($path);
+            }
+
+            throw $exception;
+        }
+
+        return redirect()
+            ->route('admin.documents.index')
+            ->with('success', 'PDF document generated successfully.');
+    }
+
 
 }
