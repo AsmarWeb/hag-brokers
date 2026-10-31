@@ -9,65 +9,32 @@ echo " HAG Brokers Laravel Bootstrap"
 echo "=============================================="
 
 # -------------------------------------------------------
-# Create Laravel application if it does not exist
+# Validate existing Laravel application
 # -------------------------------------------------------
 
 if [ ! -f artisan ]; then
-
-    echo "Creating Laravel application..."
-
-    rm -rf /tmp/trans-marine-laravel
-
-    composer create-project laravel/laravel:^12.0 \
-        /tmp/trans-marine-laravel \
-        --no-interaction \
-        --prefer-dist
-
-    cp -a /tmp/trans-marine-laravel/. /var/www/html/
+    echo "ERROR: Laravel application is missing (artisan not found)." >&2
+    exit 1
 fi
 
-
-# -------------------------------------------------------
-# Install Sanctum
-# -------------------------------------------------------
-
-if ! composer show laravel/sanctum >/dev/null 2>&1; then
-
-    echo "Installing Laravel Sanctum..."
-
-    composer require laravel/sanctum \
-        --no-interaction \
-        --prefer-dist
+if [ ! -f vendor/autoload.php ]; then
+    echo "ERROR: Composer dependencies are missing." >&2
+    echo "Install dependencies explicitly before starting Docker." >&2
+    exit 1
 fi
 
-
-# -------------------------------------------------------
-# Laravel API installation
-# -------------------------------------------------------
-
-php artisan install:api \
-    --no-interaction \
-    >/dev/null 2>&1 || true
-
-
-# -------------------------------------------------------
-# Overlay HAG Brokers application code
-# -------------------------------------------------------
-
-echo "Updating application files..."
-
-if [ -d /opt/transmarine/app ]; then
-    cp -a /opt/transmarine/app/. /var/www/html/app/
+if ! php -r '
+require "vendor/autoload.php";
+if (!class_exists("Illuminate\\Foundation\\Application")) {
+    fwrite(STDERR, "Laravel framework class not found.\n");
+    exit(1);
+}
+'; then
+    echo "ERROR: Laravel dependencies are invalid or incomplete." >&2
+    exit 1
 fi
 
-if [ -d /opt/transmarine/database ]; then
-    cp -a /opt/transmarine/database/. /var/www/html/database/
-fi
-
-if [ -f /opt/transmarine/routes/api.php ]; then
-    cp -f /opt/transmarine/routes/api.php \
-        /var/www/html/routes/api.php
-fi
+echo "Existing Laravel application verified."
 
 
 # -------------------------------------------------------
@@ -84,73 +51,66 @@ fi
 # Generate application key
 # -------------------------------------------------------
 
-php artisan key:generate \
-    --force \
-    --no-interaction \
-    >/dev/null 2>&1 || true
+if ! grep -Eq '^APP_KEY=.+$' .env; then
+    echo "Generating Laravel APP_KEY for first-time setup..."
+    php artisan key:generate --no-interaction
+else
+    echo "Existing Laravel APP_KEY preserved."
+fi
 
 
 # -------------------------------------------------------
-# Docker environment overrides
+# Docker environment defaults
 # -------------------------------------------------------
 
 php -r '
 $p = ".env";
-
 $s = file_get_contents($p);
 
-$r = [
-    "APP_ENV=local",
-    "DB_CONNECTION=sqlite",
-    "DB_DATABASE=/var/www/html/database/database.sqlite",
-    "REDIS_HOST=redis",
-    "QUEUE_CONNECTION=redis",
-    "CACHE_STORE=redis",
-    "SESSION_DRIVER=database",
-    "MAIL_MAILER=smtp",
-    "MAIL_HOST=mailpit",
-    "MAIL_PORT=1025"
+$defaults = [
+    "APP_ENV" => "local",
+    "DB_CONNECTION" => "sqlite",
+    "DB_DATABASE" => "/var/www/html/database/database.sqlite",
+    "REDIS_HOST" => "redis",
+    "QUEUE_CONNECTION" => "redis",
+    "CACHE_STORE" => "redis",
+    "SESSION_DRIVER" => "database",
+    "MAIL_MAILER" => "smtp",
+    "MAIL_HOST" => "mailpit",
+    "MAIL_PORT" => "1025"
 ];
 
-foreach ($r as $line) {
-
-    [$k, $v] = array_pad(
-        explode("=", $line, 2),
-        2,
-        ""
-    );
-
-    $pattern = "/^" .
-        preg_quote($k, "/") .
-        "=.*$/m";
-
-    $s = preg_replace(
-        $pattern,
-        $line,
-        $s,
-        -1,
-        $count
-    );
-
-    if (!$count) {
-        $s .= "\n" . $line;
+foreach ($defaults as $key => $value) {
+    if (!preg_match("/^" . preg_quote($key, "/") . "=/m", $s)) {
+        $s .= "\n" . $key . "=" . $value;
     }
 }
 
-file_put_contents($p, $s);
+if ($s !== file_get_contents($p)) {
+    file_put_contents($p, $s);
+}
 '
 
-
 # -------------------------------------------------------
-# SQLite
+# SQLite database initialization
 # -------------------------------------------------------
 
-echo "Preparing SQLite database..."
+DB_DRIVER=$(php -r '
+foreach (file(".env") as $line) {
+    if (preg_match("/^DB_CONNECTION=(.*)$/", trim($line), $m)) {
+        echo trim($m[1], "\"\047");
+        break;
+    }
+}
+')
 
-mkdir -p database
+if [ "$DB_DRIVER" = "sqlite" ]; then
+    echo "Preparing SQLite database..."
+    mkdir -p database
 
-if [ ! -f database/database.sqlite ]; then
-    touch database/database.sqlite
+    if [ ! -f database/database.sqlite ]; then
+        touch database/database.sqlite
+    fi
 fi
 
 
@@ -178,31 +138,19 @@ chown -R www-data:www-data \
 
 echo "Clearing Laravel caches..."
 
-php artisan optimize:clear \
-    --no-interaction \
-    >/dev/null 2>&1 || true
+if ! php artisan optimize:clear --no-interaction; then
+    echo "ERROR: Laravel cache clearing failed." >&2
+    exit 1
+fi
 
 
 # -------------------------------------------------------
-# Database Bootstrap
+# Bootstrap readiness check
 # -------------------------------------------------------
 
 if [ "${1:-}" = "bootstrap" ]; then
-
-    echo "=============================================="
-    echo " Running database migrations"
-    echo "=============================================="
-
-    php artisan migrate \
-        --force \
-        --no-interaction
-
-    echo "=============================================="
-    echo " Database migration completed"
-    echo "=============================================="
-
     echo "Bootstrap completed successfully."
-
+    echo "Database migrations must be run separately."
     exit 0
 fi
 
