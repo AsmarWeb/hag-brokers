@@ -24,6 +24,16 @@
                         </x-nav-link>
                     @endauth
 
+                    @auth
+                        <x-nav-link :href="route('notifications.index')"
+                            :active="request()->routeIs('notifications.*')">
+                            {{ app()->getLocale() === 'ar' ? 'الإشعارات' : 'Notifications' }}
+                            @if (Auth::user()->unreadNotifications()->exists())
+                                <span class="ms-1 inline-block h-2 w-2 rounded-full bg-cyan-500"></span>
+                            @endif
+                        </x-nav-link>
+                    @endauth
+
                     <x-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
                         {{ app()->getLocale() === 'ar' ? 'الفرص' : 'Opportunities' }}
                     </x-nav-link>
@@ -176,6 +186,13 @@
 
 
             {{-- Opportunities --}}
+            @auth
+                <x-responsive-nav-link :href="route('notifications.index')"
+                    :active="request()->routeIs('notifications.*')">
+                    {{ app()->getLocale() === 'ar' ? 'الإشعارات' : 'Notifications' }}
+                </x-responsive-nav-link>
+            @endauth
+
             <x-responsive-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
                 {{ app()->getLocale() === 'ar' ? 'الفرص' : 'Opportunities' }}
             </x-responsive-nav-link>
