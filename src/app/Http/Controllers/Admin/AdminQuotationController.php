@@ -43,8 +43,17 @@ class AdminQuotationController extends Controller
             ->paginate(20)
             ->withQueryString();
 
+        $quotationStats = [
+            'total' => Quotation::count(),
+            'pending' => Quotation::where('status', 'pending')->count(),
+            'processing' => Quotation::where('status', 'processing')->count(),
+            'approved' => Quotation::where('status', 'approved')->count(),
+            'completed' => Quotation::where('status', 'completed')->count(),
+        ];
+
         return view('admin.quotations.index', [
             'quotations' => $quotations,
+            'quotationStats' => $quotationStats,
         ]);
     }
 

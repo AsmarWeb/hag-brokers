@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Customer;
 use App\Models\Quotation;
+use App\Models\Role;
+use App\Notifications\AdminPlatformNotification;
+use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -192,6 +195,119 @@ class QuotationFeatureTest extends TestCase
             ->assertSessionHasErrors('customer');
 
         $this->assertDatabaseCount('quotations', 0);
+    }
+
+
+
+    public function test_admin_receives_new_quotation_notification(): void
+    {
+        Notification::fake();
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        $role = Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'Administrator']
+        );
+
+        $admin->addRole($role);
+
+        $customer = $this->customerUser('notify-admin');
+        $payload = $this->validPayload();
+
+        $this->actingAs($customer)
+            ->post(route('quotations.store'), $payload)
+            ->assertSessionHasNoErrors();
+
+        Notification::assertSentTo(
+            $admin,
+            AdminPlatformNotification::class,
+            fn ($notification) =>
+                $notification->type === 'quotation.created'
+        );
+    }
+
+    public function test_customer_receives_status_change_notification_only_once(): void
+    {
+        Notification::fake();
+
+        $customer = $this->customerUser('notify-status');
+        $payload = $this->validPayload();
+
+        $quotation = $this->quotationFor(
+            $customer,
+            $payload,
+            'QT-2026-STATUS-TEST'
+        );
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        $role = Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'Administrator']
+        );
+
+        $admin->addRole($role);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.quotations.status', $quotation), [
+                'status' => 'processing',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('processing', $quotation->fresh()->status);
+
+        Notification::assertSentToTimes(
+            $customer,
+            AdminPlatformNotification::class,
+            1
+        );
+
+        $this->actingAs($admin)
+            ->patch(route('admin.quotations.status', $quotation), [
+                'status' => 'processing',
+            ])
+            ->assertSessionHasNoErrors();
+
+        Notification::assertSentToTimes(
+            $customer,
+            AdminPlatformNotification::class,
+            1
+        );
+    }
+
+    public function test_admin_quotation_dashboard_receives_summary_statistics(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        $role = Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'Administrator']
+        );
+
+        $admin->addRole($role);
+
+        $this->actingAs($admin)
+            ->get(route('admin.quotations.index'))
+            ->assertOk()
+            ->assertViewHas('quotationStats', function ($stats) {
+                return isset(
+                    $stats['total'],
+                    $stats['pending'],
+                    $stats['processing'],
+                    $stats['approved'],
+                    $stats['completed']
+                );
+            });
     }
 
 
