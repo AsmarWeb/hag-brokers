@@ -329,6 +329,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'approve',
         ])->name('quotations.final-pdf.approve');
 
+        Route::post('/quotations/{quotation}/final-pdf/{document}/send', [
+            \App\Http\Controllers\Admin\AdminQuotationDeliveryController::class,
+            'store',
+        ])->name('quotations.final-pdf.send');
+
 
 
 

@@ -251,9 +251,50 @@
                             </button>
                         </form>
                     @elseif ($finalQuotationDocument->status === 'active')
-                        <p class="mt-3 text-sm font-semibold text-emerald-700">
-                            Approved for publishing — not emailed yet.
-                        </p>
+                        @if ($finalQuotationDelivery)
+                            <p class="mt-3 text-sm font-semibold">
+                                Email status: {{ ucfirst($finalQuotationDelivery->status) }}
+                            </p>
+                            <p class="text-sm text-slate-500">
+                                Recipient: {{ $finalQuotationDelivery->recipient_email }}
+                            </p>
+                            @if ($finalQuotationDelivery->failed_at)
+                                <p class="text-sm text-red-600">
+                                    Delivery failed. Review the queue log before retrying.
+                                </p>
+                            @endif
+                        @else
+                            <form method="POST"
+                                  class="mt-3 space-y-3"
+                                  action="{{ route(
+                                      'admin.quotations.final-pdf.send',
+                                      [$quotation, $finalQuotationDocument]
+                                  ) }}">
+                                @csrf
+
+                                <label class="block text-sm font-semibold">
+                                    Customer recipient
+                                </label>
+
+                                <select name="recipient_user_id"
+                                        required
+                                        class="w-full rounded-xl border-slate-300">
+                                    <option value="">Select recipient</option>
+                                    @foreach ($quotation->customer?->users ?? [] as $recipient)
+                                        @if (filter_var($recipient->email, FILTER_VALIDATE_EMAIL))
+                                            <option value="{{ $recipient->id }}">
+                                                {{ $recipient->name }} — {{ $recipient->email }}
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                </select>
+
+                                <button type="submit"
+                                        class="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white">
+                                    Queue Final Quotation Email
+                                </button>
+                            </form>
+                        @endif
                     @endif
 
                     @error('approval')
