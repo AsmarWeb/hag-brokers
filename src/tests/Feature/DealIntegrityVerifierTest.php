@@ -218,20 +218,119 @@ class DealIntegrityVerifierTest extends TestCase
         );
     }
 
-    public function test_unhashed_platform_revenue_change_is_not_detected(): void
+    public function test_v2_platform_revenue_tampering_is_detected(): void
     {
         $deal = $this->approvedDeal();
+
+        $agreement = $deal->agreements()
+            ->where('status', 'approved')
+            ->sole();
+
+        $this->assertSame(2, (int) $agreement->integrity_version);
 
         DB::table('deals')
             ->where('id', $deal->id)
             ->update(['platform_revenue' => '9999.00']);
 
-        // Documents a known limitation of the original hash.
+        $this->assertIssue(
+            $deal,
+            'agreement_hash_mismatch'
+        );
+    }
+
+    public function test_v2_customer_tampering_is_detected(): void
+    {
+        $deal = $this->approvedDeal();
+
+        $customer = Customer::create([
+            'company_name' => 'Unauthorized Customer',
+            'country_code' => 'AE',
+        ]);
+
+        DB::table('deals')
+            ->where('id', $deal->id)
+            ->update(['customer_id' => $customer->id]);
+
+        $this->assertIssue(
+            $deal,
+            'agreement_hash_mismatch'
+        );
+    }
+
+    public function test_legacy_v1_approved_agreement_still_verifies(): void
+    {
+        $deal = $this->approvedDeal();
+
+        $agreement = $deal->agreements()
+            ->where('status', 'approved')
+            ->sole();
+
+        $commission = $deal->commissions()->sole();
+
+        $legacySnapshot = (
+            new \App\Services\Revenue\FinancialSnapshotBuilder()
+        )->legacy(
+            $deal,
+            $agreement,
+            (string) $commission->amount,
+            $commission->rate_bps
+        );
+
+        $legacyHash = hash('sha256', $legacySnapshot);
+
+        DB::table('deal_agreements')
+            ->where('id', $agreement->id)
+            ->update([
+                'integrity_version' => 1,
+                'content_sha256' => $legacyHash,
+            ]);
+
+        $audit = DealAudit::query()
+            ->where('deal_id', $deal->id)
+            ->sole();
+
+        $payload = $audit->payload;
+        $payload['agreement_sha256'] = $legacyHash;
+
+        $serialized = json_encode(
+            $payload,
+            JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+        );
+
+        DB::table('deal_audits')
+            ->where('id', $audit->id)
+            ->update([
+                'payload' => $serialized,
+                'payload_sha256' => hash('sha256', $serialized),
+            ]);
+
         $result = $this->verify($deal);
 
         $this->assertTrue(
             $result['valid'],
             implode(', ', $result['issues'])
         );
+
+        // V1 intentionally does not cover this field.
+        DB::table('deals')
+            ->where('id', $deal->id)
+            ->update(['platform_revenue' => '9999.00']);
+
+        $this->assertTrue($this->verify($deal)['valid']);
     }
+
+    public function test_unknown_integrity_version_is_rejected(): void
+    {
+        $deal = $this->approvedDeal();
+
+        DB::table('deal_agreements')
+            ->where('deal_id', $deal->id)
+            ->update(['integrity_version' => 99]);
+
+        $this->assertIssue(
+            $deal,
+            'financial_snapshot_invalid'
+        );
+    }
+
 }

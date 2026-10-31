@@ -112,29 +112,16 @@ final class DealApprovalService
                 ]);
             }
 
-            $snapshot = json_encode([
-                'deal_id' => $lockedDeal->getKey(),
-                'agreement_id' => $lockedAgreement->getKey(),
-                'version' => $lockedAgreement->version,
-                'collection_model' => $lockedDeal->collection_model,
-                'currency' => $lockedDeal->currency,
-                'deal_amount' => $calculator->fixed($basis),
-                'supplier_cost' => $cost === null
-                    ? null
-                    : $calculator->fixed($cost),
-                'fee_kind' => $kind,
-                'commission_bps' => $rate,
-                'fixed_fee' => $lockedAgreement->fixed_fee === null
-                    ? null
-                    : $calculator->fixed(
-                        (string) $lockedAgreement->fixed_fee
-                    ),
-                'terms' => $lockedAgreement->terms,
-                'commission_amount' => $amount,
-            ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            $snapshot = (new FinancialSnapshotBuilder())->version2(
+                $lockedDeal,
+                $lockedAgreement,
+                $amount,
+                $rate
+            );
 
             $lockedAgreement->forceFill([
                 'status' => 'approved',
+                'integrity_version' => 2,
                 'content_sha256' => hash('sha256', $snapshot),
                 'approved_by' => $actorId,
                 'approved_at' => now(),
