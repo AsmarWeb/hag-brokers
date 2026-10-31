@@ -324,6 +324,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'store',
         ])->name('quotations.final-pdf.store');
 
+        Route::patch('/quotations/{quotation}/final-pdf/{document}/approve', [
+            \App\Http\Controllers\Admin\AdminFinalQuotationApprovalController::class,
+            'approve',
+        ])->name('quotations.final-pdf.approve');
+
 
 
 

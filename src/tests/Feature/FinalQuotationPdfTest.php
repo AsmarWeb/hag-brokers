@@ -191,4 +191,107 @@ class FinalQuotationPdfTest extends TestCase
 
         $this->assertDatabaseCount('documents', 0);
     }
+
+    public function test_admin_approves_draft_pdf_without_sending(): void
+    {
+        $this->template();
+        $quotation = $this->quotation(true);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post(route('admin.quotations.final-pdf.store', $quotation))
+            ->assertSessionHasNoErrors();
+
+        $document = Document::firstOrFail();
+
+        $this->actingAs($admin)
+            ->patch(route('admin.quotations.final-pdf.approve', [
+                $quotation, $document,
+            ]))
+            ->assertRedirect(route('admin.documents.versions', $document))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('active', $document->fresh()->status);
+
+        $this->assertDatabaseHas('quotation_history', [
+            'quotation_id' => $quotation->id,
+            'user_id' => $admin->id,
+            'event' => 'final_pdf_approved',
+        ]);
+    }
+
+    public function test_cannot_approve_pdf_twice(): void
+    {
+        $this->template();
+        $quotation = $this->quotation(true);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post(route('admin.quotations.final-pdf.store', $quotation))
+            ->assertSessionHasNoErrors();
+
+        $document = Document::firstOrFail();
+        $url = route('admin.quotations.final-pdf.approve', [
+            $quotation, $document,
+        ]);
+
+        $this->actingAs($admin)->patch($url)->assertSessionHasNoErrors();
+        $this->actingAs($admin)->patch($url)->assertSessionHasErrors('approval');
+
+        $this->assertSame(
+            1,
+            \Illuminate\Support\Facades\DB::table('quotation_history')
+                ->where('event', 'final_pdf_approved')
+                ->count()
+        );
+    }
+
+    public function test_customer_cannot_approve_pdf(): void
+    {
+        $this->template();
+        $quotation = $this->quotation(true);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post(route('admin.quotations.final-pdf.store', $quotation))
+            ->assertSessionHasNoErrors();
+
+        $document = Document::firstOrFail();
+
+        $customer = User::factory()->create([
+            'role' => 'customer',
+            'email_verified_at' => now(),
+        ]);
+
+        $this->actingAs($customer)
+            ->patch(route('admin.quotations.final-pdf.approve', [
+                $quotation, $document,
+            ]))
+            ->assertForbidden();
+
+        $this->assertSame('draft', $document->fresh()->status);
+    }
+
+    public function test_missing_pdf_cannot_be_approved(): void
+    {
+        $this->template();
+        $quotation = $this->quotation(true);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post(route('admin.quotations.final-pdf.store', $quotation))
+            ->assertSessionHasNoErrors();
+
+        $document = Document::firstOrFail();
+        Storage::disk('local')->delete($document->file_path);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.quotations.final-pdf.approve', [
+                $quotation, $document,
+            ]))
+            ->assertSessionHasErrors('approval');
+
+        $this->assertSame('draft', $document->fresh()->status);
+    }
+
 }

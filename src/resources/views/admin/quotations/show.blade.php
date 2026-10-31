@@ -234,6 +234,31 @@
                        class="inline-flex rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white">
                         View Generated PDF
                     </a>
+
+                    @if ($finalQuotationDocument->status === 'draft')
+                        <form method="POST"
+                              class="mt-3"
+                              action="{{ route(
+                                  'admin.quotations.final-pdf.approve',
+                                  [$quotation, $finalQuotationDocument]
+                              ) }}">
+                            @csrf
+                            @method('PATCH')
+
+                            <button type="submit"
+                                    class="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white">
+                                Approve PDF for Publishing
+                            </button>
+                        </form>
+                    @elseif ($finalQuotationDocument->status === 'active')
+                        <p class="mt-3 text-sm font-semibold text-emerald-700">
+                            Approved for publishing — not emailed yet.
+                        </p>
+                    @endif
+
+                    @error('approval')
+                        <p class="mt-3 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 @else
                     <form method="POST"
                           action="{{ route('admin.quotations.final-pdf.store', $quotation) }}">
