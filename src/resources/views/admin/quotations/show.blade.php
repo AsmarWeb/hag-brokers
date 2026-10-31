@@ -216,6 +216,41 @@
             </div>
         @endif
 
+
+        {{-- Final Quotation PDF --}}
+        @if ($quotation->approved_offer_id !== null)
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="mb-2 text-lg font-bold text-slate-900">
+                    Final Quotation PDF
+                </h2>
+
+                <p class="mb-4 text-sm text-slate-500">
+                    Generate an internal draft PDF using the approved customer
+                    price. It will not be emailed to the customer.
+                </p>
+
+                @if ($finalQuotationDocument)
+                    <a href="{{ route('admin.documents.versions', $finalQuotationDocument) }}"
+                       class="inline-flex rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white">
+                        View Generated PDF
+                    </a>
+                @else
+                    <form method="POST"
+                          action="{{ route('admin.quotations.final-pdf.store', $quotation) }}">
+                        @csrf
+                        <button type="submit"
+                                class="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white">
+                            Generate Final Quotation PDF
+                        </button>
+                    </form>
+                @endif
+
+                @error('pdf')
+                    <p class="mt-3 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+        @endif
+
         {{-- Carrier Offers --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <h2 class="mb-2 text-lg font-bold text-slate-900">Carrier Offers</h2>

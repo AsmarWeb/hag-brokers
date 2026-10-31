@@ -87,6 +87,11 @@ class AdminQuotationController extends Controller
             ->get(['id', 'name']);
 
         return view('admin.quotations.show', [
+            'finalQuotationDocument' => \App\Models\Document::query()
+                ->where('documentable_type', 'quotation')
+                ->where('documentable_id', $quotation->id)
+                ->where('type', 'final_quotation')
+                ->first(),
             'carriers' => $carriers,
             'quotation' => $quotation,
             'staff' => $staff,
