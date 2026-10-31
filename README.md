@@ -1,9 +1,9 @@
 # HAG Brokers — Digital Freight & Commercial Brokerage Platform
 
 منصة HAG Brokers للوساطة التجارية والشحن البحري وإدارة الفرص والصفقات.
-**HAG Brokers** is an open-source Laravel foundation for maritime freight quotations, brokerage opportunities, documents, workflow approval, and planned revenue operations.
+**HAG Brokers** is a proprietary commercial Laravel platform for maritime freight quotations, brokerage opportunities, documents, workflow approval, and planned revenue operations.
 
-> **Status:** Active development, not production-ready. Phase 9A adds revenue schema and deterministic calculation tools; it does not activate payments or customer billing.
+> **Status:** Active development, not production-ready. Phases 9A and 9B provide the revenue foundation, deal creation, agreement approval, pending commissions, financial audit records, and initial access controls. Payment collection and customer billing are not active.
 
 ## Features
 
@@ -12,7 +12,9 @@
 - Opportunities for commercial and vessel/yacht brokerage
 - Customers, carriers, shipments, ports, documents and versioning
 - Admin dashboard, bilingual Arabic / English UI, notifications
-- Phase 9A: additive deal/agreements/commissions schema and fee calculator; payments are planned
+- Phase 9A: deal, agreement and commission database foundation with deterministic fee calculations
+- Phase 9B: approved quotation to deal conversion, agreement drafts and approval, pending commissions, audit logging and financial authorization
+- Future development: financial security hardening, management interfaces, invoicing, payments and revenue reporting
 
 ## Stack
 
@@ -39,10 +41,12 @@ docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE
 
 **Do not run migrations or seeders on existing databases without backups and a review.** The payment gateway and revenue collection flow are not live. The final-quotation delivery feature remains disabled by default (`HAG_FINAL_QUOTATION_DELIVERY_ENABLED=false`).
 
-## Community and security
+## Internal development and security
 
-See [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security](SECURITY.md), and [License](LICENSE). Please do not publish credentials or customer data in issues.
+HAG Brokers is proprietary software owned by HAG Brokers, subject to applicable law and third-party rights. It is not an open-source project. Access, development, reuse and distribution require company authorization.
+
+See [Internal Development Guidelines](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security](SECURITY.md), and [Proprietary License](LICENSE). Never publish source code, credentials, financial records or customer data without authorization.
 
 ## Brand and repository name
 
-Brand: **HAG Brokers**. Repository slug may be renamed to `hag-brokers` in GitHub Settings → General → Repository name; update remote URLs and deployment integration references after the rename.
+Brand: **HAG Brokers**. GitHub repository: `AsmarWeb/hag-brokers`. The repository is intended for private, authorized company development.
