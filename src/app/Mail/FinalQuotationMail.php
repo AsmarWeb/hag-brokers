@@ -12,8 +12,12 @@ class FinalQuotationMail extends Mailable
 
     public function __construct(
         public string $quotationId,
-        public string $pdf
-    ) {}
+        string $pdf
+    ) {
+        $this->pdfBase64 = base64_encode($pdf);
+    }
+
+    public string $pdfBase64;
 
     public function build(): static
     {
@@ -27,7 +31,7 @@ class FinalQuotationMail extends Mailable
                 . '<p>HAG Brokers</p>'
             )
             ->attachData(
-                $this->pdf,
+                base64_decode($this->pdfBase64, true),
                 'HAG-Freight-Quotation.pdf',
                 ['mime' => 'application/pdf']
             );
