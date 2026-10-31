@@ -304,6 +304,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'updateStatus',
         ])->name('quotations.status');
 
+        Route::patch('/quotations/{quotation}/assign', [
+            AdminQuotationController::class,
+            'assign',
+        ])->name('quotations.assign');
+
 
         Route::get('/settings', [AdminSettingController::class, 'edit'])
             ->name('settings.edit');
