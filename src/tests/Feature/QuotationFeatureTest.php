@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Customer;
 use App\Models\Quotation;
+use App\Mail\QuotationAlertMail;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Role;
 use App\Notifications\AdminPlatformNotification;
 use Illuminate\Support\Facades\Notification;
@@ -308,6 +310,40 @@ class QuotationFeatureTest extends TestCase
                     $stats['completed']
                 );
             });
+    }
+
+
+
+    public function test_quotation_email_is_queued_when_enabled(): void
+    {
+        Mail::fake();
+        Notification::fake();
+
+        config(['quotation_alerts.email_enabled' => true]);
+
+        $admin = User::factory()->create([
+            'role' => 'admin',
+            'email_verified_at' => now(),
+        ]);
+
+        $role = Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'Administrator']
+        );
+
+        $admin->addRole($role);
+
+        $customer = $this->customerUser('email-alert');
+        $payload = $this->validPayload();
+
+        $this->actingAs($customer)
+            ->post(route('quotations.store'), $payload)
+            ->assertSessionHasNoErrors();
+
+        Mail::assertQueued(
+            QuotationAlertMail::class,
+            fn ($mail) => $mail->hasTo($admin->email)
+        );
     }
 
 
