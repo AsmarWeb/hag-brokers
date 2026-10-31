@@ -117,6 +117,62 @@
         </div>
 
 
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="mb-4 text-lg font-bold text-slate-900">Assigned Staff</h2>
+
+            <form method="POST" action="{{ route('admin.quotations.assign', $quotation) }}"
+                  class="flex flex-col gap-3 sm:flex-row">
+                @csrf
+                @method('PATCH')
+
+                <select name="assigned_to" required
+                        class="w-full rounded-xl border-slate-300">
+                    <option value="">Select staff member</option>
+                    @foreach ($staff as $person)
+                        <option value="{{ $person->id }}"
+                            @selected(old('assigned_to', $quotation->assigned_to) == $person->id)>
+                            {{ $person->name }} — {{ $person->email }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button type="submit"
+                        class="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white">
+                    Assign
+                </button>
+            </form>
+
+            @error('assigned_to')
+                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 class="mb-4 text-lg font-bold text-slate-900">Activity History</h2>
+
+            <div class="space-y-3">
+                @forelse ($history as $event)
+                    <div class="rounded-xl border border-slate-100 p-4">
+                        <p class="font-semibold">
+                            {{ ucwords(str_replace('_', ' ', $event->event)) }}
+                        </p>
+                        <p class="text-sm text-slate-600">
+                            {{ $event->old_value ?? '—' }}
+                            →
+                            {{ $event->new_value ?? '—' }}
+                        </p>
+                        <p class="mt-1 text-xs text-slate-500">
+                            {{ $historyUsers[$event->user_id] ?? 'System' }}
+                            · {{ $event->created_at }}
+                        </p>
+                    </div>
+                @empty
+                    <p class="text-sm text-slate-500">No activity recorded yet.</p>
+                @endforelse
+            </div>
+        </div>
+
         {{-- Status Update --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 

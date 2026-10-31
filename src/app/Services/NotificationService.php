@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Mail\QuotationAlertMail;
 use App\Notifications\AdminPlatformNotification;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 
 class NotificationService
 {
@@ -88,5 +90,19 @@ class NotificationService
                 extra: $extra,
             )
         );
+
+        if (
+            config('quotation_alerts.email_enabled', false)
+            && str_starts_with($type, 'quotation.')
+            && filter_var($user->email, FILTER_VALIDATE_EMAIL)
+        ) {
+            try {
+                Mail::to($user->email)->queue(
+                    new QuotationAlertMail($title, $message, $url)
+                );
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
     }
 }

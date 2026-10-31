@@ -34,6 +34,26 @@
         </div>
 
 
+
+        <div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
+            @foreach ([
+                'total' => ['Total Requests', 'text-slate-900'],
+                'pending' => ['Pending', 'text-amber-600'],
+                'processing' => ['Processing', 'text-blue-600'],
+                'approved' => ['Approved', 'text-emerald-600'],
+                'completed' => ['Completed', 'text-indigo-600'],
+            ] as $key => [$label, $color])
+                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {{ $label }}
+                    </p>
+                    <p class="mt-3 text-3xl font-black {{ $color }}">
+                        {{ $quotationStats[$key] }}
+                    </p>
+                </div>
+            @endforeach
+        </div>
+
         {{-- Filters --}}
         <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
