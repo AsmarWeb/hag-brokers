@@ -13,6 +13,24 @@ class Deal extends Model {
                     'Financial record is immutable.'
                 );
             }
+
+            $financialFields = [
+                'customer_id',
+                'quotation_id',
+                'opportunity_id',
+                'collection_model',
+                'currency',
+                'deal_amount',
+                'supplier_cost',
+                'platform_revenue',
+            ];
+
+            if ($record->isDirty($financialFields)
+                && $record->agreements()->exists()) {
+                throw new \LogicException(
+                    'Deal financial terms are locked after agreement creation.'
+                );
+            }
         });
 
         static::deleting(function (self $record): void {
