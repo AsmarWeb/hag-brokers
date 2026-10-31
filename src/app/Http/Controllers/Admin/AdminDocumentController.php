@@ -51,6 +51,13 @@ class AdminDocumentController extends Controller
 
         return view('admin.documents.index', [
             'documents' => $documents,
+
+            'types' => Document::query()
+                ->whereNotNull('type')
+                ->where('type', '!=', '')
+                ->distinct()
+                ->orderBy('type')
+                ->pluck('type'),
         ]);
     }
 
@@ -766,6 +773,4 @@ class AdminDocumentController extends Controller
             ->route('admin.documents.index')
             ->with('success', 'PDF document generated successfully.');
     }
-
-
 }

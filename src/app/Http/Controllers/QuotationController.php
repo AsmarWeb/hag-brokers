@@ -33,7 +33,11 @@ class QuotationController extends Controller
      */
     public function create(): View
     {
-        return view('quotations.create');
+        $ports = \App\Models\Port::query()
+            ->orderBy('name')
+            ->get();
+
+        return view('quotations.create', ['ports' => $ports]);
     }
 
     /**

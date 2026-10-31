@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -160,4 +162,10 @@ class Opportunity extends Model
             OpportunityMedia::class
         )->orderBy('sort_order');
     }
+
+    public function vessel(): HasOne
+    {
+        return $this->hasOne(OpportunityVessel::class);
+    }
+
 }
