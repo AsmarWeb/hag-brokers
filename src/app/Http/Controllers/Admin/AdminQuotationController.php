@@ -79,7 +79,23 @@ class AdminQuotationController extends Controller
             $history->pluck('user_id')->filter()->unique()->all()
         )->pluck('name', 'id');
 
+        $quotation->load(['offers.carrier']);
+
+        $carriers = \App\Models\Carrier::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
         return view('admin.quotations.show', [
+            'finalQuotationDelivery' => \Illuminate\Support\Facades\DB::table('quotation_deliveries')
+                ->where('quotation_id', $quotation->id)
+                ->first(),
+            'finalQuotationDocument' => \App\Models\Document::query()
+                ->where('documentable_type', 'quotation')
+                ->where('documentable_id', $quotation->id)
+                ->where('type', 'final_quotation')
+                ->first(),
+            'carriers' => $carriers,
             'quotation' => $quotation,
             'staff' => $staff,
             'history' => $history,

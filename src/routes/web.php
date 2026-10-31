@@ -309,6 +309,33 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             'assign',
         ])->name('quotations.assign');
 
+        Route::post('/quotations/{quotation}/offers', [
+            \App\Http\Controllers\Admin\AdminQuotationOfferController::class,
+            'store',
+        ])->name('quotations.offers.store');
+
+        Route::patch('/quotations/{quotation}/offers/{offer}/approve', [
+            \App\Http\Controllers\Admin\AdminQuotationOfferController::class,
+            'approve',
+        ])->name('quotations.offers.approve');
+
+        Route::post('/quotations/{quotation}/final-pdf', [
+            \App\Http\Controllers\Admin\AdminFinalQuotationPdfController::class,
+            'store',
+        ])->name('quotations.final-pdf.store');
+
+        Route::patch('/quotations/{quotation}/final-pdf/{document}/approve', [
+            \App\Http\Controllers\Admin\AdminFinalQuotationApprovalController::class,
+            'approve',
+        ])->name('quotations.final-pdf.approve');
+
+        Route::post('/quotations/{quotation}/final-pdf/{document}/send', [
+            \App\Http\Controllers\Admin\AdminQuotationDeliveryController::class,
+            'store',
+        ])->name('quotations.final-pdf.send');
+
+
+
 
         Route::get('/settings', [AdminSettingController::class, 'edit'])
             ->name('settings.edit');
