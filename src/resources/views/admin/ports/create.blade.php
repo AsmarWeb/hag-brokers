@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div>
             <h2 class="text-2xl font-black text-white">
-                Add Port
+                {{ __('admin_ui.label_084') }}
             </h2>
 
             <p class="mt-1 text-sm text-slate-400">
-                Add a new port to HAG Brokers.
+                {{ __('admin_ui.label_087') }}
             </p>
         </div>
     </x-slot>
@@ -27,12 +27,12 @@
 
                 <a href="{{ route('admin.ports.index') }}"
                     class="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-white">
-                    Cancel
+                    {{ __('admin_ui.label_007') }}
                 </a>
 
                 <button type="submit"
                     class="rounded-xl bg-cyan-400 px-6 py-3 text-sm font-black text-slate-950 hover:bg-cyan-300">
-                    Save Port
+                    {{ __('admin_ui.label_085') }}
                 </button>
 
             </div>

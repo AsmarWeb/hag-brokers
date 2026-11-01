@@ -13,7 +13,7 @@
         <div>
 
             <a href="{{ route('admin.users.show', $user) }}"
-                class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600">
+                class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-cyan-600">
 
                 ← {{ $isAr ? 'العودة إلى المستخدم' : 'Back to User' }}
 
@@ -22,7 +22,7 @@
             <div class="mt-5 flex items-center gap-4">
 
                 <div
-                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-lg font-bold text-blue-700">
+                    class="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-50 text-lg font-bold text-cyan-700">
 
                     {{ strtoupper(substr($user->name ?: 'U', 0, 1)) }}
 
@@ -30,15 +30,15 @@
 
                 <div>
 
-                    <p class="text-sm font-medium text-blue-600">
+                    <p class="text-sm font-medium text-cyan-600">
                         HAG Brokers
                     </p>
 
-                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         {{ $isAr ? 'تعديل المستخدم' : 'Edit User' }}
                     </h1>
 
-                    <p class="text-sm text-slate-500">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
                         {{ $user->name }} · {{ $user->email }}
                     </p>
 
@@ -74,9 +74,9 @@
 
 
             {{-- Account --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
 
-                <h2 class="text-lg font-bold text-slate-900">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white">
                     {{ $isAr ? 'معلومات الحساب' : 'Account Information' }}
                 </h2>
 
@@ -84,36 +84,36 @@
 
                     <div>
 
-                        <label class="text-sm font-semibold text-slate-700">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             {{ $isAr ? 'الاسم' : 'Name' }}
                         </label>
 
                         <input type="text" name="name" value="{{ old('name', $user->name) }}" required
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100">
 
                     </div>
 
 
                     <div>
 
-                        <label class="text-sm font-semibold text-slate-700">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             {{ $isAr ? 'البريد الإلكتروني' : 'Email' }}
                         </label>
 
                         <input type="email" name="email" value="{{ old('email', $user->email) }}" required
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100">
 
                     </div>
 
 
                     <div>
 
-                        <label class="text-sm font-semibold text-slate-700">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             {{ $isAr ? 'كلمة مرور جديدة' : 'New Password' }}
                         </label>
 
                         <input type="password" name="password"
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100">
 
                         <p class="mt-1 text-xs text-slate-400">
                             {{ $isAr ? 'اتركها فارغة للإبقاء على كلمة المرور الحالية.' : 'Leave empty to keep the current password.' }}
@@ -124,24 +124,24 @@
 
                     <div>
 
-                        <label class="text-sm font-semibold text-slate-700">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             {{ $isAr ? 'تأكيد كلمة المرور' : 'Confirm Password' }}
                         </label>
 
                         <input type="password" name="password_confirmation"
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100">
 
                     </div>
 
 
                     <div class="sm:col-span-2">
 
-                        <label class="text-sm font-semibold text-slate-700">
+                        <label class="text-sm font-semibold text-slate-700 dark:text-slate-200">
                             {{ $isAr ? 'العميل المرتبط' : 'Customer Assignment' }}
                         </label>
 
                         <select name="customer_id"
-                            class="mt-2 block w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100">
 
                             <option value="">
                                 {{ $isAr ? 'بدون عميل' : 'No Customer' }}
@@ -165,17 +165,17 @@
 
 
             {{-- Roles --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
 
                 <div class="flex items-center justify-between gap-3">
 
                     <div>
 
-                        <h2 class="text-lg font-bold text-slate-900">
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">
                             {{ $isAr ? 'Roles' : 'Roles' }}
                         </h2>
 
-                        <p class="mt-1 text-sm text-slate-500">
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             {{ $isAr ? 'حدد الأدوار التي يمتلكها المستخدم.' : 'Select the roles assigned to this user.' }}
                         </p>
 
@@ -192,7 +192,7 @@
 
                     @foreach ($roles as $role)
                         <label
-                            class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-purple-300 hover:bg-purple-50">
+                            class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 p-4 transition hover:border-purple-300 hover:bg-purple-50">
 
                             <input type="checkbox" name="roles[]" value="{{ $role->id }}"
                                 @checked(in_array($role->id, old('roles', $userRoleIds)))
@@ -200,12 +200,12 @@
 
                             <span>
 
-                                <span class="block text-sm font-semibold text-slate-800">
+                                <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">
                                     {{ $role->display_name ?? $role->name }}
                                 </span>
 
                                 @if ($role->description)
-                                    <span class="mt-1 block text-xs text-slate-500">
+                                    <span class="mt-1 block text-xs text-slate-500 dark:text-slate-400">
                                         {{ $role->description }}
                                     </span>
                                 @endif
@@ -221,15 +221,15 @@
 
 
             {{-- Permissions --}}
-            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
 
                 <div>
 
-                    <h2 class="text-lg font-bold text-slate-900">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">
                         {{ $isAr ? 'الصلاحيات المباشرة' : 'Direct Permissions' }}
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $isAr
                             ? 'حدد الصلاحيات التي تريد منحها للمستخدم مباشرة.'
                             : 'Select permissions that should be assigned directly to this user.' }}
@@ -242,13 +242,13 @@
 
                     @foreach ($permissions as $permission)
                         <label
-                            class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-cyan-300 hover:bg-cyan-50">
+                            class="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-800 p-4 transition hover:border-cyan-300 hover:bg-cyan-50">
 
                             <input type="checkbox" name="permissions[]" value="{{ $permission->id }}"
                                 @checked(in_array($permission->id, old('permissions', $userPermissionIds)))
                                 class="mt-1 h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500">
 
-                            <span class="text-sm font-medium text-slate-800">
+                            <span class="text-sm font-medium text-slate-800 dark:text-slate-100">
                                 {{ $permission->display_name ?? $permission->name }}
                             </span>
 
@@ -280,7 +280,7 @@
                 <div class="flex flex-col gap-3 sm:flex-row">
 
                     <a href="{{ route('admin.users.show', $user) }}"
-                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50">
 
                         {{ $isAr ? 'إلغاء' : 'Cancel' }}
 

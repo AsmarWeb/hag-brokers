@@ -67,8 +67,7 @@
                             </div>
 
                             <span
-                                class="rounded-full px-3 py-1 text-xs font-black
-                                {{ $template->is_active ? 'bg-emerald-400/10 text-emerald-300' : 'bg-slate-700 text-slate-400' }}">
+                                class="rounded-full px-3 py-1 text-xs font-black {{ $template->is_active ? 'bg-emerald-400/10 text-emerald-300' : 'bg-slate-700 text-slate-400' }}">
                                 {{ $template->is_active ? ($isAr ? 'نشط' : 'Active') : ($isAr ? 'متوقف' : 'Inactive') }}
                             </span>
 
@@ -79,7 +78,7 @@
                             {{ $template->name }}
                         </h2>
 
-                        <p class="mt-1 text-xs text-slate-500">
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                             {{ $template->slug }}
                         </p>
 
@@ -88,7 +87,7 @@
 
                             <div class="rounded-xl bg-slate-900/70 p-3">
 
-                                <p class="text-[10px] uppercase tracking-wider text-slate-500">
+                                <p class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $isAr ? 'النوع' : 'Type' }}
                                 </p>
 
@@ -101,7 +100,7 @@
 
                             <div class="rounded-xl bg-slate-900/70 p-3">
 
-                                <p class="text-[10px] uppercase tracking-wider text-slate-500">
+                                <p class="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $isAr ? 'الإصدار' : 'Version' }}
                                 </p>
 
@@ -140,7 +139,7 @@
                             {{ $isAr ? 'لا توجد قوالب' : 'No templates yet' }}
                         </h3>
 
-                        <p class="mt-2 text-sm text-slate-500">
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                             {{ $isAr ? 'ابدأ بإنشاء أول قالب للمستندات.' : 'Create your first document template.' }}
                         </p>
 

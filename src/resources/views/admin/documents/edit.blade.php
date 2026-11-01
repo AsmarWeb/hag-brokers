@@ -152,7 +152,7 @@
                                     {{ $isAr ? 'بيانات المستند' : 'Document Details' }}
                                 </h2>
 
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $isAr ? 'تعديل معلومات المستند الأساسية' : 'Update the basic document information' }}
                                 </p>
 
@@ -234,7 +234,7 @@
                                     {{ $isAr ? 'السجل المرتبط' : 'Linked Record' }}
                                 </h2>
 
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $isAr
                                         ? 'يمكن تغيير العميل أو الشحنة أو عرض السعر المرتبط'
                                         : 'Change the customer, shipment, or quotation linked to this document' }}
@@ -330,7 +330,7 @@
                                     {{ $isAr ? 'استبدال الملف' : 'Replace File' }}
                                 </h2>
 
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $isAr
                                         ? 'اتركه فارغًا إذا كنت تريد تعديل البيانات فقط'
                                         : 'Leave empty if you only want to update document details' }}
@@ -359,7 +359,7 @@
                                                 {{ $document->original_name ?: $document->name }}
                                             </div>
 
-                                            <div class="mt-1 text-xs text-slate-500">
+                                            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 {{ $isAr ? 'الإصدار الحالي' : 'Current version' }}
                                                 v{{ $document->version ?? 1 }}
                                                 ·
@@ -397,7 +397,7 @@
                                 <div id="newFilePreview"
                                     class="mt-4 hidden rounded-xl border border-emerald-400/10 bg-emerald-400/[0.03] p-4">
                                     <div class="text-sm font-bold text-emerald-300" id="newFileName"></div>
-                                    <div class="mt-1 text-xs text-slate-500" id="newFileSize"></div>
+                                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400" id="newFileSize"></div>
                                 </div>
 
                             </div>
@@ -429,7 +429,7 @@
                                         {{ $isAr ? 'الإصدار الحالي' : 'Current Version' }}
                                     </h3>
 
-                                    <p class="text-xs text-slate-500">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
                                         {{ $isAr ? 'إدارة إصدارات المستند' : 'Document version control' }}
                                     </p>
                                 </div>
@@ -443,7 +443,7 @@
                                     v{{ $document->version ?? 1 }}
                                 </div>
 
-                                <div class="mt-2 text-xs text-slate-500">
+                                <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $isAr ? 'الإصدار النشط' : 'Active version' }}
                                 </div>
 

@@ -1,7 +1,7 @@
 <x-admin-layout>
 
     <x-slot name="header">
-        Company Settings
+        {{ __('admin_ui.label_073') }}
     </x-slot>
 
     <div class="p-6">
@@ -18,7 +18,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Company Name
+                    {{ __('admin_ui.label_074') }}
                 </label>
 
                 <input type="text" name="company_name" value="{{ old('company_name', $company->company_name) }}"
@@ -27,7 +27,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Company Name Arabic
+                    {{ __('admin_ui.label_075') }}
                 </label>
 
                 <input type="text" name="company_name_ar"
@@ -37,7 +37,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Email
+                    {{ __('admin_ui.label_033') }}
                 </label>
 
                 <input type="email" name="email" value="{{ old('email', $company->email) }}"
@@ -46,7 +46,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Phone
+                    {{ __('admin_ui.label_034') }}
                 </label>
 
                 <input type="text" name="phone" value="{{ old('phone', $company->phone) }}"
@@ -55,7 +55,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Address
+                    {{ __('admin_ui.label_076') }}
                 </label>
 
                 <textarea name="address" rows="3" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3">{{ old('address', $company->address) }}</textarea>
@@ -63,7 +63,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Logo
+                    {{ __('admin_ui.label_077') }}
                 </label>
 
                 <input type="file" name="logo" accept="image/*" class="block w-full">
@@ -76,7 +76,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Stamp
+                    {{ __('admin_ui.label_078') }}
                 </label>
 
                 <input type="file" name="stamp" accept="image/*" class="block w-full">
@@ -89,7 +89,7 @@
 
             <div>
                 <label class="block mb-2">
-                    Signature
+                    {{ __('admin_ui.label_079') }}
                 </label>
 
                 <input type="file" name="signature" accept="image/*" class="block w-full">
@@ -101,7 +101,7 @@
             </div>
 
             <button type="submit" class="rounded-xl bg-cyan-400 px-6 py-3 font-bold text-slate-950">
-                Save Company Settings
+                {{ __('admin_ui.label_080') }}
             </button>
 
         </form>

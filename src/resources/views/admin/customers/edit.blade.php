@@ -10,10 +10,10 @@
                 </div>
 
                 <h1 class="text-3xl font-black text-white">
-                    Edit Customer
+                    {{ __('admin_ui.label_057') }}
                 </h1>
 
-                <p class="mt-2 text-sm text-slate-500">
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                     Update {{ $customer->company_name }}.
                 </p>
             </div>
@@ -27,7 +27,7 @@
 
                 <a href="{{ route('admin.customers.index') }}"
                     class="rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-900 hover:text-white">
-                    Back
+                    {{ __('admin_ui.label_030') }}
                 </a>
 
             </div>

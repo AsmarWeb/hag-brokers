@@ -5,14 +5,14 @@
 
             <div>
                 <div class="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-400">
-                    Customers
+                    {{ __('admin_ui.label_031') }}
                 </div>
 
                 <h1 class="text-3xl font-black text-white">
-                    Add Customer
+                    {{ __('admin_ui.label_058') }}
                 </h1>
 
-                <p class="mt-2 text-sm text-slate-500">
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                     Create a new customer account for HAG Brokers.
                 </p>
             </div>

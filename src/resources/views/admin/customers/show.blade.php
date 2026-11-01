@@ -22,7 +22,7 @@
                         {{ $customer->company_name }}
                     </h1>
 
-                    <p class="mt-2 text-sm text-slate-500">
+                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                         {{ $customer->contact_person ?: 'No contact person' }}
                     </p>
 
@@ -34,7 +34,7 @@
 
                 <a href="{{ route('admin.customers.edit', $customer) }}"
                     class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
-                    Edit Customer
+                    {{ __('admin_ui.label_057') }}
                 </a>
 
                 <a href="{{ route('admin.customers.index') }}"
@@ -66,7 +66,7 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Users
+                    {{ __('admin_ui.label_060') }}
                 </div>
 
                 <div class="mt-2 text-3xl font-black text-white">
@@ -76,7 +76,7 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Quotations
+                    {{ __('admin_ui.label_009') }}
                 </div>
 
                 <div class="mt-2 text-3xl font-black text-white">
@@ -86,7 +86,7 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Shipments
+                    {{ __('admin_ui.label_014') }}
                 </div>
 
                 <div class="mt-2 text-3xl font-black text-white">
@@ -96,7 +96,7 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
                 <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Country
+                    {{ __('admin_ui.label_010') }}
                 </div>
 
                 <div class="mt-2 text-3xl font-black text-cyan-400">
@@ -139,7 +139,7 @@
 
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                            Email
+                            {{ __('admin_ui.label_033') }}
                         </div>
 
                         <div class="mt-1 text-sm font-semibold text-slate-200">
@@ -149,7 +149,7 @@
 
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                            Phone
+                            {{ __('admin_ui.label_034') }}
                         </div>
 
                         <div class="mt-1 text-sm font-semibold text-slate-200">
@@ -159,7 +159,7 @@
 
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                            Location
+                            {{ __('admin_ui.label_059') }}
                         </div>
 
                         <div class="mt-1 text-sm font-semibold text-slate-200">
@@ -171,7 +171,7 @@
 
                     <div>
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                            Created
+                            {{ __('admin_ui.label_018') }}
                         </div>
 
                         <div class="mt-1 text-sm font-semibold text-slate-200">
@@ -210,7 +210,7 @@
                                     {{ $user->name }}
                                 </div>
 
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $user->email }}
                                 </div>
 
@@ -242,33 +242,33 @@
             <div class="border-b border-slate-800 p-6">
 
                 <h2 class="text-lg font-black text-white">
-                    Quotations
+                    {{ __('admin_ui.label_009') }}
                 </h2>
 
             </div>
 
             <div class="overflow-x-auto">
 
-                <table class="w-full min-w-[850px] text-left">
+                <table class="w-full min-w-[850px] text-start">
 
                     <thead class="border-b border-slate-800 bg-slate-900/50">
 
                         <tr>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Reference
+                                {{ __('admin_ui.label_017') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Route
+                                {{ __('admin_ui.label_015') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Cargo
+                                {{ __('admin_ui.label_056') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Status
+                                {{ __('admin_ui.label_001') }}
                             </th>
 
                         </tr>
@@ -306,7 +306,7 @@
                                         {{ $quotation->cargo_type ?: '—' }}
                                     </div>
 
-                                    <div class="mt-1 text-xs text-slate-500">
+                                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                         {{ $quotation->container_type ?: '—' }}
                                         ·
                                         Qty {{ $quotation->quantity }}
@@ -329,7 +329,7 @@
                             <tr>
 
                                 <td colspan="4" class="px-5 py-10 text-center text-sm text-slate-600">
-                                    No quotations found.
+                                    {{ __('admin_ui.label_043') }}
                                 </td>
 
                             </tr>
@@ -349,37 +349,37 @@
             <div class="border-b border-slate-800 p-6">
 
                 <h2 class="text-lg font-black text-white">
-                    Shipments
+                    {{ __('admin_ui.label_014') }}
                 </h2>
 
             </div>
 
             <div class="overflow-x-auto">
 
-                <table class="w-full min-w-[950px] text-left">
+                <table class="w-full min-w-[950px] text-start">
 
                     <thead class="border-b border-slate-800 bg-slate-900/50">
 
                         <tr>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Shipment
+                                {{ __('admin_ui.label_023') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Route
+                                {{ __('admin_ui.label_015') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Carrier
+                                {{ __('admin_ui.label_002') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Vessel
+                                {{ __('admin_ui.label_024') }}
                             </th>
 
                             <th class="px-5 py-4 text-xs font-black uppercase text-slate-600">
-                                Status
+                                {{ __('admin_ui.label_001') }}
                             </th>
 
                         </tr>

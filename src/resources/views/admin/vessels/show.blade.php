@@ -7,10 +7,10 @@
 
             <div>
 
-                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
                     <a href="{{ route('admin.vessels.index') }}" class="hover:text-cyan-400">
-                        Vessels
+                        {{ __('admin_ui.label_148') }}
                     </a>
 
                     <span>/</span>
@@ -33,7 +33,7 @@
                             {{ $vessel->name }}
                         </h1>
 
-                        <p class="mt-1 text-sm text-slate-500">
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             Vessel #{{ $vessel->id }}
                         </p>
 
@@ -48,12 +48,12 @@
 
                 <a href="{{ route('admin.vessels.edit', $vessel) }}"
                     class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
-                    Edit Vessel
+                    {{ __('admin_ui.label_070') }}
                 </a>
 
                 <a href="{{ route('admin.vessels.index') }}"
                     class="rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                    Back
+                    {{ __('admin_ui.label_030') }}
                 </a>
 
             </div>
@@ -70,7 +70,7 @@
                 <div class="border-b border-slate-800 px-6 py-5">
 
                     <h2 class="font-black text-white">
-                        Vessel Information
+                        {{ __('admin_ui.label_071') }}
                     </h2>
 
                 </div>
@@ -78,8 +78,8 @@
                 <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2">
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Carrier
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_002') }}
                         </p>
 
                         <p class="mt-2 font-bold text-white">
@@ -89,7 +89,7 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Vessel Type
                         </p>
 
@@ -100,7 +100,7 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             IMO
                         </p>
 
@@ -111,7 +111,7 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             MMSI
                         </p>
 
@@ -122,7 +122,7 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Call Sign
                         </p>
 
@@ -133,7 +133,7 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Flag
                         </p>
 
@@ -144,8 +144,8 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Destination
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_013') }}
                         </p>
 
                         <p class="mt-2 font-bold text-white">
@@ -155,13 +155,12 @@
 
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Status
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_001') }}
                         </p>
 
                         <span
-                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold
-                        {{ $vessel->status === 'active' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-400' }}">
+                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $vessel->status === 'active' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-400' }}">
                             {{ ucfirst($vessel->status) }}
                         </span>
                     </div>
@@ -186,7 +185,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Gulf Status
                         </p>
 
@@ -200,7 +199,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Speed
                         </p>
 
@@ -213,7 +212,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Course
                         </p>
 
@@ -244,7 +243,7 @@
             <div class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-3">
 
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Latitude
                     </p>
 
@@ -254,7 +253,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Longitude
                     </p>
 
@@ -264,7 +263,7 @@
                 </div>
 
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Last Position
                     </p>
 
@@ -283,7 +282,7 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-950 p-6">
 
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Estimated Time of Arrival
                 </p>
 
@@ -294,7 +293,7 @@
                 </p>
 
                 @if ($vessel->eta)
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $vessel->eta->format('H:i') }}
                     </p>
                 @endif
@@ -304,8 +303,8 @@
 
             <div class="rounded-2xl border border-slate-800 bg-slate-950 p-6">
 
-                <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Carrier
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    {{ __('admin_ui.label_002') }}
                 </p>
 
                 <p class="mt-3 text-2xl font-black text-white">
@@ -313,7 +312,7 @@
                 </p>
 
                 @if ($vessel->carrier?->code)
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $vessel->carrier->code }}
                     </p>
                 @endif

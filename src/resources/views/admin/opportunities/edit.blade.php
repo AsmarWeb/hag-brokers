@@ -678,7 +678,7 @@
                             ) }}"
                             class="{{ $inputClass }}">
 
-                        <p class="mt-2 text-xs text-slate-500">
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                             {{ $isAr
                                 ? 'إذا كانت الفرصة عامة وموثقة ولم يتم تحديد تاريخ، سيتم تعيين تاريخ النشر تلقائياً.'
                                 : 'If the opportunity is public and verified without a date, the publication date will be set automatically.' }}

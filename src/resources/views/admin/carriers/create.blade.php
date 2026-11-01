@@ -7,22 +7,22 @@
 
             <div>
 
-                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
                     <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-400">
-                        Carriers
+                        {{ __('admin_ui.label_016') }}
                     </a>
 
                     <span>/</span>
 
                     <span class="text-slate-400">
-                        Create
+                        {{ __('admin_ui.label_064') }}
                     </span>
 
                 </div>
 
                 <h1 class="text-3xl font-black tracking-tight text-white">
-                    Add Carrier
+                    {{ __('admin_ui.label_025') }}
                 </h1>
 
                 <p class="mt-2 text-sm text-slate-400">
@@ -49,10 +49,10 @@
             <div class="border-b border-slate-800 px-6 py-5">
 
                 <h2 class="text-lg font-black text-white">
-                    Carrier Information
+                    {{ __('admin_ui.label_065') }}
                 </h2>
 
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Enter the shipping carrier's basic information.
                 </p>
 
@@ -71,7 +71,7 @@
 
                 <a href="{{ route('admin.carriers.index') }}"
                     class="rounded-xl border border-slate-700 px-6 py-3 text-center text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                    Cancel
+                    {{ __('admin_ui.label_007') }}
                 </a>
 
                 <button type="submit"

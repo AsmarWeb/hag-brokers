@@ -91,7 +91,7 @@
         <div class="relative overflow-hidden border-b border-white/5">
 
             <div class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl"></div>
-            <div class="absolute -right-24 top-0 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl"></div>
+            <div class="absolute -right-24 top-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl"></div>
 
             <div class="relative px-4 py-6 sm:px-6 lg:px-8">
 
@@ -176,7 +176,7 @@
 
                     <div class="flex items-start justify-between">
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['total'] }}
                             </p>
 
@@ -204,7 +204,7 @@
                     <div class="flex items-start justify-between">
 
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['active'] }}
                             </p>
 
@@ -232,7 +232,7 @@
                     <div class="flex items-start justify-between">
 
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['pdf'] }}
                             </p>
 
@@ -262,7 +262,7 @@
                     <div class="flex items-start justify-between">
 
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['images'] }}
                             </p>
 
@@ -287,12 +287,12 @@
 
                 {{-- Recent --}}
                 <div
-                    class="group rounded-2xl border border-white/5 bg-white/[0.035] p-4 transition hover:border-blue-400/20 hover:bg-white/[0.05]">
+                    class="group rounded-2xl border border-white/5 bg-white/[0.035] p-4 transition hover:border-cyan-400/20 hover:bg-white/[0.05]">
 
                     <div class="flex items-start justify-between">
 
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['recent'] }}
                             </p>
 
@@ -301,7 +301,7 @@
                             </p>
                         </div>
 
-                        <div class="rounded-xl bg-blue-400/10 p-2 text-blue-300">
+                        <div class="rounded-xl bg-cyan-400/10 p-2 text-cyan-300">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                                 stroke-width="1.8">
                                 <circle cx="12" cy="12" r="8" />
@@ -321,7 +321,7 @@
                     <div class="flex items-start justify-between">
 
                         <div>
-                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['templates'] }}
                             </p>
 
@@ -366,7 +366,7 @@
 
                         <div class="relative">
 
-                            <svg class="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500"
+                            <svg class="pointer-events-none absolute start-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500 dark:text-slate-400"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <circle cx="11" cy="11" r="6.5" />
                                 <path stroke-linecap="round" d="m16 16 4 4" />
@@ -546,42 +546,42 @@
                             <tr>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['document'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['type'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['linked_to'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['version'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['size'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['uploaded_by'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['status'] }}
                                 </th>
 
                                 <th
-                                    class="px-5 py-4 text-end text-xs font-black uppercase tracking-wider text-slate-500">
+                                    class="px-5 py-4 text-end text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                     {{ $t['actions'] }}
                                 </th>
 
@@ -672,7 +672,7 @@
                                                     {{ $document->name }}
                                                 </div>
 
-                                                <div class="mt-0.5 max-w-xs truncate text-xs text-slate-500">
+                                                <div class="mt-0.5 max-w-xs truncate text-xs text-slate-500 dark:text-slate-400">
                                                     {{ $document->original_name ?: '-' }}
                                                 </div>
 
@@ -719,7 +719,7 @@
                                             </span>
 
                                             @if ($document->versions->count() > 1)
-                                                <span class="text-[11px] text-slate-500">
+                                                <span class="text-[11px] text-slate-500 dark:text-slate-400">
                                                     {{ $document->versions->count() }}
                                                 </span>
                                             @endif
@@ -795,7 +795,7 @@
                                             <a href="{{ route('admin.documents.preview', $document) }}"
                                                 target="_blank" title="{{ $t['print'] }}"
                                                 onclick="setTimeout(() => {}, 100)"
-                                                class="rounded-lg p-2 text-slate-400 transition hover:bg-blue-400/10 hover:text-blue-300">
+                                                class="rounded-lg p-2 text-slate-400 transition hover:bg-cyan-400/10 hover:text-cyan-300">
                                                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                                     stroke="currentColor" stroke-width="1.8">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -903,7 +903,7 @@
                                                 {{ $t['no_documents'] }}
                                             </h3>
 
-                                            <p class="mt-2 max-w-md text-sm text-slate-500">
+                                            <p class="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
                                                 {{ $t['no_documents_hint'] }}
                                             </p>
 
@@ -1012,7 +1012,7 @@
                                                 {{ $document->name }}
                                             </h3>
 
-                                            <p class="mt-1 truncate text-xs text-slate-500">
+                                            <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
                                                 {{ $document->original_name ?: '-' }}
                                             </p>
 
@@ -1165,7 +1165,7 @@
                                 {{ $t['no_documents'] }}
                             </h3>
 
-                            <p class="mt-2 text-sm text-slate-500">
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                                 {{ $t['no_documents_hint'] }}
                             </p>
 

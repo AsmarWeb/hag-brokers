@@ -10,10 +10,10 @@
                 </div>
 
                 <h1 class="text-3xl font-black text-white">
-                    Customers
+                    {{ __('admin_ui.label_031') }}
                 </h1>
 
-                <p class="mt-2 text-sm text-slate-500">
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                     Manage HAG Brokers customers and their company accounts.
                 </p>
             </div>
@@ -51,19 +51,19 @@
 
                 <select name="status"
                     class="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none focus:border-cyan-400">
-                    <option value="">All Statuses</option>
+                    <option value="">{{ __('admin_ui.label_021') }}</option>
                     <option value="active" @selected(request('status') === 'active')>
-                        Active
+                        {{ __('admin_ui.label_006') }}
                     </option>
 
                     <option value="inactive" @selected(request('status') === 'inactive')>
-                        Inactive
+                        {{ __('admin_ui.label_012') }}
                     </option>
                 </select>
 
                 <button type="submit"
                     class="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-700">
-                    Search
+                    {{ __('admin_ui.label_008') }}
                 </button>
 
             </form>
@@ -75,34 +75,34 @@
 
             <div class="overflow-x-auto">
 
-                <table class="w-full min-w-[1000px] text-left">
+                <table class="w-full min-w-[1000px] text-start">
 
                     <thead class="border-b border-slate-800 bg-slate-900/70">
 
                         <tr>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Customer
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_005') }}
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 Contact
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Location
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_059') }}
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 Activity
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Status
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_001') }}
                             </th>
 
-                            <th class="px-5 py-4 text-right text-xs font-black uppercase tracking-wider text-slate-500">
-                                Actions
+                            <th class="px-5 py-4 text-end text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_011') }}
                             </th>
 
                         </tr>
@@ -146,7 +146,7 @@
                                         {{ $customer->contact_person ?: '—' }}
                                     </div>
 
-                                    <div class="mt-1 text-xs text-slate-500">
+                                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                         {{ $customer->email ?: 'No email' }}
                                     </div>
 
@@ -198,12 +198,12 @@
                                     @if ($customer->is_active)
                                         <span
                                             class="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">
-                                            Active
+                                            {{ __('admin_ui.label_006') }}
                                         </span>
                                     @else
                                         <span
                                             class="inline-flex rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-300">
-                                            Inactive
+                                            {{ __('admin_ui.label_012') }}
                                         </span>
                                     @endif
 
@@ -216,12 +216,12 @@
 
                                         <a href="{{ route('admin.customers.show', $customer) }}"
                                             class="rounded-lg border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                                            View
+                                            {{ __('admin_ui.label_004') }}
                                         </a>
 
                                         <a href="{{ route('admin.customers.edit', $customer) }}"
                                             class="rounded-lg border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 text-xs font-bold text-cyan-300 transition hover:bg-cyan-400/10">
-                                            Edit
+                                            {{ __('admin_ui.label_003') }}
                                         </a>
 
                                     </div>
@@ -247,13 +247,13 @@
                                             No customers found
                                         </h3>
 
-                                        <p class="mt-2 text-sm text-slate-500">
+                                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                                             Try changing your search or create a new customer.
                                         </p>
 
                                         <a href="{{ route('admin.customers.create') }}"
                                             class="mt-5 inline-flex rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950">
-                                            Add Customer
+                                            {{ __('admin_ui.label_058') }}
                                         </a>
 
                                     </div>

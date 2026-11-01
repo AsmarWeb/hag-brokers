@@ -6,18 +6,18 @@
         <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
             <div>
-                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                     <a href="{{ route('admin.vessels.index') }}" class="transition hover:text-cyan-400">
-                        Vessels
+                        {{ __('admin_ui.label_148') }}
                     </a>
 
                     <span>/</span>
 
-                    <span class="text-slate-400">Create</span>
+                    <span class="text-slate-400">{{ __('admin_ui.label_064') }}</span>
                 </div>
 
                 <h1 class="text-3xl font-black tracking-tight text-white">
-                    Add Vessel
+                    {{ __('admin_ui.label_026') }}
                 </h1>
 
                 <p class="mt-2 text-sm text-slate-400">
@@ -40,10 +40,10 @@
 
             <div class="border-b border-slate-800 px-6 py-5">
                 <h2 class="text-lg font-black text-white">
-                    Vessel Information
+                    {{ __('admin_ui.label_071') }}
                 </h2>
 
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Enter identification, carrier and tracking information.
                 </p>
             </div>
@@ -57,7 +57,7 @@
 
                 <a href="{{ route('admin.vessels.index') }}"
                     class="rounded-xl border border-slate-700 px-6 py-3 text-center text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                    Cancel
+                    {{ __('admin_ui.label_007') }}
                 </a>
 
                 <button type="submit"

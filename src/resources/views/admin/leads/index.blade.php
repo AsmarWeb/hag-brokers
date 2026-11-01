@@ -216,7 +216,7 @@
                                     </a>
 
                                     @if ($lead->email)
-                                        <div class="mt-1 text-xs text-slate-500">
+                                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             {{ $lead->email }}
                                         </div>
                                     @endif
@@ -284,7 +284,7 @@
 
                             <tr>
 
-                                <td colspan="7" class="px-5 py-14 text-center text-sm text-slate-500">
+                                <td colspan="7" class="px-5 py-14 text-center text-sm text-slate-500 dark:text-slate-400">
                                     {{ $t['no_leads'] }}
                                 </td>
 

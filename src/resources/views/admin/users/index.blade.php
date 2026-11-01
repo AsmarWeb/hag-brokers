@@ -10,15 +10,15 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
-                <p class="text-sm font-medium text-blue-600">
+                <p class="text-sm font-medium text-cyan-600">
                     HAG Brokers
                 </p>
 
-                <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+                <h1 class="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                     {{ $isAr ? 'المستخدمون' : 'Users' }}
                 </h1>
 
-                <p class="mt-1 text-sm text-slate-500">
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     {{ $isAr
                         ? 'إدارة حسابات المستخدمين والأدوار والصلاحيات والعملاء المرتبطين.'
                         : 'Manage user accounts, roles, permissions and customer assignments.' }}
@@ -28,7 +28,7 @@
             <div class="flex flex-wrap items-center gap-2">
 
                 <span
-                    class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
+                    class="inline-flex items-center rounded-full bg-cyan-50 px-3 py-1.5 text-sm font-medium text-cyan-700">
                     {{ $users->total() }}
                     {{ $isAr ? 'مستخدم' : 'Users' }}
                 </span>
@@ -65,13 +65,13 @@
 
 
         {{-- Search --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm">
 
             <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col gap-3 sm:flex-row">
 
                 <div class="relative flex-1">
 
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
                         <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -81,7 +81,7 @@
 
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="{{ $isAr ? 'البحث بالاسم أو البريد الإلكتروني...' : 'Search by name or email...' }}"
-                        class="block w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder-slate-400 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100">
+                        class="block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 ps-10 pe-4 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none transition focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100">
 
                 </div>
 
@@ -94,7 +94,7 @@
 
                 @if (request()->filled('search'))
                     <a href="{{ route('admin.users.index') }}"
-                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        class="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-50">
 
                         {{ $isAr ? 'مسح' : 'Clear' }}
 
@@ -107,44 +107,44 @@
 
 
         {{-- Users Table --}}
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
 
             {{-- Desktop --}}
             <div class="hidden overflow-x-auto md:block">
 
-                <table class="min-w-full divide-y divide-slate-200">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
 
-                    <thead class="bg-slate-50">
+                    <thead class="bg-slate-50 dark:bg-slate-950">
 
                         <tr>
 
                             <th
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'المستخدم' : 'User' }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'البريد' : 'Email' }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'الأدوار' : 'Roles' }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'الصلاحيات' : 'Permissions' }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'العميل' : 'Customer' }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-end text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'الإجراءات' : 'Actions' }}
                             </th>
 
@@ -152,7 +152,7 @@
 
                     </thead>
 
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
 
                         @forelse ($users as $user)
 
@@ -164,7 +164,7 @@
                                     <div class="flex items-center gap-3">
 
                                         <div
-                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700">
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-sm font-bold text-cyan-700">
 
                                             {{ strtoupper(substr($user->name ?: 'U', 0, 1)) }}
 
@@ -172,11 +172,11 @@
 
                                         <div>
 
-                                            <div class="font-semibold text-slate-900">
+                                            <div class="font-semibold text-slate-900 dark:text-white">
                                                 {{ $user->name ?: 'Unnamed User' }}
                                             </div>
 
-                                            <div class="text-xs text-slate-500">
+                                            <div class="text-xs text-slate-500 dark:text-slate-400">
                                                 #{{ $user->id }}
                                             </div>
 
@@ -192,7 +192,7 @@
 
                                     @if ($user->email)
                                         <a href="mailto:{{ $user->email }}"
-                                            class="text-sm text-slate-700 transition hover:text-blue-600">
+                                            class="text-sm text-slate-700 dark:text-slate-200 transition hover:text-cyan-600">
                                             {{ $user->email }}
                                         </a>
                                     @else
@@ -249,7 +249,7 @@
                                 <td class="whitespace-nowrap px-6 py-4">
 
                                     @if ($user->customer)
-                                        <div class="text-sm font-semibold text-slate-800">
+                                        <div class="text-sm font-semibold text-slate-800 dark:text-slate-100">
                                             {{ $user->customer->company_name ?? ($user->customer->name ?? 'Customer') }}
                                         </div>
 
@@ -274,12 +274,12 @@
                                     <div class="flex items-center justify-end gap-2">
 
                                         <a href="{{ route('admin.users.show', $user) }}"
-                                            class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                                            class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50">
                                             {{ $isAr ? 'عرض' : 'View' }}
                                         </a>
 
                                         <a href="{{ route('admin.users.edit', $user) }}"
-                                            class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100">
+                                            class="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700 hover:bg-cyan-100">
                                             {{ $isAr ? 'تعديل' : 'Edit' }}
                                         </a>
 
@@ -324,11 +324,11 @@
 
                                     </div>
 
-                                    <h3 class="mt-4 text-sm font-semibold text-slate-900">
+                                    <h3 class="mt-4 text-sm font-semibold text-slate-900 dark:text-white">
                                         {{ $isAr ? 'لا يوجد مستخدمون' : 'No users found' }}
                                     </h3>
 
-                                    <p class="mt-1 text-sm text-slate-500">
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                         {{ $isAr ? 'لم يتم العثور على أي حساب مستخدم.' : 'No user accounts are available.' }}
                                     </p>
 
@@ -346,7 +346,7 @@
 
 
             {{-- Mobile --}}
-            <div class="divide-y divide-slate-100 md:hidden">
+            <div class="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
 
                 @forelse ($users as $user)
 
@@ -357,7 +357,7 @@
                             <div class="flex min-w-0 items-center gap-3">
 
                                 <div
-                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700">
+                                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-sm font-bold text-cyan-700">
 
                                     {{ strtoupper(substr($user->name ?: 'U', 0, 1)) }}
 
@@ -365,11 +365,11 @@
 
                                 <div class="min-w-0">
 
-                                    <p class="truncate font-semibold text-slate-900">
+                                    <p class="truncate font-semibold text-slate-900 dark:text-white">
                                         {{ $user->name ?: 'Unnamed User' }}
                                     </p>
 
-                                    <p class="truncate text-sm text-slate-500">
+                                    <p class="truncate text-sm text-slate-500 dark:text-slate-400">
                                         {{ $user->email }}
                                     </p>
 
@@ -412,25 +412,25 @@
                         {{-- Info --}}
                         <div class="mt-4 grid grid-cols-2 gap-3">
 
-                            <div class="rounded-xl bg-slate-50 p-3">
+                            <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-3">
 
                                 <p class="text-xs font-medium text-slate-400">
                                     {{ $isAr ? 'User ID' : 'User ID' }}
                                 </p>
 
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
+                                <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
                                     #{{ $user->id }}
                                 </p>
 
                             </div>
 
-                            <div class="rounded-xl bg-slate-50 p-3">
+                            <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-3">
 
                                 <p class="text-xs font-medium text-slate-400">
                                     {{ $isAr ? 'Customer' : 'Customer' }}
                                 </p>
 
-                                <p class="mt-1 truncate text-sm font-semibold text-slate-800">
+                                <p class="mt-1 truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
 
                                     @if ($user->customer)
                                         {{ $user->customer->company_name ?? ($user->customer->name ?? '#' . $user->customer_id) }}
@@ -444,25 +444,25 @@
 
                             </div>
 
-                            <div class="rounded-xl bg-slate-50 p-3">
+                            <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-3">
 
                                 <p class="text-xs font-medium text-slate-400">
                                     {{ $isAr ? 'Permissions' : 'Permissions' }}
                                 </p>
 
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
+                                <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
                                     {{ $user->permissions->count() }}
                                 </p>
 
                             </div>
 
-                            <div class="rounded-xl bg-slate-50 p-3">
+                            <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-3">
 
                                 <p class="text-xs font-medium text-slate-400">
                                     {{ $isAr ? 'Joined' : 'Joined' }}
                                 </p>
 
-                                <p class="mt-1 text-sm font-semibold text-slate-800">
+                                <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
                                     {{ $user->created_at?->format('d M Y') ?? '—' }}
                                 </p>
 
@@ -475,14 +475,14 @@
                         <div class="mt-4 grid grid-cols-2 gap-2">
 
                             <a href="{{ route('admin.users.show', $user) }}"
-                                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                class="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50">
 
                                 {{ $isAr ? 'عرض' : 'View' }}
 
                             </a>
 
                             <a href="{{ route('admin.users.edit', $user) }}"
-                                class="inline-flex items-center justify-center rounded-xl bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100">
+                                class="inline-flex items-center justify-center rounded-xl bg-cyan-50 px-4 py-2.5 text-sm font-semibold text-cyan-700 hover:bg-cyan-100">
 
                                 {{ $isAr ? 'تعديل' : 'Edit' }}
 
@@ -514,7 +514,7 @@
 
                     <div class="px-6 py-16 text-center">
 
-                        <h3 class="text-sm font-semibold text-slate-900">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-white">
                             {{ $isAr ? 'لا يوجد مستخدمون' : 'No users found' }}
                         </h3>
 
@@ -529,7 +529,7 @@
 
         {{-- Pagination --}}
         @if ($users->hasPages())
-            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:px-6">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 shadow-sm sm:px-6">
                 {{ $users->links() }}
             </div>
         @endif

@@ -244,7 +244,7 @@
 
                         {{-- Customer --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['customer'] }}
                             </div>
 
@@ -270,7 +270,7 @@
 
                         {{-- Contact --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['contact'] }}
                             </div>
 
@@ -279,7 +279,7 @@
                             </div>
 
                             @if ($opportunity->contact?->email)
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $opportunity->contact->email }}
                                 </div>
                             @endif
@@ -288,7 +288,7 @@
 
                         {{-- Assigned --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['assigned_to'] }}
                             </div>
 
@@ -300,7 +300,7 @@
 
                         {{-- Opportunity Type --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['opportunity_type'] }}
                             </div>
 
@@ -312,7 +312,7 @@
 
                         {{-- Category --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['category'] }}
                             </div>
 
@@ -324,7 +324,7 @@
 
                         {{-- Country --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['country'] }}
                             </div>
 
@@ -336,7 +336,7 @@
 
                         {{-- City --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['city'] }}
                             </div>
 
@@ -348,7 +348,7 @@
 
                         {{-- Cargo --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['cargo_type'] }}
                             </div>
 
@@ -360,7 +360,7 @@
 
                         {{-- Container --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['container_type'] }}
                             </div>
 
@@ -372,7 +372,7 @@
 
                         {{-- Origin --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['origin'] }}
                             </div>
 
@@ -384,7 +384,7 @@
 
                         {{-- Destination --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['destination'] }}
                             </div>
 
@@ -409,7 +409,7 @@
                             {{ $opportunity->description }}
                         </div>
                     @else
-                        <div class="text-sm text-slate-500">
+                        <div class="text-sm text-slate-500 dark:text-slate-400">
                             {{ $t['no_description'] }}
                         </div>
                     @endif
@@ -428,7 +428,7 @@
 
                         {{-- Estimated Value --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['estimated_value'] }}
                             </div>
 
@@ -447,7 +447,7 @@
 
                         {{-- Required Capital --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['required_capital'] }}
                             </div>
 
@@ -466,7 +466,7 @@
 
                         {{-- Minimum Investment --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['min_investment'] }}
                             </div>
 
@@ -485,7 +485,7 @@
 
                         {{-- Currency --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['currency'] }}
                             </div>
 
@@ -497,7 +497,7 @@
 
                         {{-- Commission Type --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['commission_type'] }}
                             </div>
 
@@ -515,7 +515,7 @@
 
                         {{-- Commission Rate --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['commission_rate'] }}
                             </div>
 
@@ -553,7 +553,7 @@
                             {{ $opportunity->notes }}
                         </div>
                     @else
-                        <div class="text-sm text-slate-500">
+                        <div class="text-sm text-slate-500 dark:text-slate-400">
                             {{ $t['no_notes'] }}
                         </div>
                     @endif
@@ -573,7 +573,7 @@
                                 {{ $t['interests'] }}
                             </h2>
 
-                            <p class="mt-1 text-sm text-slate-500">
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                 {{ $t['interest_count'] }}:
                                 <span class="font-semibold text-cyan-300">
                                     {{ $opportunity->interests->count() }}
@@ -615,14 +615,14 @@
                                             </div>
 
                                             @if ($interest->user?->email)
-                                                <div class="mt-1 text-xs text-slate-500">
+                                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                     {{ $interest->user->email }}
                                                 </div>
                                             @endif
 
                                         </div>
 
-                                        <div class="text-xs text-slate-500">
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $interest->created_at?->format('Y-m-d H:i') ?? '—' }}
                                         </div>
 
@@ -722,7 +722,7 @@
                     @else
                         <div class="rounded-xl border border-dashed border-white/10 bg-slate-950/40 p-8 text-center">
 
-                            <div class="text-sm text-slate-500">
+                            <div class="text-sm text-slate-500 dark:text-slate-400">
                                 {{ $t['no_interests'] }}
                             </div>
 
@@ -743,7 +743,7 @@
                 {{-- Stage --}}
                 <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-6 shadow-xl">
 
-                    <div class="text-xs uppercase tracking-wide text-slate-500">
+                    <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         {{ $t['stage'] }}
                     </div>
 
@@ -761,7 +761,7 @@
 
                         <div class="mb-2 flex items-center justify-between text-xs">
 
-                            <span class="text-slate-500">
+                            <span class="text-slate-500 dark:text-slate-400">
                                 {{ $t['probability'] }}
                             </span>
 
@@ -795,7 +795,7 @@
 
                         {{-- Visibility --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['visibility'] }}
                             </div>
 
@@ -812,7 +812,7 @@
 
                         {{-- Verification --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['verification'] }}
                             </div>
 
@@ -829,7 +829,7 @@
 
                         {{-- Published --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['published'] }}
                             </div>
 
@@ -847,7 +847,7 @@
 
                         {{-- Expires --}}
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['expires'] }}
                             </div>
 
@@ -877,7 +877,7 @@
                     <div class="space-y-5">
 
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['created'] }}
                             </div>
 
@@ -887,7 +887,7 @@
                         </div>
 
                         <div>
-                            <div class="text-xs uppercase tracking-wide text-slate-500">
+                            <div class="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
                                 {{ $t['updated'] }}
                             </div>
 

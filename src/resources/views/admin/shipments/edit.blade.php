@@ -7,12 +7,12 @@
 
             <div>
                 <div class="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-400">
-                    HAG Brokers / Shipments
+                    {{ __('admin_ui.label_048') }}
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <h1 class="text-3xl font-black text-white">
-                        Edit Shipment
+                        {{ __('admin_ui.label_049') }}
                     </h1>
 
                     @if ($shipment->status)
@@ -23,7 +23,7 @@
                     @endif
                 </div>
 
-                <p class="mt-2 text-sm leading-6 text-slate-500">
+                <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                     Update shipment details, customer, route, carrier,
                     vessel, cargo and schedule information.
                 </p>
@@ -33,7 +33,7 @@
 
                 <a href="{{ route('admin.shipments.show', $shipment) }}"
                     class="inline-flex items-center justify-center rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-900 hover:text-white">
-                    View Shipment
+                    {{ __('admin_ui.label_140') }}
                 </a>
 
                 <a href="{{ route('admin.shipments.index') }}"
@@ -52,8 +52,8 @@
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                        Shipment Number
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {{ __('admin_ui.label_141') }}
                     </p>
 
                     <p class="mt-1 text-xl font-black text-white">
@@ -62,9 +62,9 @@
                 </div>
 
                 @if ($shipment->booking_no)
-                    <div class="sm:text-right">
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Booking Number
+                    <div class="sm:text-end">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_142') }}
                         </p>
 
                         <p class="mt-1 font-bold text-cyan-300">
@@ -91,10 +91,10 @@
                 <div>
 
                     <h2 class="font-black text-amber-300">
-                        Updating an operational shipment
+                        {{ __('admin_ui.label_143') }}
                     </h2>
 
-                    <p class="mt-1 text-sm leading-6 text-slate-500">
+                    <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
                         Changes to the carrier, vessel, route, schedule or status
                         may affect the operational tracking information shown
                         to the customer.
@@ -119,7 +119,7 @@
                     </div>
 
                     <h2 class="font-black text-red-300">
-                        Please fix the following errors
+                        {{ __('admin_ui.label_050') }}
                     </h2>
 
                 </div>
@@ -156,12 +156,12 @@
                         </span>
 
                         <h2 class="font-black text-red-300">
-                            Danger Zone
+                            {{ __('admin_ui.label_144') }}
                         </h2>
 
                     </div>
 
-                    <p class="max-w-2xl text-sm leading-6 text-slate-500">
+                    <p class="max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
                         Deleting a shipment is permanent. Shipments with
                         containers, documents or tracking events cannot be
                         deleted by the controller.
@@ -177,7 +177,7 @@
 
                     <button type="submit"
                         class="inline-flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm font-black text-red-300 transition hover:bg-red-500/20">
-                        Delete Shipment
+                        {{ __('admin_ui.label_145') }}
                     </button>
 
                 </form>

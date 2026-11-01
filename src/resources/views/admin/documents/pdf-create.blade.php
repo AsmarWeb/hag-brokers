@@ -176,7 +176,7 @@
                                             {{ $isAr ? 'قالب المستند' : 'Document Template' }}
                                         </h2>
 
-                                        <p class="mt-1 text-xs text-slate-500">
+                                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             {{ $isAr ? 'اختر القالب الذي سيتم استخدامه لإنشاء PDF' : 'Choose the template used to generate the PDF' }}
                                         </p>
 
@@ -234,7 +234,7 @@
                                                     {{ $isAr ? 'لا توجد قوالب' : 'No templates available' }}
                                                 </div>
 
-                                                <p class="mt-1 text-xs text-slate-500">
+                                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                     {{ $isAr
                                                         ? 'أنشئ Document Template أولاً حتى تتمكن من إنشاء PDF.'
                                                         : 'Create a Document Template first before generating PDFs.' }}
@@ -309,7 +309,7 @@
                                     {{ $isAr ? 'مصدر البيانات' : 'Data Source' }}
                                 </h2>
 
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $isAr
                                         ? 'اختر السجل الذي سيتم استخدام بياناته داخل المستند'
                                         : 'Choose the record whose data will populate the document' }}
@@ -481,7 +481,7 @@
 
                         {{-- Branding --}}
                         <section
-                            class="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/[0.08] to-blue-500/[0.03] p-6">
+                            class="rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/[0.08] to-cyan-500/[0.03] p-6">
 
                             <div class="mb-5 flex items-center gap-3">
 
@@ -503,7 +503,7 @@
                                         HAG Brokers
                                     </h3>
 
-                                    <p class="text-xs text-slate-500">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
                                         {{ $isAr ? 'هوية الشركة' : 'Company Branding' }}
                                     </p>
 
@@ -558,7 +558,7 @@
                                 {{ $isAr ? 'المتغيرات المتاحة' : 'Available Variables' }}
                             </h3>
 
-                            <p class="mt-1 text-xs text-slate-500">
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 {{ $isAr ? 'يمكن للقالب استخدام هذه البيانات' : 'Templates can use these variables' }}
                             </p>
 

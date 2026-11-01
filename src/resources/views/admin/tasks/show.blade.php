@@ -75,7 +75,7 @@
 
             <div>
 
-                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
                     <a href="{{ route('admin.tasks.index') }}" class="hover:text-cyan-600">
                         {{ $t['back'] }}

@@ -3,11 +3,11 @@
     <x-slot name="header">
         <div>
             <h2 class="text-2xl font-black text-white">
-                Edit Port
+                {{ __('admin_ui.label_081') }}
             </h2>
 
             <p class="mt-1 text-sm text-slate-400">
-                Update port information.
+                {{ __('admin_ui.label_082') }}
             </p>
         </div>
     </x-slot>
@@ -29,12 +29,12 @@
 
                 <a href="{{ route('admin.ports.index') }}"
                     class="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-white">
-                    Cancel
+                    {{ __('admin_ui.label_007') }}
                 </a>
 
                 <button type="submit"
                     class="rounded-xl bg-cyan-400 px-6 py-3 text-sm font-black text-slate-950 hover:bg-cyan-300">
-                    Update Port
+                    {{ __('admin_ui.label_083') }}
                 </button>
 
             </div>

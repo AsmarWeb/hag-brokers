@@ -1,3 +1,90 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* HAG admin foundation: scoped to the admin layout. */
+@layer base {
+  .hag-admin { --hag-accent: #22d3ee; --hag-ink: #0f172a; }
+  .hag-admin[dir="rtl"], html[dir="rtl"] .hag-admin {
+    font-family: 'Noto Sans Arabic', 'Figtree', sans-serif;
+  }
+  .hag-admin :focus-visible { outline: 2px solid #0891b2; outline-offset: 3px; }
+  .hag-admin input[type="email"], .hag-admin input[type="url"],
+  .hag-admin input[type="tel"], .hag-admin input[type="number"] { direction: ltr; text-align: start; }
+  .hag-admin input, .hag-admin select, .hag-admin textarea { color-scheme: light; }
+  .dark .hag-admin input, .dark .hag-admin select, .dark .hag-admin textarea { color-scheme: dark; }
+}
+@layer components {
+  .hag-admin-content { padding: clamp(1rem, 2.5vw, 2rem); max-width: 1800px; margin-inline: auto; }
+  .hag-admin-content h1 { letter-spacing: -.025em; line-height: 1.35; }
+  html[dir="rtl"] .hag-admin-content h1 { letter-spacing: 0; }
+  .hag-admin-content table { width: 100%; }
+  .hag-admin-content th { white-space: nowrap; }
+  .hag-admin-content td { vertical-align: middle; }
+  .hag-admin-content input:not([type="checkbox"]):not([type="radio"]),
+  .hag-admin-content select { min-height: 44px; }
+  .hag-admin-content button { touch-action: manipulation; }
+  .hag-skip-link { position: fixed; inset-block-start: .75rem; inset-inline-start: 1rem; z-index: 100; padding: .75rem 1rem; background: #22d3ee; color: #0f172a; border-radius: .75rem; transform: translateY(-200%); }
+  .hag-skip-link:focus { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hag-admin *, .hag-admin *::before, .hag-admin *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* HAG brokerage workspace v2 */
+.hag-admin { background: #f1f5f9; }
+.dark .hag-admin { background: #08121f; }
+.hag-admin #admin-sidebar { width: var(--hag-sidebar-width, 288px); background: #0b1829; border-color: #23344a; }
+.hag-admin #admin-sidebar nav { scrollbar-width: thin; scrollbar-color: #37516c transparent; }
+.hag-admin #admin-sidebar nav a { min-height: 42px; padding-block: .65rem; border-radius: .75rem; font-size: .8125rem; }
+.hag-admin #admin-sidebar nav a:hover { background-color: #173047; }
+.hag-admin #admin-sidebar nav a.bg-cyan-400 { background: #22d3ee; color: #082330; }
+.hag-admin #admin-sidebar nav a.bg-cyan-400:hover { background: #67e8f9; }
+.hag-admin .hag-shell > header > div { height: 4.5rem; }
+.hag-admin #hag-sidebar-resize { position: absolute; inset-block: 0; inset-inline-end: -5px; width: 12px; cursor: ew-resize; touch-action: none; z-index: 55; outline-offset: -3px; }
+.hag-admin #hag-sidebar-resize::after { content: ''; position: absolute; inset-block: 40%; inset-inline-start: 4px; width: 3px; border-radius: 9px; background: #54718d; }
+.hag-admin #hag-sidebar-resize:hover::after, .hag-admin #hag-sidebar-resize:focus-visible::after { background: #22d3ee; inset-block: 30%; }
+.hag-sidebar-dragging, .hag-sidebar-dragging * { cursor: ew-resize !important; user-select: none !important; }
+.hag-admin .hag-admin-content { max-width: 1640px; padding: clamp(1rem, 2vw, 1.75rem); }
+.hag-admin .hag-admin-content h1 { font-size: clamp(1.45rem, 2vw, 1.95rem); line-height: 1.45; }
+.hag-admin .hag-admin-content th { font-size: .75rem; padding-block: .9rem; }
+.hag-admin .hag-admin-content td { font-size: .875rem; padding-block: .95rem; }
+.hag-admin .hag-admin-content input:not([type="checkbox"]):not([type="radio"]),
+.hag-admin .hag-admin-content select, .hag-admin .hag-admin-content textarea { border-radius: .75rem; font-size: .875rem; }
+.hag-broker-hero { background: linear-gradient(120deg,#0b1829,#12364a); color: #fff; border: 1px solid #244759; border-radius: 1.5rem; padding: clamp(1.25rem,3vw,2rem); }
+.hag-broker-hero h1 { color: #fff; }
+.hag-broker-eyebrow { color: #67e8f9; font-size: .7rem; font-weight: 800; letter-spacing: .12em; }
+html[dir="rtl"] .hag-broker-eyebrow { letter-spacing: 0; }
+.hag-broker-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 1rem; }
+.hag-broker-columns { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(0,1fr); gap: 1.25rem; }
+.hag-broker-card { min-width: 0; border: 1px solid #e2e8f0; border-radius: 1.25rem; background: #fff; padding: 1.25rem; }
+.dark .hag-broker-card { border-color: #25354a; background: #0f1e30; }
+.hag-broker-card > h2 { font-weight: 800; font-size: 1rem; }
+.hag-broker-number { font-size: 2rem; font-weight: 800; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.hag-broker-row { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-block: 1rem; border-block-end: 1px solid #e2e8f0; }
+.dark .hag-broker-row { border-color: #25354a; }
+.hag-broker-row:last-child { border-block-end: 0; }
+.hag-broker-action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .7rem 1rem; border-radius: .75rem; font-size: .8125rem; font-weight: 800; background: #22d3ee; color: #082330; text-align: center; }
+.hag-broker-action:hover { background: #67e8f9; }
+.hag-broker-muted { color: #64748b; font-size: .8125rem; line-height: 1.8; }
+.dark .hag-broker-muted { color: #a9b9cb; }
+.hag-broker-empty { padding: 2rem 1rem; text-align: center; border: 1px dashed #94a3b8; border-radius: 1rem; }
+@media (min-width: 1024px) {
+  .hag-admin .hag-shell { margin-inline-start: var(--hag-sidebar-width,288px); transition: margin-inline-start .2s ease; }
+  .hag-admin #admin-sidebar { transform: translateX(0) !important; }
+  html[data-hag-sidebar="closed"] .hag-admin .hag-shell { margin-inline-start: 0; }
+  html[data-hag-sidebar="closed"] .hag-admin #admin-sidebar { transform: translateX(-105%) !important; }
+  html[dir="rtl"][data-hag-sidebar="closed"] .hag-admin #admin-sidebar { transform: translateX(105%) !important; }
+  .hag-sidebar-dragging .hag-shell { transition: none; }
+}
+@media (max-width: 1023px) {
+  .hag-admin .hag-shell { margin-inline-start: 0; }
+  .hag-admin #admin-sidebar { width: min(320px,calc(100vw - 48px)); transform: translateX(-105%) !important; }
+  html[dir="rtl"] .hag-admin #admin-sidebar { transform: translateX(105%) !important; }
+  html[data-hag-mobile-sidebar="open"] .hag-admin #admin-sidebar { transform: translateX(0) !important; }
+  .hag-admin #hag-sidebar-resize { display: none; }
+  .hag-broker-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .hag-broker-columns { grid-template-columns: 1fr; }
+}
+@media (max-width: 479px) { .hag-broker-grid { gap: .65rem; } .hag-broker-card { padding: 1rem; } .hag-broker-number { font-size: 1.65rem; } }
+@media (prefers-reduced-motion: reduce) { .hag-admin .hag-shell { transition: none; } }

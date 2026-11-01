@@ -12,6 +12,8 @@ class AdminDashboardController extends Controller
     public function index(): View
     {
         $stats = [
+            'total_opportunities' => \App\Models\Opportunity::count(),
+            'total_customers' => \App\Models\Customer::count(),
             'total_shipments' => Shipment::count(),
 
             'in_transit' => Shipment::where(
@@ -50,8 +52,14 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $brokerRecentOpportunities = \App\Models\Opportunity::with('customer')
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return view('admin.dashboard', [
             'stats' => $stats,
+            'brokerRecentOpportunities' => $brokerRecentOpportunities,
             'recentShipments' => $recentShipments,
             'recentQuotations' => $recentQuotations,
         ]);
