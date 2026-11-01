@@ -934,6 +934,18 @@
                     @endif
 
 
+                    {{-- Phase 9D financial reports: administrative financial data only. --}}
+                    @if ($isAdmin)
+                        <a href="{{ route('admin.finance.index') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                            {{ request()->routeIs('admin.finance.*') ? 'bg-cyan-400 text-slate-950' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                            <svg class="h-5 w-5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M4 5h16v14H4zM8 9h8M8 13h3M8 16h8" />
+                            </svg>
+                            <span>{{ __('finance.sidebar') }}</span>
+                        </a>
+                    @endif
+
                     {{-- Reports --}}
 
                     @if ($canViewReports)
