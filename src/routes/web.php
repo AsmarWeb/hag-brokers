@@ -268,6 +268,12 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         Route::get('/finance', [\App\Http\Controllers\Admin\AdminFinancialReportController::class, 'index'])->name('finance.index');
         Route::get('/finance/{deal}', [\App\Http\Controllers\Admin\AdminFinancialReportController::class, 'show'])->name('finance.show');
 
+        // Phase 9D.2A: internal invoice drafts only.
+        Route::get('/invoice-drafts', [\App\Http\Controllers\Admin\AdminInvoiceDraftController::class, 'index'])->name('invoice-drafts.index');
+        Route::get('/invoice-drafts/{invoiceDraft}', [\App\Http\Controllers\Admin\AdminInvoiceDraftController::class, 'show'])->name('invoice-drafts.show');
+        Route::patch('/invoice-drafts/{invoiceDraft}', [\App\Http\Controllers\Admin\AdminInvoiceDraftController::class, 'update'])->name('invoice-drafts.update');
+        Route::post('/commissions/{commission}/invoice-draft', [\App\Http\Controllers\Admin\AdminInvoiceDraftController::class, 'store'])->name('invoice-drafts.store');
+
         // Dashboard
         Route::get('/dashboard', [
             AdminDashboardController::class,

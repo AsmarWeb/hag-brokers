@@ -26,4 +26,9 @@ class DealCommission extends Model {
     protected $casts = ['basis_amount'=>'decimal:2','amount'=>'decimal:2','rate_bps'=>'integer','earned_at'=>'datetime'];
     public function deal(): BelongsTo {return $this->belongsTo(Deal::class);}
     public function agreement(): BelongsTo {return $this->belongsTo(DealAgreement::class,'deal_agreement_id');}
+
+    public function invoiceDraft(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(InvoiceDraft::class, 'deal_commission_id');
+    }
 }

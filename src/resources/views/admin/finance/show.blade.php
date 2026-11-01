@@ -5,6 +5,7 @@
     @endphp
     <div class="mx-auto max-w-6xl space-y-6" dir="{{ $isAr ? 'rtl' : 'ltr' }}">
         <header class="flex flex-wrap items-center justify-between gap-4"><div><p class="text-sm font-bold text-cyan-700 dark:text-cyan-300">{{ __('finance.read_only') }}</p><h1 class="mt-2 font-bold">{{ $deal->reference }}</h1><p class="hag-broker-muted mt-2">{{ $deal->customer?->company_name ?? '—' }}</p></div><a href="{{ route('admin.finance.index') }}" class="hag-broker-action">{{ __('finance.back') }}</a></header>
+        @if ($errors->any())<ul role="alert" class="list-disc rounded-xl border border-red-300 bg-red-50 p-5 ps-10 text-sm text-red-800 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>@endif
         <p class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-7 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">{{ __('finance.cash_note') }}</p>
         <section class="hag-broker-card"><h2>{{ __('finance.deal_details') }}</h2>
             <dl class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -35,6 +36,14 @@
                 <article class="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
                     <div><h3 class="font-semibold"><bdi>{{ $money::format((string) $commission->amount) }} {{ $commission->currency }}</bdi></h3><p class="hag-broker-muted mt-2">{{ __('finance.version') }}: {{ $commission->agreement?->version ?? '—' }} · {{ __('finance.basis') }}: <bdi>{{ $money::format((string) $commission->basis_amount) }} {{ $commission->currency }}</bdi></p></div>
                     <span class="rounded-lg bg-cyan-50 px-3 py-2 text-sm font-bold text-cyan-900 dark:bg-cyan-400/10 dark:text-cyan-200">{{ in_array($commission->status, ['pending','earned','reversed'], true) ? __('finance.'.$commission->status) : __('finance.other') }}</span>
+                    @if ($commission->invoiceDraft)
+                        <a href="{{ route('admin.invoice-drafts.show', $commission->invoiceDraft) }}" class="inline-flex min-h-11 items-center text-sm font-bold text-cyan-700 dark:text-cyan-300">{{ __('invoice_drafts.view') }}</a>
+                    @elseif ($commission->status === 'pending')
+                        <form action="{{ route('admin.invoice-drafts.store', $commission) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="hag-broker-action">{{ __('invoice_drafts.create') }}</button>
+                        </form>
+                    @endif
                 </article>
             @empty<p class="hag-broker-muted mt-4">{{ __('finance.no_commission') }}</p>@endforelse
         </section>
