@@ -135,7 +135,7 @@
                     <h2>{{ $isAr ? 'آخر عروض الأسعار' : 'Recent quotations' }}</h2>
                     @forelse ($recentQuotations as $quotation)
                         <a class="hag-broker-row" href="{{ route('admin.quotations.show', $quotation) }}">
-                            <div class="min-w-0"><h3 class="break-words text-sm font-semibold">{{ $quotation->reference ?? $quotation->quotation_number ?? '#'.$quotation->id }}</h3><p class="hag-broker-muted">{{ $quotation->created_at?->format('Y-m-d') }}</p></div>
+                            <div class="min-w-0"><h3 class="break-words text-sm font-semibold">{{ $quotation->reference_no ?? '#'.$quotation->id }}</h3><p class="hag-broker-muted">{{ $quotation->created_at?->format('Y-m-d') }}</p></div>
                             <span class="hag-broker-muted">{{ $stages[$quotation->status] ?? $quotation->status }}</span>
                         </a>
                     @empty

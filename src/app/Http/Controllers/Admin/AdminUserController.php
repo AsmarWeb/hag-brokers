@@ -59,6 +59,7 @@ class AdminUserController extends Controller
             'customer_id' => [
                 'nullable',
                 'integer',
+                'exists:customers,id',
             ],
         ]);
 
