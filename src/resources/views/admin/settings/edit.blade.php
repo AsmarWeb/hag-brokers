@@ -22,12 +22,7 @@
             {{-- Success --}}
             @if (session('success'))
                 <div
-                    class="mb-6 rounded-2xl border border-emerald-200
-                           bg-emerald-50 p-4 text-sm font-medium
-                           text-emerald-700
-                           dark:border-emerald-500/20
-                           dark:bg-emerald-500/10
-                           dark:text-emerald-400">
+                    class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
                     {{ session('success') }}
                 </div>
             @endif
@@ -37,11 +32,7 @@
             @if ($errors->any())
 
                 <div
-                    class="mb-6 rounded-2xl border border-red-200
-                           bg-red-50 p-4 text-sm text-red-700
-                           dark:border-red-500/20
-                           dark:bg-red-500/10
-                           dark:text-red-400">
+                    class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
 
                     <ul class="list-inside list-disc space-y-1">
 
@@ -64,10 +55,7 @@
 
                 {{-- Maintenance --}}
                 <div
-                    class="rounded-2xl bg-white p-6 shadow
-                           ring-1 ring-slate-200
-                           dark:bg-slate-900
-                           dark:ring-slate-800">
+                    class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
 
                     <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
 
@@ -76,11 +64,7 @@
                             <div class="flex items-center gap-3">
 
                                 <div
-                                    class="flex h-11 w-11 items-center
-                                           justify-center rounded-xl
-                                           bg-orange-100 text-orange-600
-                                           dark:bg-orange-500/10
-                                           dark:text-orange-400">
+                                    class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
 
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.8" stroke="currentColor" class="h-6 w-6">
@@ -114,17 +98,7 @@
                                 @checked($setting->maintenance_mode)>
 
                             <div
-                                class="h-7 w-14 rounded-full
-                                       bg-slate-300
-                                       after:absolute after:left-[3px]
-                                       after:top-[3px]
-                                       after:h-[22px] after:w-[22px]
-                                       after:rounded-full
-                                       after:bg-white
-                                       after:transition-all
-                                       peer-checked:bg-orange-500
-                                       peer-checked:after:translate-x-7
-                                       dark:bg-slate-700">
+                                class="h-7 w-14 rounded-full bg-slate-300 after:absolute after:start-[3px] after:top-[3px] after:h-[22px] after:w-[22px] after:rounded-full after:bg-white after:transition-all peer-checked:bg-orange-500 peer-checked:after:translate-x-7 dark:bg-slate-700">
                             </div>
 
                         </label>
@@ -134,12 +108,7 @@
 
                     @if ($setting->maintenance_mode)
                         <div
-                            class="mt-5 rounded-xl border border-orange-200
-                                   bg-orange-50 p-4 text-sm
-                                   text-orange-700
-                                   dark:border-orange-500/20
-                                   dark:bg-orange-500/10
-                                   dark:text-orange-400">
+                            class="mt-5 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400">
 
                             <strong>
                                 Maintenance mode is currently ON.
@@ -151,12 +120,7 @@
                         </div>
                     @else
                         <div
-                            class="mt-5 rounded-xl border border-emerald-200
-                                   bg-emerald-50 p-4 text-sm
-                                   text-emerald-700
-                                   dark:border-emerald-500/20
-                                   dark:bg-emerald-500/10
-                                   dark:text-emerald-400">
+                            class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
 
                             <strong>
                                 Platform is currently online.
@@ -172,10 +136,7 @@
 
                 {{-- Contact --}}
                 <div
-                    class="rounded-2xl bg-white p-6 shadow
-                           ring-1 ring-slate-200
-                           dark:bg-slate-900
-                           dark:ring-slate-800">
+                    class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
 
                     <div class="mb-6">
 
@@ -196,18 +157,13 @@
                         <div>
 
                             <label for="phone"
-                                class="mb-2 block text-sm font-semibold
-                                       text-slate-700 dark:text-slate-300">
+                                class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                                 Contact Phone
                             </label>
 
                             <input id="phone" name="phone" type="text"
                                 value="{{ old('phone', $setting->phone) }}" placeholder="+971 50 000 0000"
-                                class="w-full rounded-xl border-slate-300
-                                       px-4 py-3
-                                       dark:border-slate-700
-                                       dark:bg-slate-800
-                                       dark:text-white">
+                                class="w-full rounded-xl border-slate-300 px-4 py-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
 
                             @error('phone')
                                 <p class="mt-1 text-sm text-red-500">
@@ -222,18 +178,13 @@
                         <div>
 
                             <label for="email"
-                                class="mb-2 block text-sm font-semibold
-                                       text-slate-700 dark:text-slate-300">
+                                class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                                 Contact Email
                             </label>
 
                             <input id="email" name="email" type="email"
                                 value="{{ old('email', $setting->email) }}" placeholder="info@example.com"
-                                class="w-full rounded-xl border-slate-300
-                                       px-4 py-3
-                                       dark:border-slate-700
-                                       dark:bg-slate-800
-                                       dark:text-white">
+                                class="w-full rounded-xl border-slate-300 px-4 py-3 dark:border-slate-700 dark:bg-slate-800 dark:text-white">
 
                             @error('email')
                                 <p class="mt-1 text-sm text-red-500">
@@ -252,14 +203,7 @@
                 <div class="flex justify-end">
 
                     <button type="submit"
-                        class="inline-flex items-center gap-2
-                               rounded-xl bg-cyan-500
-                               px-7 py-3
-                               text-sm font-bold
-                               text-slate-950
-                               shadow-lg shadow-cyan-500/20
-                               transition
-                               hover:bg-cyan-400">
+                        class="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-7 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400">
 
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8"
                             stroke="currentColor" class="h-5 w-5">

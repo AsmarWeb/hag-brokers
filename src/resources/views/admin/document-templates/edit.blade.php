@@ -55,7 +55,7 @@
                         <div>
 
                             <label class="text-sm font-bold text-slate-300">
-                                Slug
+                                {{ __('admin_ui.label_061') }}
                             </label>
 
                             <input name="slug" value="{{ old('slug', $template->slug) }}" required

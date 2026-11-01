@@ -3,11 +3,11 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-2xl font-black text-white">
-                    Ports
+                    {{ __('admin_ui.label_086') }}
                 </h2>
 
                 <p class="mt-1 text-sm text-slate-400">
-                    Manage Gulf and international ports.
+                    {{ __('admin_ui.label_088') }}
                 </p>
             </div>
 
@@ -36,7 +36,7 @@
 
                     <button type="submit"
                         class="rounded-xl bg-slate-800 px-6 py-3 text-sm font-bold text-white hover:bg-slate-700">
-                        Search
+                        {{ __('admin_ui.label_008') }}
                     </button>
                 </div>
             </form>
@@ -44,15 +44,15 @@
 
         <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/60">
             <div class="overflow-x-auto">
-                <table class="min-w-full text-left text-sm">
+                <table class="min-w-full text-start text-sm">
                     <thead class="border-b border-slate-800 bg-slate-900/70">
                         <tr>
-                            <th class="px-6 py-4 font-bold text-slate-400">Port</th>
-                            <th class="px-6 py-4 font-bold text-slate-400">Country</th>
+                            <th class="px-6 py-4 font-bold text-slate-400">{{ __('admin_ui.label_089') }}</th>
+                            <th class="px-6 py-4 font-bold text-slate-400">{{ __('admin_ui.label_010') }}</th>
                             <th class="px-6 py-4 font-bold text-slate-400">UNLOCODE</th>
-                            <th class="px-6 py-4 font-bold text-slate-400">Type</th>
-                            <th class="px-6 py-4 font-bold text-slate-400">Status</th>
-                            <th class="px-6 py-4 text-right font-bold text-slate-400">Actions</th>
+                            <th class="px-6 py-4 font-bold text-slate-400">{{ __('admin_ui.label_035') }}</th>
+                            <th class="px-6 py-4 font-bold text-slate-400">{{ __('admin_ui.label_001') }}</th>
+                            <th class="px-6 py-4 text-end font-bold text-slate-400">{{ __('admin_ui.label_011') }}</th>
                         </tr>
                     </thead>
 
@@ -65,7 +65,7 @@
                                     </div>
 
                                     @if ($port->port_code)
-                                        <div class="mt-1 text-xs text-slate-500">
+                                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             {{ $port->port_code }}
                                         </div>
                                     @endif
@@ -84,14 +84,14 @@
                                         @if ($port->is_gulf)
                                             <span
                                                 class="rounded-full bg-cyan-400/10 px-2.5 py-1 text-xs font-bold text-cyan-300">
-                                                Gulf
+                                                {{ __('admin_ui.label_036') }}
                                             </span>
                                         @endif
 
                                         @if ($port->is_uae)
                                             <span
                                                 class="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-bold text-emerald-300">
-                                                UAE
+                                                {{ __('admin_ui.label_090') }}
                                             </span>
                                         @endif
                                     </div>
@@ -101,21 +101,21 @@
                                     @if ($port->is_active)
                                         <span
                                             class="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300">
-                                            Active
+                                            {{ __('admin_ui.label_006') }}
                                         </span>
                                     @else
                                         <span
                                             class="rounded-full bg-red-400/10 px-3 py-1 text-xs font-bold text-red-300">
-                                            Inactive
+                                            {{ __('admin_ui.label_012') }}
                                         </span>
                                     @endif
                                 </td>
 
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-6 py-4 text-end">
                                     <div class="flex justify-end gap-2">
                                         <a href="{{ route('admin.ports.edit', $port) }}"
                                             class="rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold text-white hover:bg-slate-700">
-                                            Edit
+                                            {{ __('admin_ui.label_003') }}
                                         </a>
 
                                         <form method="POST" action="{{ route('admin.ports.destroy', $port) }}"
@@ -125,7 +125,7 @@
 
                                             <button type="submit"
                                                 class="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-bold text-red-300 hover:bg-red-500/20">
-                                                Delete
+                                                {{ __('admin_ui.label_037') }}
                                             </button>
                                         </form>
                                     </div>
@@ -133,8 +133,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-slate-500">
-                                    No ports found.
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                                    {{ __('admin_ui.label_091') }}
                                 </td>
                             </tr>
                         @endforelse

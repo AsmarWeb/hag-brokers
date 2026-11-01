@@ -17,14 +17,14 @@
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
                 <div class="rounded-2xl bg-slate-900 p-6 text-white shadow">
-                    <p class="text-sm text-slate-400">Customers</p>
+                    <p class="text-sm text-slate-400">{{ __('admin_ui.label_031') }}</p>
                     <p class="mt-2 text-3xl font-bold">
                         {{ $stats['customers'] }}
                     </p>
                 </div>
 
                 <div class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-                    <p class="text-sm text-slate-500">Users</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('admin_ui.label_060') }}</p>
                     <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                         {{ $stats['users'] }}
                     </p>
@@ -32,7 +32,7 @@
 
                 <div
                     class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-                    <p class="text-sm text-slate-500">Shipments</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('admin_ui.label_014') }}</p>
                     <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                         {{ $stats['shipments'] }}
                     </p>
@@ -40,7 +40,7 @@
 
                 <div
                     class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-                    <p class="text-sm text-slate-500">Quotations</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('admin_ui.label_009') }}</p>
                     <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                         {{ $stats['quotations'] }}
                     </p>
@@ -48,7 +48,7 @@
 
                 <div
                     class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-                    <p class="text-sm text-slate-500">Carriers</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('admin_ui.label_016') }}</p>
                     <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                         {{ $stats['carriers'] }}
                     </p>
@@ -56,7 +56,7 @@
 
                 <div
                     class="rounded-2xl bg-white p-6 shadow ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
-                    <p class="text-sm text-slate-500">Vessels</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ __('admin_ui.label_148') }}</p>
                     <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">
                         {{ $stats['vessels'] }}
                     </p>
@@ -74,7 +74,7 @@
                     <div
                         class="rounded-2xl bg-amber-50 p-6 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:ring-amber-900">
                         <p class="text-sm font-medium text-amber-700 dark:text-amber-300">
-                            Pending
+                            {{ __('admin_ui.label_027') }}
                         </p>
                         <p class="mt-2 text-3xl font-bold text-amber-900 dark:text-amber-200">
                             {{ $stats['pending_shipments'] }}
@@ -117,11 +117,11 @@
                     <table class="min-w-full text-sm">
                         <thead class="bg-slate-50 dark:bg-slate-800">
                             <tr>
-                                <th class="px-6 py-4 text-left">Reference</th>
-                                <th class="px-6 py-4 text-left">Customer</th>
-                                <th class="px-6 py-4 text-left">Route</th>
-                                <th class="px-6 py-4 text-left">Carrier</th>
-                                <th class="px-6 py-4 text-left">Status</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_017') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_005') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_015') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_002') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_001') }}</th>
                             </tr>
                         </thead>
 
@@ -155,7 +155,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                    <td colspan="5" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                                         No shipments available.
                                     </td>
                                 </tr>
@@ -179,10 +179,10 @@
                     <table class="min-w-full text-sm">
                         <thead class="bg-slate-50 dark:bg-slate-800">
                             <tr>
-                                <th class="px-6 py-4 text-left">Reference</th>
-                                <th class="px-6 py-4 text-left">Customer</th>
-                                <th class="px-6 py-4 text-left">Origin</th>
-                                <th class="px-6 py-4 text-left">Destination</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_017') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_005') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_047') }}</th>
+                                <th class="px-6 py-4 text-start">{{ __('admin_ui.label_013') }}</th>
                             </tr>
                         </thead>
 
@@ -207,7 +207,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                                    <td colspan="4" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                                         No quotations available.
                                     </td>
                                 </tr>

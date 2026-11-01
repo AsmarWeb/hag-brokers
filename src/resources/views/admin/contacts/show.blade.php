@@ -109,7 +109,7 @@
 
                 {{-- Customer --}}
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $t['customer'] }}
                     </p>
 
@@ -127,7 +127,7 @@
 
                 {{-- Job --}}
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $t['job_title'] }}
                     </p>
 
@@ -138,7 +138,7 @@
 
                 {{-- Email --}}
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $t['email'] }}
                     </p>
 
@@ -156,7 +156,7 @@
 
                 {{-- Phone --}}
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $t['phone'] }}
                     </p>
 
@@ -174,7 +174,7 @@
 
                 {{-- WhatsApp --}}
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $t['whatsapp'] }}
                     </p>
 
@@ -185,7 +185,7 @@
 
                 {{-- Primary --}}
                 <div>
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $t['primary'] }}
                     </p>
 
@@ -223,7 +223,7 @@
                 <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-4">
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             {{ $t['company'] }}
                         </p>
 
@@ -233,7 +233,7 @@
                     </div>
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             {{ $t['city'] }}
                         </p>
 
@@ -243,7 +243,7 @@
                     </div>
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             {{ $t['country'] }}
                         </p>
 
@@ -253,7 +253,7 @@
                     </div>
 
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             {{ $t['status'] }}
                         </p>
 

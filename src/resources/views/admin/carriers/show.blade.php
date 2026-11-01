@@ -7,10 +7,10 @@
 
             <div>
 
-                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
                     <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-400">
-                        Carriers
+                        {{ __('admin_ui.label_016') }}
                     </a>
 
                     <span>/</span>
@@ -34,7 +34,7 @@
                             {{ $carrier->name }}
                         </h1>
 
-                        <p class="mt-1 text-sm text-slate-500">
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             Carrier #{{ $carrier->id }}
 
                             @if ($carrier->code)
@@ -53,12 +53,12 @@
 
                 <a href="{{ route('admin.carriers.edit', $carrier) }}"
                     class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
-                    Edit Carrier
+                    {{ __('admin_ui.label_062') }}
                 </a>
 
                 <a href="{{ route('admin.carriers.index') }}"
                     class="rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                    Back
+                    {{ __('admin_ui.label_030') }}
                 </a>
 
             </div>
@@ -75,7 +75,7 @@
                 <div class="border-b border-slate-800 px-6 py-5">
 
                     <h2 class="font-black text-white">
-                        Carrier Information
+                        {{ __('admin_ui.label_065') }}
                     </h2>
 
                 </div>
@@ -85,7 +85,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Carrier Name
                         </p>
 
@@ -98,7 +98,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Carrier Code
                         </p>
 
@@ -111,8 +111,8 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Country
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_010') }}
                         </p>
 
                         <p class="mt-2 font-bold text-white">
@@ -124,7 +124,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Country Code
                         </p>
 
@@ -137,8 +137,8 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Website
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_067') }}
                         </p>
 
                         @if ($carrier->website)
@@ -158,7 +158,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             API Provider
                         </p>
 
@@ -179,7 +179,7 @@
                 <div class="border-b border-slate-800 px-6 py-5">
 
                     <h2 class="font-black text-white">
-                        Operations
+                        {{ __('admin_ui.label_032') }}
                     </h2>
 
                 </div>
@@ -189,13 +189,12 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Status
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_001') }}
                         </p>
 
                         <span
-                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold
-                        {{ $carrier->is_active ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-500' }}">
+                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $carrier->is_active ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-500' }}">
                             {{ $carrier->is_active ? 'Active' : 'Inactive' }}
                         </span>
 
@@ -204,8 +203,8 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Vessels
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_148') }}
                         </p>
 
                         <p class="mt-2 text-3xl font-black text-cyan-400">
@@ -217,7 +216,7 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                             Quotation Offers
                         </p>
 
@@ -230,8 +229,8 @@
 
                     <div>
 
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
-                            Shipments
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            {{ __('admin_ui.label_014') }}
                         </p>
 
                         <p class="mt-2 text-3xl font-black text-white">
@@ -259,7 +258,7 @@
                         Carrier Vessels
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         Vessels currently assigned to this carrier.
                     </p>
 
@@ -293,7 +292,7 @@
                                         {{ $vessel->name }}
                                     </p>
 
-                                    <p class="mt-1 text-xs text-slate-500">
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
 
                                         @if ($vessel->imo)
                                             IMO {{ $vessel->imo }}
@@ -316,14 +315,14 @@
 
                                 @if ($vessel->is_in_gulf)
                                     <span class="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-400">
-                                        In Gulf
+                                        {{ __('admin_ui.label_069') }}
                                     </span>
                                 @endif
 
 
                                 <a href="{{ route('admin.vessels.show', $vessel) }}"
                                     class="rounded-lg border border-slate-700 px-4 py-2 text-xs font-bold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-400">
-                                    View
+                                    {{ __('admin_ui.label_004') }}
                                 </a>
 
                             </div>
@@ -343,7 +342,7 @@
                         No vessels assigned
                     </p>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         This carrier does not have any vessels yet.
                     </p>
 

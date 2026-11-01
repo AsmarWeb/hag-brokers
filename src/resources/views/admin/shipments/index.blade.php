@@ -10,10 +10,10 @@
                 </div>
 
                 <h1 class="text-3xl font-black text-white">
-                    Shipments
+                    {{ __('admin_ui.label_014') }}
                 </h1>
 
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
                     Manage customer shipments, routes, carriers, vessels and
                     operational shipment status.
                 </p>
@@ -62,8 +62,8 @@
                 {{-- Search --}}
                 <div class="md:col-span-2">
 
-                    <label for="search" class="mb-2 block text-xs font-black uppercase tracking-wider text-slate-500">
-                        Search
+                    <label for="search" class="mb-2 block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {{ __('admin_ui.label_008') }}
                     </label>
 
                     <input id="search" type="text" name="search" value="{{ request('search') }}"
@@ -76,15 +76,15 @@
                 {{-- Status --}}
                 <div>
 
-                    <label for="status" class="mb-2 block text-xs font-black uppercase tracking-wider text-slate-500">
-                        Status
+                    <label for="status" class="mb-2 block text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        {{ __('admin_ui.label_001') }}
                     </label>
 
                     <select id="status" name="status"
                         class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/10">
 
                         <option value="">
-                            All Statuses
+                            {{ __('admin_ui.label_021') }}
                         </option>
 
                         @foreach ([
@@ -111,7 +111,7 @@
 
                     <button type="submit"
                         class="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
-                        Search
+                        {{ __('admin_ui.label_008') }}
                     </button>
 
                     <a href="{{ route('admin.shipments.index') }}"
@@ -131,38 +131,38 @@
 
             <div class="overflow-x-auto">
 
-                <table class="w-full min-w-[1100px] text-left">
+                <table class="w-full min-w-[1100px] text-start">
 
                     <thead class="border-b border-slate-800 bg-slate-900/70">
 
                         <tr>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Shipment
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_023') }}
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Customer
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_005') }}
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Route
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_015') }}
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 Carrier / Vessel
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Schedule
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_051') }}
                             </th>
 
-                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500">
-                                Status
+                            <th class="px-5 py-4 text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_001') }}
                             </th>
 
-                            <th class="px-5 py-4 text-right text-xs font-black uppercase tracking-wider text-slate-500">
-                                Actions
+                            <th class="px-5 py-4 text-end text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_011') }}
                             </th>
 
                         </tr>
@@ -183,7 +183,7 @@
                                     </div>
 
                                     @if ($shipment->booking_no)
-                                        <div class="mt-1 text-xs text-slate-500">
+                                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             Booking:
                                             <span class="text-slate-400">
                                                 {{ $shipment->booking_no }}
@@ -207,7 +207,7 @@
                                         </div>
 
                                         @if ($shipment->customer->contact_person)
-                                            <div class="mt-1 text-xs text-slate-500">
+                                            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 {{ $shipment->customer->contact_person }}
                                             </div>
                                         @endif
@@ -239,11 +239,11 @@
 
                                     </div>
 
-                                    <div class="mt-2 text-xs text-slate-500">
+                                    <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
 
                                         {{ $shipment->originPort?->name ?? 'Unknown origin' }}
 
-                                        <span class="mx-1 text-slate-700">
+                                        <span class="mx-1 text-slate-700 dark:text-slate-200">
                                             /
                                         </span>
 
@@ -263,12 +263,12 @@
                                         </div>
                                     @else
                                         <div class="text-sm text-slate-600">
-                                            No carrier
+                                            {{ __('admin_ui.label_052') }}
                                         </div>
                                     @endif
 
                                     @if ($shipment->vessel)
-                                        <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                                        <div class="mt-1 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
 
                                             <span class="text-cyan-400">
                                                 ⚓
@@ -286,15 +286,15 @@
                                 <td class="px-5 py-5 align-top">
 
                                     @if ($shipment->etd)
-                                        <div class="text-xs text-slate-500">
-                                            ETD
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">
+                                            {{ __('admin_ui.label_020') }}
                                         </div>
 
                                         <div class="font-bold text-slate-300">
                                             {{ $shipment->etd->format('d M Y H:i') }}
                                         </div>
                                     @elseif($shipment->preferred_date)
-                                        <div class="text-xs text-slate-500">
+                                        <div class="text-xs text-slate-500 dark:text-slate-400">
                                             Preferred
                                         </div>
 
@@ -308,8 +308,8 @@
                                     @endif
 
                                     @if ($shipment->eta)
-                                        <div class="mt-2 text-xs text-slate-500">
-                                            ETA
+                                        <div class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                            {{ __('admin_ui.label_019') }}
                                         </div>
 
                                         <div class="text-xs font-bold text-cyan-300">
@@ -392,10 +392,10 @@
                                         </div>
 
                                         <h3 class="text-lg font-black text-white">
-                                            No shipments found
+                                            {{ __('admin_ui.label_053') }}
                                         </h3>
 
-                                        <p class="mt-2 text-sm leading-6 text-slate-500">
+                                        <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             No shipments match your current search
                                             or filter.
                                         </p>
@@ -434,7 +434,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                                Shipment
+                                {{ __('admin_ui.label_023') }}
                             </div>
 
                             <div class="mt-1 font-black text-white">
@@ -442,7 +442,7 @@
                             </div>
 
                             @if ($shipment->booking_no)
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     Booking: {{ $shipment->booking_no }}
                                 </div>
                             @endif
@@ -474,7 +474,7 @@
                     <div class="mt-5 border-t border-slate-800 pt-4">
 
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                            Customer
+                            {{ __('admin_ui.label_005') }}
                         </div>
 
                         <div class="mt-1 font-bold text-slate-200">
@@ -488,7 +488,7 @@
                     <div class="mt-4">
 
                         <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                            Route
+                            {{ __('admin_ui.label_015') }}
                         </div>
 
                         <div class="mt-2 flex items-center gap-2">
@@ -516,7 +516,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                                Carrier
+                                {{ __('admin_ui.label_002') }}
                             </div>
 
                             <div class="mt-1 text-sm font-bold text-slate-300">
@@ -528,7 +528,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                                Vessel
+                                {{ __('admin_ui.label_024') }}
                             </div>
 
                             <div class="mt-1 text-sm font-bold text-slate-300">
@@ -546,7 +546,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                                ETD
+                                {{ __('admin_ui.label_020') }}
                             </div>
 
                             <div class="mt-1 text-sm font-bold text-slate-300">
@@ -558,7 +558,7 @@
                         <div>
 
                             <div class="text-xs font-bold uppercase tracking-wider text-slate-600">
-                                ETA
+                                {{ __('admin_ui.label_019') }}
                             </div>
 
                             <div class="mt-1 text-sm font-bold text-cyan-300">
@@ -575,12 +575,12 @@
 
                         <a href="{{ route('admin.shipments.show', $shipment) }}"
                             class="flex-1 rounded-xl border border-slate-700 px-4 py-3 text-center text-sm font-bold text-slate-300 transition hover:bg-slate-900 hover:text-white">
-                            View
+                            {{ __('admin_ui.label_004') }}
                         </a>
 
                         <a href="{{ route('admin.shipments.edit', $shipment) }}"
                             class="flex-1 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3 text-center text-sm font-bold text-amber-300 transition hover:bg-amber-400/10">
-                            Edit
+                            {{ __('admin_ui.label_003') }}
                         </a>
 
                         <form action="{{ route('admin.shipments.destroy', $shipment) }}" method="POST"
@@ -591,7 +591,7 @@
 
                             <button type="submit"
                                 class="w-full rounded-xl border border-red-400/20 bg-red-400/5 px-4 py-3 text-sm font-bold text-red-300 transition hover:bg-red-400/10">
-                                Delete
+                                {{ __('admin_ui.label_037') }}
                             </button>
 
                         </form>
@@ -610,10 +610,10 @@
                     </div>
 
                     <h3 class="mt-4 text-lg font-black text-white">
-                        No shipments found
+                        {{ __('admin_ui.label_053') }}
                     </h3>
 
-                    <p class="mt-2 text-sm text-slate-500">
+                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                         No shipments match your current filters.
                     </p>
 

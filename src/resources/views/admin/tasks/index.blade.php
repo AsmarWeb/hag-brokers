@@ -157,47 +157,47 @@
                         <tr>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 #
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['title_field'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['customer'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['lead'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['assigned_to'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['priority'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['due_at'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['status'] }}
                             </th>
 
                             <th
-                                class="px-6 py-4 text-end text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                class="px-6 py-4 text-end text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 {{ $t['actions'] }}
                             </th>
 
@@ -227,7 +227,7 @@
 
                             <tr class="transition hover:bg-slate-50 dark:hover:bg-slate-700/30">
 
-                                <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500">
+                                <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
                                     {{ $task->id }}
                                 </td>
 
@@ -239,7 +239,7 @@
                                     </a>
 
                                     @if ($task->description)
-                                        <p class="mt-1 max-w-xs truncate text-xs text-slate-500">
+                                        <p class="mt-1 max-w-xs truncate text-xs text-slate-500 dark:text-slate-400">
                                             {{ $task->description }}
                                         </p>
                                     @endif
@@ -284,7 +284,7 @@
 
                                         {{-- View --}}
                                         <a href="{{ route('admin.tasks.show', $task) }}" title="{{ $t['view'] }}"
-                                            class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-cyan-600 dark:hover:bg-slate-700">
+                                            class="rounded-lg p-2 text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:text-cyan-600 dark:hover:bg-slate-700">
 
                                             <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -298,7 +298,7 @@
 
                                         {{-- Edit --}}
                                         <a href="{{ route('admin.tasks.edit', $task) }}" title="{{ $t['edit'] }}"
-                                            class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-700">
+                                            class="rounded-lg p-2 text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:text-cyan-600 dark:hover:bg-slate-700">
 
                                             <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -318,7 +318,7 @@
                                             @method('DELETE')
 
                                             <button type="submit" title="{{ $t['delete'] }}"
-                                                class="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20">
+                                                class="rounded-lg p-2 text-slate-500 dark:text-slate-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20">
                                                 <svg class="h-5 w-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"

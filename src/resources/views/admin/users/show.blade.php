@@ -12,7 +12,7 @@
             <div>
 
                 <a href="{{ route('admin.users.index') }}"
-                    class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-blue-600">
+                    class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-cyan-600">
 
                     ← {{ $isAr ? 'العودة للمستخدمين' : 'Back to Users' }}
 
@@ -23,7 +23,7 @@
             <div class="flex gap-2">
 
                 <a href="{{ route('admin.users.edit', $user) }}"
-                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+                    class="inline-flex items-center justify-center rounded-xl bg-cyan-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-cyan-700">
 
                     {{ $isAr ? 'تعديل' : 'Edit User' }}
 
@@ -52,14 +52,14 @@
 
 
         {{-- Profile Card --}}
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
 
             <div class="p-6">
 
                 <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
 
                     <div
-                        class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-2xl font-bold text-blue-700">
+                        class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-2xl font-bold text-cyan-700">
 
                         {{ strtoupper(substr($user->name ?: 'U', 0, 1)) }}
 
@@ -67,15 +67,15 @@
 
                     <div class="min-w-0">
 
-                        <p class="text-sm font-medium text-blue-600">
+                        <p class="text-sm font-medium text-cyan-600">
                             HAG Brokers
                         </p>
 
-                        <h1 class="mt-1 text-2xl font-bold text-slate-900">
+                        <h1 class="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
                             {{ $user->name ?: 'Unnamed User' }}
                         </h1>
 
-                        <p class="mt-1 text-sm text-slate-500">
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             {{ $user->email }}
                         </p>
 
@@ -91,27 +91,27 @@
 
 
             {{-- Basic Info --}}
-            <div class="grid border-t border-slate-100 sm:grid-cols-3">
+            <div class="grid border-t border-slate-100 dark:border-slate-800 sm:grid-cols-3">
 
-                <div class="border-b border-slate-100 p-5 sm:border-b-0 sm:border-r">
+                <div class="border-b border-slate-100 dark:border-slate-800 p-5 sm:border-b-0 sm:border-r">
 
                     <p class="text-xs font-medium text-slate-400">
                         {{ $isAr ? 'تاريخ التسجيل' : 'Joined' }}
                     </p>
 
-                    <p class="mt-1 font-semibold text-slate-800">
+                    <p class="mt-1 font-semibold text-slate-800 dark:text-slate-100">
                         {{ $user->created_at?->format('d M Y') ?? '—' }}
                     </p>
 
                 </div>
 
-                <div class="border-b border-slate-100 p-5 sm:border-b-0 sm:border-r">
+                <div class="border-b border-slate-100 dark:border-slate-800 p-5 sm:border-b-0 sm:border-r">
 
                     <p class="text-xs font-medium text-slate-400">
                         {{ $isAr ? 'آخر تحديث' : 'Last Updated' }}
                     </p>
 
-                    <p class="mt-1 font-semibold text-slate-800">
+                    <p class="mt-1 font-semibold text-slate-800 dark:text-slate-100">
                         {{ $user->updated_at?->format('d M Y') ?? '—' }}
                     </p>
 
@@ -123,7 +123,7 @@
                         {{ $isAr ? 'Customer' : 'Customer' }}
                     </p>
 
-                    <p class="mt-1 font-semibold text-slate-800">
+                    <p class="mt-1 font-semibold text-slate-800 dark:text-slate-100">
 
                         @if ($user->customer)
                             {{ $user->customer->company_name ?? ($user->customer->name ?? 'Customer #' . $user->customer_id) }}
@@ -143,17 +143,17 @@
 
 
         {{-- Roles --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
                 <div>
 
-                    <h2 class="text-lg font-bold text-slate-900">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">
                         {{ $isAr ? 'الأدوار' : 'Roles' }}
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'الأدوار المرتبطة بهذا المستخدم.' : 'Roles assigned to this user.' }}
                     </p>
 
@@ -200,17 +200,17 @@
 
 
         {{-- Direct Permissions --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
 
             <div class="flex items-center justify-between">
 
                 <div>
 
-                    <h2 class="text-lg font-bold text-slate-900">
+                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">
                         {{ $isAr ? 'الصلاحيات المباشرة' : 'Direct Permissions' }}
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'الصلاحيات التي تم منحها للمستخدم مباشرة.' : 'Permissions directly assigned to this user.' }}
                     </p>
 
@@ -244,7 +244,7 @@
 
                 @empty
 
-                    <div class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                    <div class="rounded-xl bg-slate-50 dark:bg-slate-950 px-4 py-3 text-sm text-slate-500 dark:text-slate-400">
 
                         {{ $isAr ? 'لا توجد صلاحيات مباشرة.' : 'No direct permissions assigned.' }}
 
@@ -257,15 +257,15 @@
 
 
         {{-- Contact --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
 
-            <h2 class="text-lg font-bold text-slate-900">
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">
                 {{ $isAr ? 'معلومات الاتصال' : 'Contact Information' }}
             </h2>
 
             <div class="mt-5 grid gap-4 sm:grid-cols-2">
 
-                <div class="rounded-xl bg-slate-50 p-4">
+                <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-4">
 
                     <p class="text-xs font-medium text-slate-400">
                         {{ $isAr ? 'البريد الإلكتروني' : 'Email' }}
@@ -273,13 +273,13 @@
 
                     @if ($user->email)
                         <a href="mailto:{{ $user->email }}"
-                            class="mt-1 block text-sm font-semibold text-blue-600 hover:text-blue-700">
+                            class="mt-1 block text-sm font-semibold text-cyan-600 hover:text-cyan-700">
 
                             {{ $user->email }}
 
                         </a>
                     @else
-                        <p class="mt-1 text-sm text-slate-500">
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             —
                         </p>
                     @endif
@@ -288,13 +288,13 @@
 
 
                 @if (isset($user->phone))
-                    <div class="rounded-xl bg-slate-50 p-4">
+                    <div class="rounded-xl bg-slate-50 dark:bg-slate-950 p-4">
 
                         <p class="text-xs font-medium text-slate-400">
                             {{ $isAr ? 'الهاتف' : 'Phone' }}
                         </p>
 
-                        <p class="mt-1 text-sm font-semibold text-slate-800">
+                        <p class="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
                             {{ $user->phone ?: '—' }}
                         </p>
 
@@ -310,7 +310,7 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
 
             <a href="{{ route('admin.users.index') }}"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                class="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50">
 
                 {{ $isAr ? 'العودة للمستخدمين' : 'Back to Users' }}
 

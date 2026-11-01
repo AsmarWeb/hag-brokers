@@ -7,14 +7,14 @@
 
             <div>
                 <div class="mb-2 text-xs font-black uppercase tracking-[0.2em] text-cyan-400">
-                    HAG Brokers / Shipments
+                    {{ __('admin_ui.label_048') }}
                 </div>
 
                 <h1 class="text-3xl font-black text-white">
-                    Create Shipment
+                    {{ __('admin_ui.label_146') }}
                 </h1>
 
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
                     Create a new shipment and connect it with the customer,
                     quotation, route, carrier, vessel, cargo and schedule.
                 </p>
@@ -41,10 +41,10 @@
                 <div>
 
                     <h2 class="font-black text-cyan-300">
-                        Create an operational shipment
+                        {{ __('admin_ui.label_147') }}
                     </h2>
 
-                    <p class="mt-1 text-sm leading-6 text-slate-500">
+                    <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
                         A shipment represents the actual sea-freight movement
                         after a customer request and quotation process.
                         Assign the customer, quotation, route, carrier,
@@ -70,7 +70,7 @@
                     </div>
 
                     <h2 class="font-black text-red-300">
-                        Please fix the following errors
+                        {{ __('admin_ui.label_050') }}
                     </h2>
 
                 </div>

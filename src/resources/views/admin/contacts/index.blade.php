@@ -158,7 +158,7 @@
                                             {{ $contact->customer->company_name }}
                                         </a>
                                     @else
-                                        <span class="text-slate-500">—</span>
+                                        <span class="text-slate-500 dark:text-slate-400">—</span>
                                     @endif
                                 </td>
 

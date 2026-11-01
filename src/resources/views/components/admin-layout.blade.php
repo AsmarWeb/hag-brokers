@@ -109,7 +109,7 @@
     $t = [
         'admin_dashboard' => $isAr ? 'لوحة تحكم الإدارة' : 'Admin Dashboard',
 
-        'admin_control' => $isAr ? 'مركز تحكم الإدارة' : 'Admin Control Center',
+        'admin_control' => $isAr ? 'إدارة أعمال الوساطة' : 'Brokerage Management',
 
         'administrator' => $isAr ? 'مدير النظام' : 'Administrator',
 
@@ -119,7 +119,7 @@
 
         'dashboard' => $isAr ? 'لوحة التحكم' : 'Dashboard',
 
-        'crm_sales' => $isAr ? 'إدارة العملاء والمبيعات' : 'CRM & Sales',
+        'crm_sales' => $isAr ? 'العلاقات والفرص التجارية' : 'Relationships & Opportunities',
 
         'leads' => $isAr ? 'العملاء المحتملون' : 'Leads',
 
@@ -139,7 +139,7 @@
 
         'users' => $isAr ? 'المستخدمون' : 'Users',
 
-        'operations' => $isAr ? 'العمليات' : 'Operations',
+        'operations' => $isAr ? 'التنفيذ والخدمات' : 'Execution & Services',
 
         'documents' => $isAr ? 'المستندات' : 'Documents',
 
@@ -198,6 +198,71 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $isAr ? 'rtl' : 'ltr' }}">
 
 <head>
+<script>
+(() => {
+    let collapsed = false, width = 288;
+    try {
+        collapsed = localStorage.getItem('hag-sidebar-collapsed') === 'true';
+        const saved = Number(localStorage.getItem('hag-sidebar-width'));
+        if (Number.isFinite(saved) && saved >= 240 && saved <= 380) width = saved;
+    } catch (_) {}
+    document.documentElement.dataset.hagSidebar = collapsed ? 'closed' : 'open';
+    document.documentElement.style.setProperty('--hag-sidebar-width', width + 'px');
+})();
+
+</script>
+
+    <!-- HAG admin theme bootstrap -->
+    <script>
+        (() => {
+            const key = 'hag-admin-theme';
+            const root = document.documentElement;
+            const system = window.matchMedia('(prefers-color-scheme: dark)');
+            let preference = null;
+            try {
+                const saved = localStorage.getItem(key);
+                if (saved === 'light' || saved === 'dark') preference = saved;
+            } catch (_) {}
+
+            function apply(mode) {
+                const dark = mode === 'dark';
+                root.classList.toggle('dark', dark);
+                root.style.colorScheme = mode;
+                const button = document.getElementById('hag-admin-theme-toggle');
+                if (button) {
+                    button.setAttribute('aria-pressed', String(dark));
+                    const label = dark ? button.dataset.lightLabel : button.dataset.darkLabel;
+                    button.setAttribute('aria-label', label);
+                    button.title = label;
+                }
+            }
+
+            apply(preference || (system.matches ? 'dark' : 'light'));
+            document.addEventListener('DOMContentLoaded', () => {
+                const button = document.getElementById('hag-admin-theme-toggle');
+                apply(preference || (system.matches ? 'dark' : 'light'));
+                if (button) button.addEventListener('click', () => {
+                    preference = root.classList.contains('dark') ? 'light' : 'dark';
+                    try { localStorage.setItem(key, preference); } catch (_) {}
+                    apply(preference);
+                });
+            });
+
+            const followSystem = () => {
+                if (!preference) apply(system.matches ? 'dark' : 'light');
+            };
+            if (system.addEventListener) system.addEventListener('change', followSystem);
+            else if (system.addListener) system.addListener(followSystem);
+
+            window.addEventListener('storage', event => {
+                if (event.key !== key && event.key !== null) return;
+                preference = event.newValue === 'dark' || event.newValue === 'light'
+                    ? event.newValue : null;
+                apply(preference || (system.matches ? 'dark' : 'light'));
+            });
+        })();
+    </script>
+
 
     <meta charset="utf-8">
 
@@ -211,7 +276,7 @@
 
     <link rel="preconnect" href="https://fonts.bunny.net">
 
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900|noto-sans-arabic:400,500,600,700&display=swap" rel="stylesheet">
 
     <link rel="icon" type="image/png" href="{{ asset('storage/favicon.png') }}">
 
@@ -220,8 +285,10 @@
 </head>
 
 
-<body class="min-h-screen bg-slate-100 font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body class="hag-admin min-h-screen bg-slate-100 font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100">
 
+
+    <a href="#admin-content" class="hag-skip-link">{{ $isAr ? 'الانتقال إلى المحتوى' : 'Skip to content' }}</a>
 
     {{-- =========================================================
         Mobile Overlay
@@ -235,7 +302,7 @@
         Sidebar
     ========================================================== --}}
 
-    <aside id="admin-sidebar"
+    <aside id="admin-sidebar" aria-label="{{ $isAr ? 'قائمة إدارة الأعمال' : 'Business navigation' }}"
         class="fixed inset-y-0 start-0 z-50 flex w-72 -translate-x-full flex-col border-e border-slate-800 bg-slate-950 shadow-2xl transition-transform duration-300 lg:translate-x-0 rtl:translate-x-full rtl:lg:translate-x-0">
 
 
@@ -1049,6 +1116,11 @@
         </div>
 
 
+
+        <div id="hag-sidebar-resize" role="separator" tabindex="0" aria-orientation="vertical"
+            aria-controls="admin-sidebar" aria-valuemin="240" aria-valuemax="380" aria-valuenow="288"
+            aria-label="{{ $isAr ? 'تغيير عرض القائمة الجانبية' : 'Resize sidebar' }}"
+            title="{{ $isAr ? 'اسحب لتغيير العرض، أو استخدم مفاتيح الأسهم. انقر مرتين لإعادة العرض.' : 'Drag to resize, or use arrow keys. Double-click to reset.' }}"></div>
     </aside>
 
 
@@ -1056,7 +1128,7 @@
         Main Wrapper
     ========================================================== --}}
 
-    <div class="min-h-screen lg:ms-72">
+    <div class="hag-shell min-h-screen">
 
 
         {{-- =====================================================
@@ -1076,8 +1148,8 @@
 
                     {{-- Mobile menu --}}
 
-                    <button type="button" onclick="openAdminSidebar()"
-                        class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-cyan-300 hover:text-cyan-600 lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
+                    <button type="button" id="hag-sidebar-toggle" aria-controls="admin-sidebar" aria-expanded="false" data-open-label="{{ $t['open_menu'] }}" data-close-label="{{ $t['close_menu'] }}"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-cyan-300 hover:text-cyan-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-cyan-500 dark:hover:text-cyan-400"
                         aria-label="{{ $t['open_menu'] }}">
 
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1121,10 +1193,26 @@
                 <div class="flex items-center gap-2 sm:gap-3">
 
 
+                    {{-- HAG admin light/dark toggle --}}
+                    <button id="hag-admin-theme-toggle" type="button"
+                        data-light-label="{{ $isAr ? 'تفعيل الوضع النهاري' : 'Switch to light mode' }}"
+                        data-dark-label="{{ $isAr ? 'تفعيل الوضع الليلي' : 'Switch to dark mode' }}"
+                        aria-label="{{ $isAr ? 'تبديل مظهر لوحة الإدارة' : 'Toggle admin appearance' }}"
+                        aria-pressed="false"
+                        class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-cyan-400 hover:text-cyan-700 dark:border-slate-700 dark:bg-slate-900 dark:text-cyan-400 dark:hover:border-cyan-500">
+                        <svg class="h-5 w-5 dark:hidden" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.9 13a9 9 0 0 1-9.9-9.9A9 9 0 1 0 20.9 13Z" />
+                        </svg>
+                        <svg class="hidden h-5 w-5 dark:block" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <circle cx="12" cy="12" r="4" />
+                            <path stroke-linecap="round" d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5" />
+                        </svg>
+                    </button>
+
                     {{-- Language --}}
 
                     <div
-                        class="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-900 sm:flex">
+                        class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-900">
 
                         <span class="text-slate-400">
                             {{ $t['language'] }}
@@ -1211,7 +1299,7 @@
             Page Content
         ====================================================== --}}
 
-        <main>
+        <main id="admin-content" class="hag-admin-content" tabindex="-1">
 
             @if (isset($header))
                 <div class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
@@ -1239,108 +1327,129 @@
     ========================================================== --}}
 
     <script>
-        function openAdminSidebar() {
+(() => {
+    const root = document.documentElement;
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('admin-mobile-overlay');
+    const toggle = document.getElementById('hag-sidebar-toggle');
+    const handle = document.getElementById('hag-sidebar-resize');
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const rtl = () => root.dir === 'rtl';
+    let mobileOpen = false, drag = null, swipe = null;
+    let width = parseInt(root.style.getPropertyValue('--hag-sidebar-width'), 10) || 288;
+    if (!sidebar || !overlay || !toggle || !handle) return;
 
-            const sidebar =
-                document.getElementById('admin-sidebar');
-
-            const overlay =
-                document.getElementById('admin-mobile-overlay');
-
-
-            if (!sidebar || !overlay) {
-                return;
-            }
-
-
-            sidebar.classList.remove('-translate-x-full');
-
-            sidebar.classList.remove('translate-x-full');
-
-            sidebar.classList.add('translate-x-0');
-
-            overlay.classList.remove('hidden');
-
-            document.body.classList.add('overflow-hidden');
-
+    const save = (key, value) => { try { localStorage.setItem(key, String(value)); } catch (_) {} };
+    const isOpen = () => desktop.matches ? root.dataset.hagSidebar !== 'closed' : mobileOpen;
+    function sync() {
+        const open = isOpen();
+        root.dataset.hagMobileSidebar = mobileOpen ? 'open' : 'closed';
+        overlay.classList.toggle('hidden', desktop.matches || !mobileOpen);
+        document.body.classList.toggle('overflow-hidden', !desktop.matches && mobileOpen);
+        sidebar.inert = !open;
+        sidebar.setAttribute('aria-hidden', String(!open));
+        toggle.setAttribute('aria-expanded', String(open));
+        const label = open ? toggle.dataset.closeLabel : toggle.dataset.openLabel;
+        toggle.setAttribute('aria-label', label);
+        toggle.title = label;
+        if (!desktop.matches && mobileOpen) {
+            sidebar.setAttribute('role', 'dialog');
+            sidebar.setAttribute('aria-modal', 'true');
+        } else {
+            sidebar.removeAttribute('role');
+            sidebar.removeAttribute('aria-modal');
         }
-
-
-        function closeAdminSidebar() {
-
-            const sidebar =
-                document.getElementById('admin-sidebar');
-
-            const overlay =
-                document.getElementById('admin-mobile-overlay');
-
-
-            if (!sidebar || !overlay) {
-                return;
-            }
-
-
-            const isRtl =
-                document.documentElement.dir === 'rtl';
-
-
-            sidebar.classList.remove('translate-x-0');
-
-            sidebar.classList.add(
-                isRtl ?
-                'translate-x-full' :
-                '-translate-x-full'
-            );
-
-
-            overlay.classList.add('hidden');
-
-            document.body.classList.remove('overflow-hidden');
-
+        handle.setAttribute('aria-valuenow', String(width));
+        handle.setAttribute('aria-valuetext', width + ' px');
+    }
+    function setOpen(open, focus = true) {
+        if (desktop.matches) {
+            root.dataset.hagSidebar = open ? 'open' : 'closed';
+            save('hag-sidebar-collapsed', !open);
+        } else mobileOpen = open;
+        sync();
+        if (focus && !desktop.matches && open) sidebar.querySelector('a, button')?.focus();
+        else if (focus && !open) toggle.focus();
+    }
+    window.openAdminSidebar = () => setOpen(true);
+    window.closeAdminSidebar = () => setOpen(false);
+    toggle.addEventListener('click', () => setOpen(!isOpen()));
+    function setWidth(value, persist = false) {
+        width = Math.round(Math.max(240, Math.min(380, value)));
+        root.style.setProperty('--hag-sidebar-width', width + 'px');
+        handle.setAttribute('aria-valuenow', String(width));
+        handle.setAttribute('aria-valuetext', width + ' px');
+        if (persist) save('hag-sidebar-width', width);
+    }
+    handle.addEventListener('pointerdown', event => {
+        if (!desktop.matches || !isOpen() || event.button !== 0) return;
+        event.preventDefault();
+        drag = { x: event.clientX, width, id: event.pointerId };
+        handle.setPointerCapture(event.pointerId);
+        root.classList.add('hag-sidebar-dragging');
+    });
+    handle.addEventListener('pointermove', event => {
+        if (!drag || drag.id !== event.pointerId) return;
+        setWidth(drag.width + (event.clientX - drag.x) * (rtl() ? -1 : 1));
+    });
+    function endDrag(event) {
+        if (!drag || (event && drag.id !== event.pointerId)) return;
+        save('hag-sidebar-width', width);
+        drag = null;
+        root.classList.remove('hag-sidebar-dragging');
+    }
+    handle.addEventListener('pointerup', endDrag);
+    handle.addEventListener('pointercancel', endDrag);
+    handle.addEventListener('lostpointercapture', endDrag);
+    handle.addEventListener('keydown', event => {
+        let next = width;
+        if (event.key === 'Home') next = 240;
+        else if (event.key === 'End') next = 380;
+        else if (event.key === 'ArrowRight') next += rtl() ? -16 : 16;
+        else if (event.key === 'ArrowLeft') next += rtl() ? 16 : -16;
+        else return;
+        event.preventDefault(); setWidth(next, true);
+    });
+    handle.addEventListener('dblclick', () => setWidth(288, true));
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !desktop.matches && mobileOpen) setOpen(false);
+        if (event.key !== 'Tab' || desktop.matches || !mobileOpen) return;
+        const items = Array.from(sidebar.querySelectorAll('a[href], button, [tabindex="0"]'))
+            .filter(el => !el.disabled && el.getClientRects().length > 0);
+        const first = items[0], last = items[items.length - 1];
+        if (!first) return;
+        if (event.shiftKey && (document.activeElement === first || !sidebar.contains(document.activeElement))) {
+            event.preventDefault(); last.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || !sidebar.contains(document.activeElement))) {
+            event.preventDefault(); first.focus();
         }
+    });
+    // Touch: start at the screen edge to open; swipe inside the drawer to close.
+    document.addEventListener('pointerdown', event => {
+        if (desktop.matches || event.pointerType !== 'touch' || !event.isPrimary) return;
+        if (event.target.closest('input,select,textarea,button,[role="separator"]')) return;
+        const edge = rtl() ? event.clientX >= window.innerWidth - 24 : event.clientX <= 24;
+        if ((!mobileOpen && edge) || (mobileOpen && sidebar.contains(event.target))) {
+            swipe = { x: event.clientX, y: event.clientY, open: mobileOpen, id: event.pointerId };
+        }
+    }, { passive: true });
+    document.addEventListener('pointerup', event => {
+        if (!swipe || swipe.id !== event.pointerId) return;
+        const dx = (event.clientX - swipe.x) * (rtl() ? -1 : 1);
+        const dy = Math.abs(event.clientY - swipe.y);
+        if (Math.abs(dx) > 70 && Math.abs(dx) > dy * 1.5) {
+            if (!swipe.open && dx > 0) setOpen(true);
+            else if (swipe.open && dx < 0) setOpen(false);
+        }
+        swipe = null;
+    }, { passive: true });
+    document.addEventListener('pointercancel', () => { swipe = null; });
+    const onBreakpoint = () => { mobileOpen = false; endDrag(); sync(); };
+    if (desktop.addEventListener) desktop.addEventListener('change', onBreakpoint);
+    else desktop.addListener(onBreakpoint);
+    setWidth(width); sync();
+})();
 
-
-        document.addEventListener(
-            'keydown',
-            function(event) {
-
-                if (event.key === 'Escape') {
-
-                    closeAdminSidebar();
-
-                }
-
-            }
-        );
-
-
-        window.addEventListener(
-            'resize',
-            function() {
-
-                if (window.innerWidth >= 1024) {
-
-                    const overlay =
-                        document.getElementById(
-                            'admin-mobile-overlay'
-                        );
-
-
-                    if (overlay) {
-
-                        overlay.classList.add('hidden');
-
-                    }
-
-
-                    document.body.classList.remove(
-                        'overflow-hidden'
-                    );
-
-                }
-
-            }
-        );
     </script>
 
 

@@ -7,22 +7,22 @@
 
             <div>
 
-                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
                     <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-400">
-                        Carriers
+                        {{ __('admin_ui.label_016') }}
                     </a>
 
                     <span>/</span>
 
                     <span class="text-slate-400">
-                        Edit
+                        {{ __('admin_ui.label_003') }}
                     </span>
 
                 </div>
 
                 <h1 class="text-3xl font-black tracking-tight text-white">
-                    Edit Carrier
+                    {{ __('admin_ui.label_062') }}
                 </h1>
 
                 <p class="mt-2 text-sm text-slate-400">
@@ -57,7 +57,7 @@
                             {{ $carrier->name }}
                         </h2>
 
-                        <p class="mt-1 text-sm text-slate-500">
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             Carrier ID #{{ $carrier->id }}
                         </p>
 
@@ -65,8 +65,7 @@
 
 
                     <span
-                        class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold
-                    {{ $carrier->is_active ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-400' }}">
+                        class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-bold {{ $carrier->is_active ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-400' }}">
                         {{ $carrier->is_active ? 'Active' : 'Inactive' }}
                     </span>
 
@@ -107,12 +106,12 @@
 
                     <a href="{{ route('admin.carriers.index') }}"
                         class="rounded-xl border border-slate-700 px-6 py-3 text-center text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
-                        Cancel
+                        {{ __('admin_ui.label_007') }}
                     </a>
 
                     <button type="submit"
                         class="rounded-xl bg-cyan-400 px-6 py-3 text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/10 transition hover:bg-cyan-300">
-                        Save Changes
+                        {{ __('admin_ui.label_063') }}
                     </button>
 
                 </div>

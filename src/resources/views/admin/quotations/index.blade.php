@@ -7,26 +7,26 @@
 
             <div>
 
-                <div class="flex items-center gap-2 text-sm text-slate-500">
+                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
                     <a href="{{ route('admin.dashboard') }}" class="transition hover:text-slate-900">
-                        Dashboard
+                        {{ __('admin_ui.label_038') }}
                     </a>
 
                     <span>/</span>
 
-                    <span class="text-slate-900">
-                        Quotations
+                    <span class="text-slate-900 dark:text-white">
+                        {{ __('admin_ui.label_009') }}
                     </span>
 
                 </div>
 
-                <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-                    Quotations
+                <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    {{ __('admin_ui.label_009') }}
                 </h1>
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Manage customer quotation requests and their current status.
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {{ __('admin_ui.label_092') }}
                 </p>
 
             </div>
@@ -43,8 +43,8 @@
                 'approved' => ['Approved', 'text-emerald-600'],
                 'completed' => ['Completed', 'text-indigo-600'],
             ] as $key => [$label, $color])
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         {{ $label }}
                     </p>
                     <p class="mt-3 text-3xl font-black {{ $color }}">
@@ -55,7 +55,7 @@
         </div>
 
         {{-- Filters --}}
-        <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
 
             <form method="GET" action="{{ route('admin.quotations.index') }}"
                 class="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -63,13 +63,13 @@
                 {{-- Search --}}
                 <div class="md:col-span-2">
 
-                    <label for="search" class="mb-2 block text-sm font-medium text-slate-700">
-                        Search Reference
+                    <label for="search" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {{ __('admin_ui.label_093') }}
                     </label>
 
                     <div class="relative">
 
-                        <svg class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                        <svg class="pointer-events-none absolute start-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
@@ -77,7 +77,7 @@
 
                         <input id="search" name="search" type="text" value="{{ request('search') }}"
                             placeholder="Quotation reference..."
-                            class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100">
+                            class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-2.5 ps-10 pe-4 text-sm text-slate-900 dark:text-white outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100">
 
                     </div>
 
@@ -87,35 +87,35 @@
                 {{-- Status --}}
                 <div>
 
-                    <label for="status" class="mb-2 block text-sm font-medium text-slate-700">
-                        Status
+                    <label for="status" class="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {{ __('admin_ui.label_001') }}
                     </label>
 
                     <select id="status" name="status"
-                        class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100">
+                        class="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-100">
 
                         <option value="">
-                            All statuses
+                            {{ __('admin_ui.label_022') }}
                         </option>
 
                         <option value="pending" @selected(request('status') === 'pending')>
-                            Pending
+                            {{ __('admin_ui.label_027') }}
                         </option>
 
                         <option value="processing" @selected(request('status') === 'processing')>
-                            Processing
+                            {{ __('admin_ui.label_039') }}
                         </option>
 
                         <option value="approved" @selected(request('status') === 'approved')>
-                            Approved
+                            {{ __('admin_ui.label_040') }}
                         </option>
 
                         <option value="rejected" @selected(request('status') === 'rejected')>
-                            Rejected
+                            {{ __('admin_ui.label_041') }}
                         </option>
 
                         <option value="completed" @selected(request('status') === 'completed')>
-                            Completed
+                            {{ __('admin_ui.label_042') }}
                         </option>
 
                     </select>
@@ -134,15 +134,15 @@
                                 d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
                         </svg>
 
-                        Filter
+                        {{ __('admin_ui.label_094') }}
 
                     </button>
 
 
                     @if (request()->hasAny(['search', 'status']))
                         <a href="{{ route('admin.quotations.index') }}"
-                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
-                            Clear
+                            class="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+                            {{ __('admin_ui.label_028') }}
                         </a>
                     @endif
 
@@ -154,26 +154,26 @@
 
 
         {{-- Quotations --}}
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
 
             {{-- Table Header --}}
             <div
-                class="flex flex-col gap-2 border-b border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                class="flex flex-col gap-2 border-b border-slate-200 dark:border-slate-800 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
 
                 <div>
 
-                    <h2 class="font-semibold text-slate-900">
-                        Quotation Requests
+                    <h2 class="font-semibold text-slate-900 dark:text-white">
+                        {{ __('admin_ui.label_095') }}
                     </h2>
 
-                    <p class="text-sm text-slate-500">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
                         {{ $quotations->total() }}
                         {{ Str::plural('quotation', $quotations->total()) }}
                     </p>
 
                 </div>
 
-                <div class="text-sm text-slate-500">
+                <div class="text-sm text-slate-500 dark:text-slate-400">
 
                     Page {{ $quotations->currentPage() }}
                     of {{ $quotations->lastPage() }}
@@ -186,30 +186,30 @@
             {{-- Desktop Table --}}
             <div class="hidden overflow-x-auto lg:block">
 
-                <table class="min-w-full divide-y divide-slate-200">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
 
-                    <thead class="bg-slate-50">
+                    <thead class="bg-slate-50 dark:bg-slate-950">
 
                         <tr>
 
                             <th
-                                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Reference
+                                class="px-6 py-3 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_017') }}
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Status
+                                class="px-6 py-3 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_001') }}
                             </th>
 
                             <th
-                                class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Created
+                                class="px-6 py-3 text-start text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_018') }}
                             </th>
 
                             <th
-                                class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                                Action
+                                class="px-6 py-3 text-end text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                {{ __('admin_ui.label_096') }}
                             </th>
 
                         </tr>
@@ -217,7 +217,7 @@
                     </thead>
 
 
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
 
                         @forelse($quotations as $quotation)
                             @php
@@ -258,11 +258,11 @@
                                 {{-- Reference --}}
                                 <td class="whitespace-nowrap px-6 py-4">
 
-                                    <div class="font-semibold text-slate-900">
+                                    <div class="font-semibold text-slate-900 dark:text-white">
                                         {{ $quotation->reference_no ?? '—' }}
                                     </div>
 
-                                    <div class="mt-1 text-xs text-slate-500">
+                                    <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                         Quotation #{{ $quotation->id }}
                                     </div>
 
@@ -283,7 +283,7 @@
                                 {{-- Created --}}
                                 <td class="whitespace-nowrap px-6 py-4">
 
-                                    <div class="text-sm text-slate-700">
+                                    <div class="text-sm text-slate-700 dark:text-slate-200">
 
                                         {{ $quotation->created_at?->format('d M Y') ?? '—' }}
 
@@ -299,12 +299,12 @@
 
 
                                 {{-- Action --}}
-                                <td class="whitespace-nowrap px-6 py-4 text-right">
+                                <td class="whitespace-nowrap px-6 py-4 text-end">
 
                                     <a href="{{ route('admin.quotations.show', $quotation) }}"
-                                        class="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900">
+                                        class="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-100 hover:text-slate-900">
 
-                                        View
+                                        {{ __('admin_ui.label_004') }}
 
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -335,12 +335,12 @@
 
                                     </div>
 
-                                    <h3 class="mt-4 font-semibold text-slate-900">
-                                        No quotations found
+                                    <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">
+                                        {{ __('admin_ui.label_097') }}
                                     </h3>
 
-                                    <p class="mt-1 text-sm text-slate-500">
-                                        Try changing your search or status filter.
+                                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        {{ __('admin_ui.label_098') }}
                                     </p>
 
                                 </td>
@@ -356,7 +356,7 @@
 
 
             {{-- Mobile --}}
-            <div class="divide-y divide-slate-100 lg:hidden">
+            <div class="divide-y divide-slate-100 dark:divide-slate-800 lg:hidden">
 
                 @forelse($quotations as $quotation)
                     @php
@@ -385,11 +385,11 @@
 
                             <div>
 
-                                <div class="font-semibold text-slate-900">
+                                <div class="font-semibold text-slate-900 dark:text-white">
                                     {{ $quotation->reference_no ?? '—' }}
                                 </div>
 
-                                <div class="mt-1 text-xs text-slate-500">
+                                <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     #{{ $quotation->id }}
                                 </div>
 
@@ -403,11 +403,11 @@
                         </div>
 
 
-                        <div class="mt-4 text-xs text-slate-500">
+                        <div class="mt-4 text-xs text-slate-500 dark:text-slate-400">
 
-                            Created:
+                            {{ __('admin_ui.label_099') }}
 
-                            <span class="font-medium text-slate-700">
+                            <span class="font-medium text-slate-700 dark:text-slate-200">
                                 {{ $quotation->created_at?->format('d M Y, H:i') ?? '—' }}
                             </span>
 
@@ -417,8 +417,8 @@
 
                 @empty
 
-                    <div class="px-6 py-16 text-center text-sm text-slate-500">
-                        No quotations found.
+                    <div class="px-6 py-16 text-center text-sm text-slate-500 dark:text-slate-400">
+                        {{ __('admin_ui.label_043') }}
                     </div>
                 @endforelse
 
@@ -427,7 +427,7 @@
 
             {{-- Pagination --}}
             @if ($quotations->hasPages())
-                <div class="border-t border-slate-200 px-6 py-4">
+                <div class="border-t border-slate-200 dark:border-slate-800 px-6 py-4">
 
                     {{ $quotations->links() }}
 

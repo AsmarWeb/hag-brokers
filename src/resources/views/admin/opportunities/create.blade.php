@@ -179,7 +179,7 @@
                         {{ $isAr ? 'معلومات CRM' : 'CRM Information' }}
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $isAr
                             ? 'اربط الفرصة بالعميل وجهة الاتصال والمسؤول عنها.'
                             : 'Connect the opportunity with the customer, contact and assigned user.' }}
@@ -641,7 +641,7 @@
                         {{ $isAr ? 'العمولة' : 'Commission' }}
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $isAr
                             ? 'حدد طريقة احتساب عمولة HAG لهذه الفرصة.'
                             : 'Define how HAG commission will be calculated for this opportunity.' }}
@@ -789,7 +789,7 @@
                                 {{ $isAr ? 'Marketplace' : 'Marketplace' }}
                             </h2>
 
-                            <p class="text-sm text-slate-500">
+                            <p class="text-sm text-slate-500 dark:text-slate-400">
                                 {{ $isAr
                                     ? 'حدد كيف ستظهر هذه الفرصة في سوق الفرص.'
                                     : 'Control how this opportunity appears in the public marketplace.' }}
@@ -824,7 +824,7 @@
 
                         </select>
 
-                        <p class="mt-2 text-xs text-slate-500">
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                             {{ $isAr ? 'الفرصة الخاصة لن تظهر للعامة.' : 'Private opportunities are not visible publicly.' }}
                         </p>
 
@@ -850,7 +850,7 @@
 
                         </select>
 
-                        <p class="mt-2 text-xs text-slate-500">
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                             {{ $isAr
                                 ? 'التحقق يعني أن HAG قامت بمراجعة بيانات الفرصة، وليس ضمان نجاح الصفقة.'
                                 : 'Verification means HAG reviewed the opportunity information; it does not guarantee transaction success.' }}

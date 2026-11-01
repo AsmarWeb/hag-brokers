@@ -112,7 +112,7 @@
 
                 <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
 
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'المستند' : 'Document' }}
                     </p>
 
@@ -125,7 +125,7 @@
 
                 <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
 
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'الإصدار الحالي' : 'Current Version' }}
                     </p>
 
@@ -138,7 +138,7 @@
 
                 <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
 
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'عدد الإصدارات' : 'Total Versions' }}
                     </p>
 
@@ -151,7 +151,7 @@
 
                 <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
 
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'مرتبط بـ' : 'Linked To' }}
                     </p>
 
@@ -273,7 +273,7 @@
                             class="block w-full rounded-xl border border-white/10 bg-slate-900 p-3 text-sm text-slate-200 file:me-4 file:rounded-lg file:border-0 file:bg-cyan-400 file:px-4 file:py-2 file:font-bold file:text-slate-950"
                         >
 
-                        <p class="mt-2 text-xs text-slate-500">
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                             {{ $isAr ? 'الحد الأقصى: 10 ميجابايت' : 'Maximum file size: 10 MB' }}
                         </p>
 
@@ -326,10 +326,7 @@
                                 {{-- Timeline node --}}
 
                                 <div
-                                    class="absolute top-5 {{ $isAr ? 'right-0' : 'left-0' }} hidden h-12 w-12 items-center justify-center rounded-full border md:flex
-                                    {{ $isCurrent
-                                        ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300'
-                                        : 'border-white/10 bg-slate-900 text-slate-400' }}">
+                                    class="absolute top-5 {{ $isAr ? 'right-0' : 'left-0' }} hidden h-12 w-12 items-center justify-center rounded-full border md:flex {{ $isCurrent ? 'border-cyan-400/40 bg-cyan-400/10 text-cyan-300' : 'border-white/10 bg-slate-900 text-slate-400' }}">
 
                                     <span class="text-xs font-black">
                                         v{{ $version->version }}
@@ -341,8 +338,7 @@
                                 {{-- Version Card --}}
 
                                 <div
-                                    class="overflow-hidden rounded-2xl border bg-white/[0.03] backdrop-blur-xl
-                                    {{ $isCurrent ? 'border-cyan-400/20 shadow-xl shadow-cyan-400/5' : 'border-white/10' }}">
+                                    class="overflow-hidden rounded-2xl border bg-white/[0.03] backdrop-blur-xl {{ $isCurrent ? 'border-cyan-400/20 shadow-xl shadow-cyan-400/5' : 'border-white/10' }}">
 
                                     <div class="p-5">
 
@@ -389,7 +385,7 @@
 
                                                 <div>
 
-                                                    <p class="text-slate-500">
+                                                    <p class="text-slate-500 dark:text-slate-400">
                                                         {{ $isAr ? 'الحجم' : 'Size' }}
                                                     </p>
 
@@ -402,7 +398,7 @@
 
                                                 <div>
 
-                                                    <p class="text-slate-500">
+                                                    <p class="text-slate-500 dark:text-slate-400">
                                                         {{ $isAr ? 'النوع' : 'Type' }}
                                                     </p>
 
@@ -415,7 +411,7 @@
 
                                                 <div>
 
-                                                    <p class="text-slate-500">
+                                                    <p class="text-slate-500 dark:text-slate-400">
                                                         {{ $isAr ? 'رفع بواسطة' : 'Uploaded By' }}
                                                     </p>
 
@@ -428,7 +424,7 @@
 
                                                 <div>
 
-                                                    <p class="text-slate-500">
+                                                    <p class="text-slate-500 dark:text-slate-400">
                                                         {{ $isAr ? 'التاريخ' : 'Date' }}
                                                     </p>
 
@@ -483,7 +479,7 @@
                 <div class="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center">
 
                     <div
-                        class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-slate-500">
+                        class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-slate-500 dark:text-slate-400">
 
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
@@ -498,7 +494,7 @@
                         {{ $isAr ? 'لا توجد إصدارات' : 'No Versions Found' }}
                     </h3>
 
-                    <p class="mt-2 text-sm text-slate-500">
+                    <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                         {{ $isAr ? 'لم يتم تسجيل أي إصدار لهذا المستند.' : 'No version history has been recorded for this document.' }}
                     </p>
 

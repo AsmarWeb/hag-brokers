@@ -131,7 +131,7 @@
                 <dl class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['company'] }}
                         </dt>
 
@@ -141,7 +141,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['contact_person'] }}
                         </dt>
 
@@ -151,7 +151,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['email'] }}
                         </dt>
 
@@ -161,7 +161,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['phone'] }}
                         </dt>
 
@@ -171,7 +171,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['country'] }}
                         </dt>
 
@@ -181,7 +181,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['city'] }}
                         </dt>
 
@@ -191,7 +191,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['source'] }}
                         </dt>
 
@@ -201,7 +201,7 @@
                     </div>
 
                     <div>
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['assigned_to'] }}
                         </dt>
 
@@ -212,7 +212,7 @@
 
                     <div class="sm:col-span-2">
 
-                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['notes'] }}
                         </dt>
 
@@ -266,7 +266,7 @@
 
                     <div class="mt-5 border-t border-slate-800 pt-5">
 
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             {{ $t['updated'] }}
                         </p>
 
@@ -316,7 +316,7 @@
                                     {{ $activity->subject }}
                                 </span>
 
-                                <span class="text-xs text-slate-500">
+                                <span class="text-xs text-slate-500 dark:text-slate-400">
                                     {{ optional($activity->due_at)->format('Y-m-d H:i') ?: '—' }}
                                 </span>
 

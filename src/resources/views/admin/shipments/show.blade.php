@@ -36,7 +36,7 @@
 
                 </div>
 
-                <p class="mt-2 text-sm text-slate-500">
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                     Operational shipment information and tracking overview.
                 </p>
 
@@ -48,7 +48,7 @@
 
                 <a href="{{ route('admin.shipments.edit', $shipment) }}"
                     class="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-cyan-300">
-                    Edit Shipment
+                    {{ __('admin_ui.label_049') }}
                 </a>
 
                 <a href="{{ route('admin.shipments.index') }}"
@@ -106,11 +106,11 @@
 
                     <div>
                         <p class="text-xs font-black uppercase tracking-wider text-slate-600">
-                            Customer
+                            {{ __('admin_ui.label_005') }}
                         </p>
 
                         <h2 class="mt-1 text-lg font-black text-white">
-                            Customer
+                            {{ __('admin_ui.label_005') }}
                         </h2>
                     </div>
 
@@ -127,7 +127,7 @@
                     </div>
 
                     @if ($shipment->customer->contact_person)
-                        <div class="mt-1 text-sm text-slate-500">
+                        <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             {{ $shipment->customer->contact_person }}
                         </div>
                     @endif
@@ -160,7 +160,7 @@
 
                     <div>
                         <p class="text-xs font-black uppercase tracking-wider text-slate-600">
-                            Carrier
+                            {{ __('admin_ui.label_002') }}
                         </p>
 
                         <h2 class="mt-1 text-lg font-black text-white">
@@ -182,7 +182,7 @@
                     </div>
 
                     @if ($shipment->carrier->code)
-                        <div class="mt-1 text-sm text-slate-500">
+                        <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             Code: {{ $shipment->carrier->code }}
                         </div>
                     @endif
@@ -209,7 +209,7 @@
 
                     <div>
                         <p class="text-xs font-black uppercase tracking-wider text-slate-600">
-                            Vessel
+                            {{ __('admin_ui.label_024') }}
                         </p>
 
                         <h2 class="mt-1 text-lg font-black text-white">
@@ -230,13 +230,13 @@
                     </div>
 
                     @if ($shipment->vessel->imo)
-                        <div class="mt-1 text-sm text-slate-500">
+                        <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             IMO: {{ $shipment->vessel->imo }}
                         </div>
                     @endif
 
                     @if ($shipment->vessel->mmsi)
-                        <div class="mt-1 text-sm text-slate-500">
+                        <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                             MMSI: {{ $shipment->vessel->mmsi }}
                         </div>
                     @endif
@@ -280,7 +280,7 @@
                         {{ $shipment->originPort?->port_code ?? ($shipment->originPort?->name ?? '—') }}
                     </div>
 
-                    <div class="mt-1 text-sm text-slate-500">
+                    <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $shipment->originPort?->name ?? 'Unknown origin' }}
                     </div>
 
@@ -315,7 +315,7 @@
                         {{ $shipment->destinationPort?->port_code ?? ($shipment->destinationPort?->name ?? '—') }}
                     </div>
 
-                    <div class="mt-1 text-sm text-slate-500">
+                    <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         {{ $shipment->destinationPort?->name ?? 'Unknown destination' }}
                     </div>
 
@@ -367,14 +367,14 @@
                     </div>
 
                     <div>
-                        <div class="text-xs text-slate-600">Quotation</div>
+                        <div class="text-xs text-slate-600">{{ __('admin_ui.label_054') }}</div>
                         <div class="mt-1 font-bold text-slate-200">
                             {{ $shipment->quotation?->reference_no ?? '—' }}
                         </div>
                     </div>
 
                     <div>
-                        <div class="text-xs text-slate-600">Quantity</div>
+                        <div class="text-xs text-slate-600">{{ __('admin_ui.label_055') }}</div>
                         <div class="mt-1 font-bold text-slate-200">
                             {{ $shipment->quantity }}
                         </div>
@@ -391,7 +391,7 @@
                 <div class="mb-5">
 
                     <p class="text-xs font-black uppercase tracking-wider text-slate-600">
-                        Cargo
+                        {{ __('admin_ui.label_056') }}
                     </p>
 
                     <h2 class="mt-1 text-xl font-black text-white">
@@ -417,7 +417,7 @@
                     </div>
 
                     <div>
-                        <div class="text-xs text-slate-600">Quantity</div>
+                        <div class="text-xs text-slate-600">{{ __('admin_ui.label_055') }}</div>
                         <div class="mt-1 font-bold text-slate-200">
                             {{ $shipment->quantity }}
                         </div>
@@ -443,7 +443,7 @@
             <div class="mb-6">
 
                 <p class="text-xs font-black uppercase tracking-wider text-cyan-400">
-                    Schedule
+                    {{ __('admin_ui.label_051') }}
                 </p>
 
                 <h2 class="mt-1 text-xl font-black text-white">
@@ -472,7 +472,7 @@
                 <div class="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
 
                     <div class="text-xs text-slate-600">
-                        ETD
+                        {{ __('admin_ui.label_020') }}
                     </div>
 
                     <div class="mt-2 font-bold text-slate-300">
@@ -486,7 +486,7 @@
                 <div class="rounded-xl border border-cyan-400/10 bg-cyan-400/5 p-4">
 
                     <div class="text-xs text-cyan-400/70">
-                        ETA
+                        {{ __('admin_ui.label_019') }}
                     </div>
 
                     <div class="mt-2 font-bold text-cyan-300">
@@ -563,28 +563,28 @@
                             <tr>
 
                                 <th
-                                    class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-slate-600">
+                                    class="px-6 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-600">
                                     Container
                                 </th>
 
                                 <th
-                                    class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-slate-600">
-                                    Type
+                                    class="px-6 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-600">
+                                    {{ __('admin_ui.label_035') }}
                                 </th>
 
                                 <th
-                                    class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-slate-600">
+                                    class="px-6 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-600">
                                     Size
                                 </th>
 
                                 <th
-                                    class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-slate-600">
+                                    class="px-6 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-600">
                                     Seal
                                 </th>
 
                                 <th
-                                    class="px-6 py-4 text-left text-xs font-black uppercase tracking-wider text-slate-600">
-                                    Status
+                                    class="px-6 py-4 text-start text-xs font-black uppercase tracking-wider text-slate-600">
+                                    {{ __('admin_ui.label_001') }}
                                 </th>
 
                             </tr>
@@ -637,7 +637,7 @@
                         □
                     </div>
 
-                    <p class="mt-3 text-sm font-bold text-slate-500">
+                    <p class="mt-3 text-sm font-bold text-slate-500 dark:text-slate-400">
                         No containers assigned to this shipment.
                     </p>
 
@@ -667,7 +667,7 @@
 
                 <div class="relative">
 
-                    <div class="absolute bottom-0 left-[15px] top-0 w-px bg-slate-800"></div>
+                    <div class="absolute bottom-0 start-[15px] top-0 w-px bg-slate-800"></div>
 
                     <div class="space-y-6">
 
@@ -690,7 +690,7 @@
                                             </h3>
 
                                             @if ($event->location)
-                                                <p class="mt-1 text-sm text-slate-500">
+                                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                                     {{ $event->location }}
                                                 </p>
                                             @endif
@@ -712,7 +712,7 @@
                                     @if ($event->port)
                                         <div class="mt-3 text-xs text-slate-600">
                                             Port:
-                                            <span class="font-bold text-slate-500">
+                                            <span class="font-bold text-slate-500 dark:text-slate-400">
                                                 {{ $event->port->name }}
                                             </span>
                                         </div>
@@ -729,7 +729,7 @@
             @else
                 <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-8 text-center">
 
-                    <p class="text-sm font-bold text-slate-500">
+                    <p class="text-sm font-bold text-slate-500 dark:text-slate-400">
                         No tracking events recorded yet.
                     </p>
 
@@ -800,7 +800,7 @@
             @else
                 <div class="p-8 text-center">
 
-                    <p class="text-sm font-bold text-slate-500">
+                    <p class="text-sm font-bold text-slate-500 dark:text-slate-400">
                         No documents uploaded for this shipment.
                     </p>
 
@@ -840,7 +840,7 @@
 
                 <div>
                     <div class="text-xs text-slate-600">
-                        Created
+                        {{ __('admin_ui.label_018') }}
                     </div>
 
                     <div class="mt-1 font-bold text-slate-300">
@@ -860,7 +860,7 @@
 
                 <div>
                     <div class="text-xs text-slate-600">
-                        Status
+                        {{ __('admin_ui.label_001') }}
                     </div>
 
                     <div class="mt-1 font-bold text-slate-300">

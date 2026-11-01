@@ -396,11 +396,11 @@
                                     </a>
 
                                     @if ($opportunity->category)
-                                        <div class="mt-1 text-xs text-slate-500">
+                                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             {{ ucfirst(str_replace('_', ' ', $opportunity->category)) }}
                                         </div>
                                     @elseif ($opportunity->cargo_type)
-                                        <div class="mt-1 text-xs text-slate-500">
+                                        <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             {{ $opportunity->cargo_type }}
                                         </div>
                                     @endif
@@ -430,7 +430,7 @@
                                     @if ($opportunity->estimated_value !== null)
                                         {{ number_format((float) $opportunity->estimated_value, 2) }}
 
-                                        <span class="text-xs text-slate-500">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $opportunity->currency ?? 'USD' }}
                                         </span>
                                     @elseif ($opportunity->required_capital !== null)
@@ -438,7 +438,7 @@
                                             {{ number_format((float) $opportunity->required_capital, 2) }}
                                         </div>
 
-                                        <span class="text-xs text-slate-500">
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $opportunity->currency ?? 'USD' }}
                                         </span>
                                     @else
@@ -579,7 +579,7 @@
 
                                 <td colspan="8" class="px-6 py-16 text-center">
 
-                                    <div class="text-sm text-slate-500">
+                                    <div class="text-sm text-slate-500 dark:text-slate-400">
                                         {{ $t['no_data'] }}
                                     </div>
 

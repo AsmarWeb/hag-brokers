@@ -52,7 +52,7 @@
                         <div>
 
                             <label class="text-sm font-bold text-slate-300">
-                                Slug
+                                {{ __('admin_ui.label_061') }}
                             </label>
 
                             <input name="slug" value="{{ old('slug') }}" placeholder="commercial-invoice"
@@ -71,9 +71,9 @@
                                 class="mt-2 w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-sm text-white">
 
                                 <option value="generic">Generic</option>
-                                <option value="customer">Customer</option>
-                                <option value="shipment">Shipment</option>
-                                <option value="quotation">Quotation</option>
+                                <option value="customer">{{ __('admin_ui.label_005') }}</option>
+                                <option value="shipment">{{ __('admin_ui.label_023') }}</option>
+                                <option value="quotation">{{ __('admin_ui.label_054') }}</option>
 
                             </select>
 
@@ -105,7 +105,7 @@
                         {{ $isAr ? 'رأس المستند' : 'Document Header' }}
                     </h2>
 
-                    <p class="mb-4 text-sm text-slate-500">
+                    <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">
                         HTML اختياري.
                     </p>
 

@@ -145,7 +145,7 @@
                                             {{ $isAr ? 'معلومات المستند' : 'Document Information' }}
                                         </h2>
 
-                                        <p class="text-xs text-slate-500">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $isAr ? 'البيانات الأساسية للمستند' : 'Basic document information' }}
                                         </p>
                                     </div>
@@ -248,7 +248,7 @@
                                             {{ $isAr ? 'ربط المستند' : 'Link Document' }}
                                         </h2>
 
-                                        <p class="text-xs text-slate-500">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $isAr ? 'حدد الكيان المرتبط بهذا المستند' : 'Choose the entity this document belongs to' }}
                                         </p>
                                     </div>
@@ -286,7 +286,7 @@
                                                 {{ $isAr ? 'عميل' : 'Customer' }}
                                             </div>
 
-                                            <div class="mt-1 text-xs text-slate-500">
+                                            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 {{ $isAr ? 'Company / Customer' : 'Customer account' }}
                                             </div>
                                         </button>
@@ -311,7 +311,7 @@
                                                 {{ $isAr ? 'شحنة' : 'Shipment' }}
                                             </div>
 
-                                            <div class="mt-1 text-xs text-slate-500">
+                                            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 {{ $isAr ? 'Shipment / Booking' : 'Shipment / Booking' }}
                                             </div>
                                         </button>
@@ -334,7 +334,7 @@
                                                 {{ $isAr ? 'عرض سعر' : 'Quotation' }}
                                             </div>
 
-                                            <div class="mt-1 text-xs text-slate-500">
+                                            <div class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                                 {{ $isAr ? 'Quotation / Offer' : 'Quotation / Offer' }}
                                             </div>
                                         </button>
@@ -360,7 +360,7 @@
                                         </option>
                                     </select>
 
-                                    <p class="mt-2 text-xs text-slate-500">
+                                    <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                                         {{ $isAr
                                             ? 'يجب ربط المستند بعميل أو شحنة أو عرض سعر.'
                                             : 'The document must be linked to a customer, shipment, or quotation.' }}
@@ -381,7 +381,7 @@
                                 <div class="flex items-center gap-3">
 
                                     <div
-                                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-400/10 text-blue-400">
+                                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-400">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                             stroke="currentColor" stroke-width="1.8">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -396,7 +396,7 @@
                                             {{ $isAr ? 'الملف' : 'File' }}
                                         </h2>
 
-                                        <p class="text-xs text-slate-500">
+                                        <p class="text-xs text-slate-500 dark:text-slate-400">
                                             {{ $isAr ? 'ارفع ملف المستند' : 'Upload the document file' }}
                                         </p>
                                     </div>
@@ -426,7 +426,7 @@
                                         {{ $isAr ? 'اضغط لاختيار الملف' : 'Click to choose a file' }}
                                     </div>
 
-                                    <div class="mt-2 text-sm text-slate-500">
+                                    <div class="mt-2 text-sm text-slate-500 dark:text-slate-400">
                                         {{ $isAr ? 'أو اسحب الملف وأسقطه هنا' : 'or drag and drop your file here' }}
                                     </div>
 
@@ -455,11 +455,11 @@
                                         <div class="min-w-0 flex-1">
                                             <div id="fileName" class="truncate text-sm font-bold text-white"></div>
 
-                                            <div id="fileSize" class="mt-1 text-xs text-slate-500"></div>
+                                            <div id="fileSize" class="mt-1 text-xs text-slate-500 dark:text-slate-400"></div>
                                         </div>
 
                                         <button type="button" id="removeFile"
-                                            class="rounded-lg p-2 text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
+                                            class="rounded-lg p-2 text-slate-500 dark:text-slate-400 transition hover:bg-red-500/10 hover:text-red-400"
                                             title="{{ $isAr ? 'إزالة الملف' : 'Remove file' }}">
                                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                                 stroke="currentColor" stroke-width="1.8">
@@ -483,7 +483,7 @@
 
                         {{-- Upload summary --}}
                         <section
-                            class="overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/[0.08] to-blue-500/[0.03] p-6">
+                            class="overflow-hidden rounded-2xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/[0.08] to-cyan-500/[0.03] p-6">
 
                             <div class="mb-5 flex items-center gap-3">
                                 <div
@@ -502,7 +502,7 @@
                                         {{ $isAr ? 'جاهز للرفع' : 'Ready to Upload' }}
                                     </h2>
 
-                                    <p class="text-xs text-slate-500">
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
                                         HAG Brokers Document Center
                                     </p>
                                 </div>
@@ -566,7 +566,7 @@
                                 </h3>
                             </div>
 
-                            <ul class="space-y-3 text-xs text-slate-500">
+                            <ul class="space-y-3 text-xs text-slate-500 dark:text-slate-400">
                                 <li class="flex gap-2">
                                     <span class="text-emerald-400">✓</span>
                                     {{ $isAr ? 'تسجيل المستخدم الذي قام بالرفع' : 'Uploader is recorded automatically' }}
