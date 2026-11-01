@@ -32,6 +32,11 @@ class AdminPortController extends Controller
         ]);
     }
 
+    public function show(Port $port): View
+    {
+        return view('admin.ports.show', ['port' => $port]);
+    }
+
     public function create(): View
     {
         return view('admin.ports.create');
@@ -53,7 +58,7 @@ class AdminPortController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $validated['country_code'] = $validated['country_code']
+        $validated['country_code'] = !empty($validated['country_code'])
             ? strtoupper($validated['country_code'])
             : null;
 
@@ -98,7 +103,7 @@ class AdminPortController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $validated['country_code'] = $validated['country_code']
+        $validated['country_code'] = !empty($validated['country_code'])
             ? strtoupper($validated['country_code'])
             : null;
 

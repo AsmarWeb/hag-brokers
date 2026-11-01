@@ -266,7 +266,7 @@
                 <div>
 
                     @if (auth()->id() !== $user->id)
-                        <button type="button" onclick="document.getElementById('delete-user-form').submit()"
+                        <button type="button" onclick="document.getElementById('delete-user-form').requestSubmit()"
                             class="inline-flex items-center justify-center rounded-xl bg-red-50 px-5 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100">
 
                             {{ $isAr ? 'حذف المستخدم' : 'Delete User' }}
