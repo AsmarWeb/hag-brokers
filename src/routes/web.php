@@ -264,6 +264,10 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             [AdminCompanySettingController::class, 'update']
         )->name('company.update');
 
+        // Phase 9D: read-only approved deal and commission reports.
+        Route::get('/finance', [\App\Http\Controllers\Admin\AdminFinancialReportController::class, 'index'])->name('finance.index');
+        Route::get('/finance/{deal}', [\App\Http\Controllers\Admin\AdminFinancialReportController::class, 'show'])->name('finance.show');
+
         // Dashboard
         Route::get('/dashboard', [
             AdminDashboardController::class,
