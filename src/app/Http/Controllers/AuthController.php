@@ -126,6 +126,17 @@ class AuthController extends Controller
         /*
          * 4. Login user automatically
          */
+        if (config('welcome_mail.enabled', false)) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)
+                    ->queue(new \App\Mail\WelcomeAccountMail(
+                        $user->name
+                    ));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
         Auth::login($user);
 
         $request->session()->regenerate();

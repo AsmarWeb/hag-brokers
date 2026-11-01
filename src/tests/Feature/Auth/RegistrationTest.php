@@ -111,4 +111,48 @@ class RegistrationTest extends TestCase
                 ->count()
         );
     }
+
+    private function welcomeRegistrationPayload(string $email): array
+    {
+        return [
+            'company_name' => 'Welcome Mail Trading LLC',
+            'contact_person' => 'Welcome Mail User',
+            'phone' => '+971501234567',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+            'email' => $email,
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ];
+    }
+
+    public function test_welcome_email_is_queued_when_enabled(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        config()->set('welcome_mail.enabled', true);
+
+        $this->post('/register', $this->welcomeRegistrationPayload(
+            'welcome-mail@example.test'
+        ))->assertSessionHasNoErrors();
+
+        \Illuminate\Support\Facades\Mail::assertQueued(
+            \App\Mail\WelcomeAccountMail::class,
+            function ($mail) {
+                return $mail->hasTo('welcome-mail@example.test')
+                    && $mail->recipientName === 'Welcome Mail User';
+            }
+        );
+    }
+
+    public function test_welcome_email_is_not_queued_when_disabled(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+        config()->set('welcome_mail.enabled', false);
+
+        $this->post('/register', $this->welcomeRegistrationPayload(
+            'disabled-mail@example.test'
+        ))->assertSessionHasNoErrors();
+
+        \Illuminate\Support\Facades\Mail::assertNothingOutgoing();
+    }
 }
