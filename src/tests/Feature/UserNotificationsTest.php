@@ -119,4 +119,50 @@ class UserNotificationsTest extends TestCase
 
         $this->assertDatabaseMissing('notifications', ['id' => $id]);
     }
+
+    public function test_notification_redirects_to_same_origin_url(): void
+    {
+        config()->set('app.url', 'https://hagbrokers.net');
+
+        $user = User::factory()->create();
+        $id = $this->createNotification($user);
+
+        DB::table('notifications')->where('id', $id)->update([
+            'data' => json_encode([
+                'type' => 'account.welcome',
+                'title' => 'Welcome',
+                'message' => 'Welcome to HAG Brokers',
+                'url' => 'https://hagbrokers.net/dashboard',
+            ]),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('notifications.show', $id))
+            ->assertRedirect('/dashboard');
+
+        $this->assertNotNull(
+            DB::table('notifications')->where('id', $id)->value('read_at')
+        );
+    }
+
+    public function test_notification_rejects_external_redirect(): void
+    {
+        config()->set('app.url', 'https://hagbrokers.net');
+
+        $user = User::factory()->create();
+        $id = $this->createNotification($user);
+
+        DB::table('notifications')->where('id', $id)->update([
+            'data' => json_encode([
+                'type' => 'admin.message',
+                'title' => 'External link',
+                'message' => 'Test external redirect',
+                'url' => 'https://example.com/phishing',
+            ]),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('notifications.show', $id))
+            ->assertRedirect(route('notifications.index'));
+    }
 }

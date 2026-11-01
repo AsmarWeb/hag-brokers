@@ -24,7 +24,7 @@ class AdminNotificationController extends Controller
             ->notifications()
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('type', 'like', "%{$search}%")
+                    $q->where('data->type', 'like', "%{$search}%")
                         ->orWhere('data->title', 'like', "%{$search}%")
                         ->orWhere('data->message', 'like', "%{$search}%");
                 });
