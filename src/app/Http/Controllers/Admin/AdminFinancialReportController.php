@@ -41,7 +41,7 @@ final class AdminFinancialReportController extends Controller
     public function show(Deal $deal): View
     {
         abort_unless($deal->status === 'approved' && $deal->approved_at !== null, 404);
-        $deal->load(['customer', 'quotation', 'opportunity', 'agreements', 'commissions.agreement']);
+        $deal->load(['customer', 'quotation', 'opportunity', 'agreements', 'commissions.agreement', 'commissions.invoiceDraft']);
         return view('admin.finance.show', ['deal' => $deal]);
     }
 }

@@ -946,6 +946,14 @@
                         </a>
                     @endif
 
+                    @if ($isAdmin)
+                        <a href="{{ route('admin.invoice-drafts.index') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition {{ request()->routeIs('admin.invoice-drafts.*') ? 'bg-cyan-400 text-slate-950' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                            <svg class="h-5 w-5 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M7 3h10l3 3v15H4V3h3m1 6h8m-8 4h8m-8 4h5" /></svg>
+                            <span>{{ __('invoice_drafts.title') }}</span>
+                        </a>
+                    @endif
+
                     {{-- Reports --}}
 
                     @if ($canViewReports)
