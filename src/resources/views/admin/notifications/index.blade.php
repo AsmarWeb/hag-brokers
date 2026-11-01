@@ -374,7 +374,7 @@
 
                         $data = is_array($notification->data) ? $notification->data : [];
 
-                        $type = $notification->type ?? 'system';
+                        $type = $data['type'] ?? 'system';
 
                         $title = $data['title'] ?? ($data['message'] ?? ($t['types'][$type] ?? $type));
 

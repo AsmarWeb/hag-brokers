@@ -34,13 +34,40 @@ class NotificationController extends Controller
 
         $url = $item->data['url'] ?? null;
 
-        if (
-            is_string($url)
-            && str_starts_with($url, '/')
-            && ! str_starts_with($url, '//')
-            && ! str_contains($url, '\\')
-        ) {
-            return redirect($url);
+        if (is_string($url) && ! str_contains($url, '\\')) {
+            $parts = parse_url($url);
+
+            if (is_array($parts)) {
+                $path = $parts['path'] ?? '/';
+
+                $relative = ! isset($parts['scheme'])
+                    && ! isset($parts['host'])
+                    && str_starts_with($url, '/')
+                    && ! str_starts_with($url, '//');
+
+                $app = parse_url(config('app.url'));
+
+                $sameOrigin = isset($parts['scheme'], $parts['host'])
+                    && strtolower($parts['scheme']) === strtolower($app['scheme'] ?? '')
+                    && strtolower($parts['host']) === strtolower($app['host'] ?? '')
+                    && ($parts['port'] ?? null) === ($app['port'] ?? null)
+                    && ! isset($parts['user'])
+                    && ! isset($parts['pass']);
+
+                if (
+                    ($relative || $sameOrigin)
+                    && str_starts_with($path, '/')
+                    && ! str_starts_with($path, '//')
+                ) {
+                    $target = $path;
+
+                    if (isset($parts['query'])) {
+                        $target .= '?' . $parts['query'];
+                    }
+
+                    return redirect($target);
+                }
+            }
         }
 
         return redirect()->route('notifications.index');

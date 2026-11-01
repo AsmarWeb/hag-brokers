@@ -41,4 +41,74 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticatedAs($user);
         $response->assertRedirect(route('dashboard', absolute: false));
     }
+
+    public function test_new_company_receives_welcome_notification(): void
+    {
+        $this->post('/register', [
+            'company_name' => 'Welcome Trading LLC',
+            'contact_person' => 'Welcome User',
+            'phone' => '+971501234567',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+            'email' => 'welcome@example.test',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertSessionHasNoErrors();
+
+        $user = User::where('email', 'welcome@example.test')->firstOrFail();
+
+        $welcome = $user->notifications()
+            ->where('data->type', 'account.welcome')
+            ->get();
+
+        $this->assertCount(1, $welcome);
+        $this->assertSame('Welcome to HAG Brokers', $welcome->first()->data['title']);
+        $this->assertNull($welcome->first()->read_at);
+    }
+
+    public function test_registration_notifies_admin_and_welcomes_customer_once(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $admin->addRole(
+            \App\Models\Role::firstOrCreate(
+                ['name' => 'admin'],
+                ['display_name' => 'Administrator']
+            )
+        );
+
+        $response = $this->post('/register', [
+            'company_name' => 'Notification Test LLC',
+            'contact_person' => 'Notification Customer',
+            'phone' => '+971501234567',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+            'email' => 'notification-customer@example.test',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $customer = User::where(
+            'email',
+            'notification-customer@example.test'
+        )->firstOrFail();
+
+        $this->assertSame(
+            1,
+            $customer->notifications()
+                ->where('data->type', 'account.welcome')
+                ->count()
+        );
+
+        $this->assertSame(
+            1,
+            $admin->notifications()
+                ->where('data->type', 'user.created')
+                ->count()
+        );
+    }
 }

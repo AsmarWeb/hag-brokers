@@ -95,7 +95,36 @@ class AuthController extends Controller
         });
 
         /*
-         * 3. Login user automatically
+         * 3. Welcome notification after successful registration.
+         */
+        $user->notify(new \App\Notifications\AdminPlatformNotification(
+            type: 'account.welcome',
+            title: 'Welcome to HAG Brokers',
+            message: 'Welcome ' . $user->name . '! Your account has been created successfully.',
+            url: '/dashboard',
+            extra: ['action' => 'complete_profile']
+        ));
+
+        /*
+         * Notify administrators after successful registration.
+         */
+        try {
+            \App\Services\NotificationService::admins(
+                type: 'user.created',
+                title: 'New User Registered',
+                message: $user->name . ' has registered a new account.',
+                model: $user,
+                data: [
+                    'user_id' => $user->id,
+                    'url' => '/admin/users',
+                ]
+            );
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+
+        /*
+         * 4. Login user automatically
          */
         Auth::login($user);
 
