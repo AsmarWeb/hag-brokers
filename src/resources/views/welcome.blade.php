@@ -119,16 +119,7 @@
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
     </script>
 
-    <script>
-        // Apply the saved theme before rendering to avoid a flash of the wrong theme.
-        (() => {
-            try {
-                const stored = localStorage.getItem('hag-theme');
-                const light = stored === 'light' || (!stored && matchMedia('(prefers-color-scheme: light)').matches);
-                document.documentElement.classList.toggle('theme-light', light);
-            } catch (error) { /* Storage may be unavailable in privacy mode. */ }
-        })();
-    </script>
+    @include('components.public-theme')
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -145,10 +136,10 @@
         }
 
         .glass {
-            background: rgba(12, 28, 47, .72);
+            background: var(--hag-public-surface, rgba(12, 28, 47, .72));
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, .08);
+            border: 1px solid var(--hag-public-border, rgba(255, 255, 255, .08));
         }
 
         .glass-light {
@@ -298,7 +289,7 @@
         html.theme-light { color-scheme: light; }
         html.theme-light body { background: #f3f7fb !important; color: #10243a; }
         html.theme-light #navbar, html.theme-light #mobile-menu { background: rgba(255,255,255,.95) !important; border-color: #dbe5ef !important; }
-        html.theme-light .glass { background: rgba(255,255,255,.92); border-color: #dce7f0; box-shadow: 0 12px 36px rgba(15,35,60,.07); }
+        html.theme-light .glass { background: var(--hag-public-surface); border-color: var(--hag-public-border); box-shadow: 0 12px 36px rgba(15,35,60,.07); }
         html.theme-light .glass-light { background: rgba(255,255,255,.78); border-color: #dbe5ef; }
         html.theme-light .gradient-text { background-image: linear-gradient(90deg,#0369a1,#0891b2); }
         html.theme-light .hero-grid { background-image: linear-gradient(rgba(10,70,100,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(10,70,100,.05) 1px,transparent 1px); }
@@ -777,28 +768,17 @@
 
             $homeOpportunities = collect($opportunities ?? []);
 
-            $categoryLabels = [
-                'import' => $isAr ? 'استيراد' : 'Import',
-                'export' => $isAr ? 'تصدير' : 'Export',
-                'sea_freight' => $isAr ? 'شحن' : 'Shipping',
-                'distribution' => $isAr ? 'توزيع' : 'Distribution',
-                'manufacturing' => $isAr ? 'تصنيع' : 'Manufacturing',
-                'real_estate' => $isAr ? 'عقارات' : 'Real Estate',
-                'technology' => $isAr ? 'تقنية' : 'Technology',
-                'services' => $isAr ? 'خدمات' : 'Services',
-                'other' => $isAr ? 'أخرى' : 'Other',
-            ];
-
-            $typeLabels = [
-                'business' => $isAr ? 'أعمال' : 'Business',
-                'investment' => $isAr ? 'استثمار' : 'Investment',
-                'trade' => $isAr ? 'تجارة' : 'Trade',
-                'procurement' => $isAr ? 'مشتريات' : 'Procurement',
-                'distribution' => $isAr ? 'توزيع' : 'Distribution',
-                'logistics' => $isAr ? 'لوجستيات' : 'Logistics',
-                'partnership' => $isAr ? 'شراكة' : 'Partnership',
-                'other' => $isAr ? 'أخرى' : 'Other',
-            ];
+            $categoryLabels = __('trade.categories');
+            $typeLabels = __('trade.types');
+            $homeFilters = [];
+            foreach ($homeOpportunities as $listing) {
+                if ($listing->opportunity_type) {
+                    $homeFilters[$listing->opportunity_type] = $typeLabels[$listing->opportunity_type] ?? $listing->opportunity_type;
+                }
+                if ($listing->category) {
+                    $homeFilters[$listing->category] = $categoryLabels[$listing->category] ?? $listing->category;
+                }
+            }
         @endphp
 
 
@@ -938,82 +918,12 @@
                             </button>
 
 
-                            {{-- Trade --}}
-                            <button type="button" data-filter="trade"
-                                class="opportunity-filter
-                               inline-flex h-10 items-center justify-center
-                               rounded-xl border border-white/10
-                               bg-white/[0.035] px-4
-                               text-xs font-semibold text-slate-400
-                               transition hover:border-cyan-400/20
-                               hover:text-white">
-                                {{ $isAr ? 'تجارة' : 'Trade' }}
-                            </button>
-
-
-                            {{-- Investment --}}
-                            <button type="button" data-filter="investment"
-                                class="opportunity-filter
-                               inline-flex h-10 items-center justify-center
-                               rounded-xl border border-white/10
-                               bg-white/[0.035] px-4
-                               text-xs font-semibold text-slate-400
-                               transition hover:border-cyan-400/20
-                               hover:text-white">
-                                {{ $isAr ? 'استثمار' : 'Investment' }}
-                            </button>
-
-
-                            {{-- Import --}}
-                            <button type="button" data-filter="import"
-                                class="opportunity-filter
-                               inline-flex h-10 items-center justify-center
-                               rounded-xl border border-white/10
-                               bg-white/[0.035] px-4
-                               text-xs font-semibold text-slate-400
-                               transition hover:border-cyan-400/20
-                               hover:text-white">
-                                {{ $isAr ? 'استيراد' : 'Import' }}
-                            </button>
-
-
-                            {{-- Export --}}
-                            <button type="button" data-filter="export"
-                                class="opportunity-filter
-                               inline-flex h-10 items-center justify-center
-                               rounded-xl border border-white/10
-                               bg-white/[0.035] px-4
-                               text-xs font-semibold text-slate-400
-                               transition hover:border-cyan-400/20
-                               hover:text-white">
-                                {{ $isAr ? 'تصدير' : 'Export' }}
-                            </button>
-
-
-                            {{-- Shipping --}}
-                            <button type="button" data-filter="sea_freight"
-                                class="opportunity-filter
-                               inline-flex h-10 items-center justify-center
-                               rounded-xl border border-white/10
-                               bg-white/[0.035] px-4
-                               text-xs font-semibold text-slate-400
-                               transition hover:border-cyan-400/20
-                               hover:text-white">
-                                {{ $isAr ? 'شحن' : 'Shipping' }}
-                            </button>
-
-
-                            {{-- Partnership --}}
-                            <button type="button" data-filter="partnership"
-                                class="opportunity-filter
-                               inline-flex h-10 items-center justify-center
-                               rounded-xl border border-white/10
-                               bg-white/[0.035] px-4
-                               text-xs font-semibold text-slate-400
-                               transition hover:border-cyan-400/20
-                               hover:text-white">
-                                {{ $isAr ? 'شراكات' : 'Partnerships' }}
-                            </button>
+                            @foreach ($homeFilters as $filterValue => $filterLabel)
+                                <button type="button" data-filter="{{ $filterValue }}"
+                                    class="opportunity-filter inline-flex h-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035] px-4 text-xs font-semibold text-slate-400 transition hover:border-cyan-400/20 hover:text-white">
+                                    {{ $filterLabel }}
+                                </button>
+                            @endforeach
 
                         </div>
 
@@ -1059,7 +969,7 @@
 
                                 $category = $opportunity->category ?: 'other';
 
-                                $type = $opportunity->type ?: 'other';
+                                $type = $opportunity->opportunity_type ?: 'other';
 
                                 $categoryLabel = $categoryLabels[$category] ?? ($isAr ? 'أخرى' : 'Other');
 
@@ -1146,7 +1056,7 @@
 
 
                                     {{-- Show verification only when explicitly approved in the database. --}}
-                                    @if ((bool) ($opportunity->is_verified ?? false))
+                                    @if ($opportunity->verification_status === 'verified')
                                     <div class="absolute left-3 top-3">
 
                                         <span
@@ -1156,7 +1066,7 @@
                                            text-[10px] font-bold
                                            text-emerald-300 backdrop-blur-md">
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-                                            {{ $isAr ? 'موثقة' : 'Verified' }}
+                                            {{ $isAr ? 'تمت المراجعة' : 'Reviewed' }}
                                         </span>
 
                                     </div>
@@ -2296,6 +2206,7 @@
                     el.setAttribute('aria-label', light ? (isArabic ? 'تفعيل الوضع الداكن' : 'Switch to dark mode') : (isArabic ? 'تفعيل الوضع الفاتح' : 'Switch to light mode'));
                 });
             }
+            window.addEventListener('hag-public-theme-change', update);
             buttons.forEach(button => button.addEventListener('click', () => {
                 const light = root.classList.toggle('theme-light');
                 try { localStorage.setItem('hag-theme', light ? 'light' : 'dark'); } catch (error) {}
