@@ -222,6 +222,9 @@ Route::post('/opportunities', [
     'store',
 ])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.store');
 
+Route::post('/company/opportunity-assistant', \App\Http\Controllers\OpportunityAssistantController::class)
+    ->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:4,1'])->name('company.opportunity-assistant');
+
 Route::get('/opportunities/{opportunity}', [
     OpportunityController::class,
     'show',

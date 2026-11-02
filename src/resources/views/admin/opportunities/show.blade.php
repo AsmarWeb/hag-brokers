@@ -71,28 +71,9 @@
                 : 'Are you sure you want to delete this opportunity?',
         ];
 
-        $opportunityTypes = [
-            'business' => $isAr ? 'أعمال' : 'Business',
-            'investment' => $isAr ? 'استثمار' : 'Investment',
-            'trade' => $isAr ? 'تجارة' : 'Trade',
-            'procurement' => $isAr ? 'مشتريات' : 'Procurement',
-            'distribution' => $isAr ? 'توزيع' : 'Distribution',
-            'logistics' => $isAr ? 'لوجستيات' : 'Logistics',
-            'partnership' => $isAr ? 'شراكة' : 'Partnership',
-            'other' => $isAr ? 'أخرى' : 'Other',
-        ];
+        $opportunityTypes = array_combine(\App\Services\Platform\OpportunityCatalog::TYPES, array_map(fn ($type) => __('trade.types.'.$type), \App\Services\Platform\OpportunityCatalog::TYPES));
 
-        $categories = [
-            'import' => $isAr ? 'استيراد' : 'Import',
-            'export' => $isAr ? 'تصدير' : 'Export',
-            'sea_freight' => $isAr ? 'شحن بحري' : 'Sea Freight',
-            'distribution' => $isAr ? 'توزيع' : 'Distribution',
-            'manufacturing' => $isAr ? 'تصنيع' : 'Manufacturing',
-            'real_estate' => $isAr ? 'عقارات' : 'Real Estate',
-            'technology' => $isAr ? 'تقنية' : 'Technology',
-            'services' => $isAr ? 'خدمات' : 'Services',
-            'other' => $isAr ? 'أخرى' : 'Other',
-        ];
+        $categories = array_combine(\App\Services\Platform\OpportunityCatalog::CATEGORIES, array_map(fn ($category) => __('trade.categories.'.$category), \App\Services\Platform\OpportunityCatalog::CATEGORIES));
 
         $stages = [
             'new' => $isAr ? 'جديدة' : 'New',
@@ -383,6 +364,8 @@
                     </div>
                 </div>
 
+
+                @include('admin.opportunities.commercial')
 
                 {{-- Description --}}
                 <div class="rounded-2xl border border-white/10 bg-slate-900/70 p-6 shadow-xl">

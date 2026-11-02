@@ -61,16 +61,7 @@
             'lost' => $isAr ? 'خاسرة' : 'Lost',
         ];
 
-        $opportunityTypes = [
-            'business' => $isAr ? 'أعمال' : 'Business',
-            'investment' => $isAr ? 'استثمار' : 'Investment',
-            'trade' => $isAr ? 'تجارة' : 'Trade',
-            'procurement' => $isAr ? 'مشتريات' : 'Procurement',
-            'distribution' => $isAr ? 'توزيع' : 'Distribution',
-            'logistics' => $isAr ? 'لوجستيات' : 'Logistics',
-            'partnership' => $isAr ? 'شراكة' : 'Partnership',
-            'other' => $isAr ? 'أخرى' : 'Other',
-        ];
+        $opportunityTypes = array_combine(\App\Services\Platform\OpportunityCatalog::TYPES, array_map(fn ($type) => __('trade.types.'.$type), \App\Services\Platform\OpportunityCatalog::TYPES));
 
         $verificationStatuses = [
             'auto_eligible' => __('market.auto_published'),
