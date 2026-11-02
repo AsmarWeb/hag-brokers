@@ -4,24 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\Opportunity;
 use App\Models\OpportunityInterest;
+use App\Models\Port;
 use App\Services\Platform\CompanyMarketplaceService;
+use App\Services\Platform\OpportunityCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 final class OpportunityController extends Controller
 {
     public function index(Request $request, CompanyMarketplaceService $service)
     {
-        $query = $service->publicQuery()->with(['originPort', 'destinationPort', 'media']);
-        if ($request->filled('search')) {
-            $term = $request->string('search')->trim()->toString();
-            $query->where(fn ($q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%'));
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:150'],
+            'type' => ['nullable', Rule::in(OpportunityCatalog::TYPES)],
+            'category' => ['nullable', Rule::in(OpportunityCatalog::CATEGORIES)],
+            'country' => ['nullable', 'string', 'max:100'],
+        ]);
+        $query = $service->publicQuery()->with(['customer', 'media']);
+        if ($term = trim($filters['search'] ?? '')) {
+            $query->where(fn ($q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%')->orWhere('commercial_details->product_name', 'like', '%'.$term.'%'));
         }
-        foreach (['type' => 'opportunity_type', 'category' => 'category', 'country' => 'country'] as $input => $field) {
-            if ($request->filled($input)) {
-                $query->where($field, $request->string($input)->toString());
+        foreach (['type' => 'opportunity_type', 'category' => 'category'] as $input => $field) {
+            if ($filters[$input] ?? null) {
+                $query->where($field, $filters[$input]);
+            }
+        }
+        if ($country = trim($filters['country'] ?? '')) {
+            if (in_array(mb_strtolower($country), ['ae', 'uae', 'united arab emirates', 'الإمارات العربية المتحدة'], true)) {
+                $query->whereIn('country', ['AE', 'UAE', 'United Arab Emirates', 'الإمارات العربية المتحدة']);
+            } else {
+                $query->where('country', $country);
             }
         }
         $opportunities = $query->latest('published_at')->paginate(12)->withQueryString();
@@ -33,23 +49,23 @@ final class OpportunityController extends Controller
     {
         $service->actor($request->user(), true);
 
-        return view('opportunities.create', ['requestKey' => (string) Str::uuid()]);
+        return view('opportunities.create', ['requestKey' => (string) Str::uuid(), 'ports' => Port::orderBy('name')->get(['id', 'name'])]);
     }
 
     private function publicationData(Request $request): array
     {
         $data = $request->validate([
             'request_key' => ['required', 'uuid'], 'title' => ['required', 'string', 'max:255'],
-            'opportunity_type' => ['required', 'in:business,investment,trade,procurement,distribution,logistics,partnership,vessel_brokerage,other'],
-            'description' => ['required', 'string', 'min:20', 'max:20000'], 'category' => ['nullable', 'string', 'max:100'],
+            'opportunity_type' => ['required', Rule::in(OpportunityCatalog::TYPES)],
+            'description' => ['required', 'string', 'min:20', 'max:20000'], 'category' => ['nullable', Rule::in(OpportunityCatalog::CATEGORIES)],
             'cargo_type' => ['nullable', 'string', 'max:255'], 'container_type' => ['nullable', 'string', 'max:255'],
             'origin_port_id' => ['nullable', 'integer', 'exists:ports,id'], 'destination_port_id' => ['nullable', 'integer', 'exists:ports,id'],
             'country' => ['nullable', 'string', 'max:100'], 'city' => ['nullable', 'string', 'max:100'],
             'estimated_value' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
             'required_capital' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
             'min_investment' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
-            'currency' => ['required', 'regex:/^[A-Za-z]{3}$/D'], 'commission_type' => ['required', 'in:percentage,fixed'],
-            'commission_rate' => ['nullable', 'decimal:0,2', 'min:0', ($request->input('commission_type') === 'percentage' ? 'max:100' : 'max:999999.99')],
+            'currency' => ['required', 'regex:/^[A-Za-z]{3}$/D'], 'commission_type' => ['nullable', 'in:percentage,fixed'],
+            'commission_rate' => ['nullable', 'decimal:0,2', 'min:0', (($request->input('commission_type') ?? 'percentage') === 'percentage' ? 'max:100' : 'max:999999.99')],
             'expected_close_date' => ['nullable', 'date_format:Y-m-d'],
             'expires_at' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:'.now('Asia/Dubai')->toDateString()],
             'notes' => ['nullable', 'string', 'max:5000'], 'media' => ['nullable', 'array', 'max:10'],
@@ -60,7 +76,11 @@ final class OpportunityController extends Controller
             'vessel.vessel_type' => ['nullable', 'string', 'max:80'], 'vessel.vessel_name' => ['nullable', 'string', 'max:255'],
             'vessel.builder' => ['nullable', 'string', 'max:255'], 'vessel.year_built' => ['nullable', 'integer', 'between:1800,2100'],
             'vessel.length_m' => ['nullable', 'numeric', 'gt:0', 'max:99999'], 'vessel.imo_number' => ['nullable', 'digits:7'],
-        ]);
+        ] + OpportunityCatalog::detailRules());
+        if (collect($request->file('media', []))->sum(fn ($file) => $file->getSize()) > 20 * 1024 * 1024) {
+            throw ValidationException::withMessages(['media' => __('trade.photo_hint')]);
+        }
+        $data['commission_type'] = $data['commission_type'] ?? 'percentage';
         unset($data['request_key'],$data['media']);
         if ($data['opportunity_type'] !== 'vessel_brokerage') {
             unset($data['vessel']);
@@ -106,7 +126,7 @@ final class OpportunityController extends Controller
     public function show(Opportunity $opportunity, CompanyMarketplaceService $service)
     {
         abort_unless($service->isPublic($opportunity), 404);
-        $opportunity->load(['originPort', 'destinationPort', 'media']);
+        $opportunity->load(['originPort', 'destinationPort', 'media', 'customer', 'vessel']);
 
         return view('opportunities.show', compact('opportunity'));
     }
@@ -131,6 +151,6 @@ final class OpportunityController extends Controller
         $data['currency'] = strtoupper($data['currency']);
         $service->apply($request->user(), $opportunity, $data, $request->string('request_key')->toString());
 
-        return redirect()->route('company.marketplace')->with('success',__('market.delivered'));
+        return redirect()->route('company.marketplace')->with('success', __('market.delivered'));
     }
 }

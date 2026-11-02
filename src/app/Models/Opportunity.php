@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Relations\HasOne;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Opportunity extends Model
 {
@@ -28,6 +27,7 @@ class Opportunity extends Model
         // Basic Opportunity Information
         // =====================================================
 
+        'commercial_details',
         'title',
         'opportunity_type',
         'category',
@@ -94,8 +94,8 @@ class Opportunity extends Model
         'notes',
     ];
 
-
     protected $casts = [
+        'commercial_details' => 'array',
 
         // Financial
         'estimated_value' => 'decimal:2',
@@ -111,7 +111,6 @@ class Opportunity extends Model
         'published_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
-
 
     // =========================================================
     // CRM Relationships
@@ -132,7 +131,6 @@ class Opportunity extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-
     // =========================================================
     // Port Relationships
     // =========================================================
@@ -146,7 +144,6 @@ class Opportunity extends Model
     {
         return $this->belongsTo(Port::class, 'destination_port_id');
     }
-
 
     // =========================================================
     // Marketplace Relationships
@@ -168,5 +165,4 @@ class Opportunity extends Model
     {
         return $this->hasOne(OpportunityVessel::class);
     }
-
 }

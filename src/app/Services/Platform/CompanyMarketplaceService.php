@@ -75,6 +75,10 @@ final class CompanyMarketplaceService
 
     private function hash(string $action, array $data, User $actor, array $media = []): string
     {
+        // Commercial detail object key order must not invalidate a safe retry.
+        if (isset($data['commercial_details']) && is_array($data['commercial_details'])) {
+            ksort($data['commercial_details']);
+        }
         ksort($data);
 
         return hash('sha256', json_encode([$action, $actor->id, $data, array_column($media, 'sha256')], JSON_THROW_ON_ERROR));
@@ -130,7 +134,7 @@ final class CompanyMarketplaceService
             }
             $vessel = $data['vessel'] ?? null;
             unset($data['vessel']);
-            $data = array_intersect_key($data, array_flip(['title', 'opportunity_type', 'category', 'description', 'cargo_type', 'container_type', 'origin_port_id', 'destination_port_id', 'country', 'city', 'estimated_value', 'required_capital', 'min_investment', 'currency', 'commission_type', 'commission_rate', 'expected_close_date', 'expires_at', 'notes']));
+            $data = array_intersect_key($data, array_flip(['commercial_details', 'title', 'opportunity_type', 'category', 'description', 'cargo_type', 'container_type', 'origin_port_id', 'destination_port_id', 'country', 'city', 'estimated_value', 'required_capital', 'min_investment', 'currency', 'commission_type', 'commission_rate', 'expected_close_date', 'expires_at', 'notes']));
             $o = Opportunity::create($data + ['customer_id' => $w->customer_id, 'company_workspace_id' => $w->id, 'submitted_by' => $actor->id, 'stage' => 'new', 'probability' => 0, 'visibility' => 'public', 'verification_status' => 'auto_eligible', 'published_at' => now('UTC'), 'marketplace_state' => 'published']);
             if ($vessel) {
                 $o->vessel()->create($vessel);
@@ -156,7 +160,7 @@ final class CompanyMarketplaceService
             if ($o->marketplace_state !== 'published' || ! $o->expires_at?->isFuture()) {
                 $this->fail('closed');
             }
-            $o->update(array_intersect_key($data, array_flip(['title', 'description', 'country', 'city', 'notes'])));
+            $o->update(array_intersect_key($data, array_flip(['title', 'description', 'country', 'city', 'notes', 'category', 'commercial_details'])));
             $this->audit($w, $actor, 'opportunity_updated', ['opportunity_id' => $o->id]);
 
             return $o;
@@ -221,15 +225,15 @@ final class CompanyMarketplaceService
             $w = $this->lockActor($actor, true);
             $o = Opportunity::whereKey($interest->opportunity_id)->lockForUpdate()->firstOrFail();
             abort_unless((int) $o->company_workspace_id === (int) $w->id, 404);
-            abort_unless(in_array($status,['accepted', 'rejected'],true), 422);
+            abort_unless(in_array($status, ['accepted', 'rejected'], true), 422);
             $i = OpportunityInterest::whereKey($interest->id)->lockForUpdate()->firstOrFail();
             if ($i->status === $status) {
                 return;
             }
             $i->update(['status' => $status, 'reviewed_at' => now('UTC'), 'reviewed_by' => $actor->id]);
             if ($i->company_workspace_id) {
-                $this->notifyCompany($i->company_workspace_id,'marketplace.decision',($status === 'accepted' ? 'تم قبول الاهتمام / Interest accepted' : 'تم رفض الاهتمام / Interest rejected'),$o,$i->id);
-            }$this->audit($w,$actor,'application_decided',['interest_id' => $i->id, 'status' => $status]);
+                $this->notifyCompany($i->company_workspace_id, 'marketplace.decision', ($status === 'accepted' ? 'تم قبول الاهتمام / Interest accepted' : 'تم رفض الاهتمام / Interest rejected'), $o, $i->id);
+            }$this->audit($w, $actor, 'application_decided', ['interest_id' => $i->id, 'status' => $status]);
         }, 3);
     }
 }

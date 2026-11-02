@@ -6,14 +6,16 @@ use App\Models\CompanyMember;
 use App\Models\Opportunity;
 use App\Models\OpportunityInterest;
 use App\Services\Platform\CompanyMarketplaceService;
+use App\Services\Platform\OpportunityCatalog;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CompanyMarketplaceController extends Controller
 {
     public function index(Request $request, CompanyMarketplaceService $service)
     {
         $w = $service->actor($request->user());
-        $canPublish = CompanyMember::where('user_id', $request->user()->id)->whereIn('role', ['owner', 'manager'])->exists();
+        $canPublish = CompanyMember::where('company_workspace_id', $w->id)->where('user_id', $request->user()->id)->whereIn('role', ['owner', 'manager'])->exists();
         $opportunities = Opportunity::where('company_workspace_id', $w->id)->latest('id')->paginate(10, ['*'], 'opportunities_page');
         $outgoing = OpportunityInterest::with(['opportunity'])->where('company_workspace_id', $w->id)->latest('id')->paginate(10, ['*'], 'outgoing_page');
         $incoming = $canPublish ? OpportunityInterest::with(['opportunity', 'user'])->whereIn('opportunity_id', Opportunity::where('company_workspace_id', $w->id)->select('id'))->latest('id')->paginate(10, ['*'], 'incoming_page') : null;
@@ -32,7 +34,8 @@ class CompanyMarketplaceController extends Controller
     public function update(Request $request, Opportunity $opportunity, CompanyMarketplaceService $service)
     {
         $data = $request->validate(['title' => ['required', 'string', 'max:255'], 'description' => ['required', 'string', 'min:20', 'max:20000'],
-            'country' => ['nullable', 'string', 'max:100'], 'city' => ['nullable', 'string', 'max:100'], 'notes' => ['nullable', 'string', 'max:5000']]);
+            'country' => ['nullable', 'string', 'max:100'], 'city' => ['nullable', 'string', 'max:100'], 'notes' => ['nullable', 'string', 'max:5000'],
+            'category' => ['nullable', Rule::in(array_merge(OpportunityCatalog::CATEGORIES, [$opportunity->category]))]] + OpportunityCatalog::detailRules());
         $service->update($request->user(), $opportunity, $data);
 
         return redirect()->route('company.marketplace')->with('success', __('market.saved'));
@@ -50,6 +53,6 @@ class CompanyMarketplaceController extends Controller
         $data = $request->validate(['status' => ['required', 'in:accepted,rejected']]);
         $service->decide($request->user(), $interest, $data['status']);
 
-        return back()->with('success',__('market.saved'));
+        return back()->with('success', __('market.saved'));
     }
 }

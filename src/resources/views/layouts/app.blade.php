@@ -8,7 +8,7 @@
 
     <!-- SEO -->
     <meta name="description"
-        content="{{ __('Sea Freight Solutions in UAE. Reliable shipping, freight forwarding and logistics services from Dubai and the UAE.') }}">
+        content="@hasSection('meta_description')@yield('meta_description')@else{{ __('Sea Freight Solutions in UAE. Reliable shipping, freight forwarding and logistics services from Dubai and the UAE.') }}@endif">
     <meta name="keywords"
         content="Sea Freight UAE, Sea Freight Dubai, Shipping UAE, Freight Forwarding Dubai, Logistics UAE">
     <meta name="author" content="Sea Freight Solutions">
@@ -16,7 +16,7 @@
     <!-- Title -->
     <title>
         @hasSection('title')
-            @yield('title') | Sea Freight Solutions
+            @yield('title') | HAG Brokers
         @else
             {{ config('app.name', 'Sea Freight Solutions') }}
         @endif
