@@ -78,6 +78,7 @@ final class InvoiceDraftService
     {
         return DB::transaction(function () use ($draft, $data) {
             $locked = InvoiceDraft::whereKey($draft->id)->lockForUpdate()->firstOrFail();
+            if ($locked->issuedInvoice()->exists()) $this->reject('already_issued');
             if ($locked->status !== 'draft' || !$this->hasValidSnapshot($locked)) $this->reject('snapshot_invalid');
             $locked->update([
                 'notes' => $data['notes'] ?? null,

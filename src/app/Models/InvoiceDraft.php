@@ -16,7 +16,7 @@ class InvoiceDraft extends Model
     protected static function booted(): void
     {
         static::updating(function (self $draft): void {
-            if ($draft->getRawOriginal('status') !== 'draft' || $draft->isDirty([
+            if ($draft->issuedInvoice()->exists() || $draft->getRawOriginal('status') !== 'draft' || $draft->isDirty([
                 'reference', 'deal_commission_id', 'deal_id', 'deal_agreement_id', 'customer_id',
                 'status', 'currency', 'amount', 'source_agreement_sha256', 'snapshot', 'snapshot_sha256', 'created_by',
             ])) {
@@ -32,4 +32,9 @@ class InvoiceDraft extends Model
     public function commission(): BelongsTo { return $this->belongsTo(DealCommission::class, 'deal_commission_id'); }
     public function agreement(): BelongsTo { return $this->belongsTo(DealAgreement::class, 'deal_agreement_id'); }
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
+
+    public function issuedInvoice(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(IssuedInvoice::class, 'invoice_draft_id');
+    }
 }
