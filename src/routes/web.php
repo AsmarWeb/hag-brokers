@@ -276,6 +276,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
         // Phase 9D.2B: explicit review and immutable invoice issuance.
         Route::get('/invoices', [\App\Http\Controllers\Admin\AdminInvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/{invoice}/payments', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'show'])->name('invoices.payments');
+        Route::post('/invoices/{invoice}/payments', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'store'])->name('invoices.payments.store');
+        Route::post('/invoices/{invoice}/payments/{payment}/reverse', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'reverse'])->name('invoices.payments.reverse');
         Route::get('/invoices/{invoice}/pdf/{language}', [\App\Http\Controllers\Admin\AdminInvoicePdfController::class, 'download'])->where('language', 'ar|en')->name('invoices.pdf');
         Route::get('/invoices/{invoice}', [\App\Http\Controllers\Admin\AdminInvoiceController::class, 'show'])->name('invoices.show');
         Route::get('/invoice-drafts/{invoiceDraft}/review', [\App\Http\Controllers\Admin\AdminInvoiceController::class, 'review'])->name('invoices.review');
