@@ -60,12 +60,13 @@
         }
     </style>
 
+    @include('components.public-theme')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @stack('styles')
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body class="hag-public-app font-sans antialiased bg-gray-100">
     <div class="min-h-screen bg-gray-100">
 
         <!-- Navigation -->
