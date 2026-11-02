@@ -1,0 +1,5 @@
+<section class="hag-broker-card"><h2 class="text-lg font-bold">{{ __('platform.current_plan') }}: {{ $plan['name_'.app()->getLocale()] }}</h2><p class="mt-2 font-semibold">{{ __('platform.source_'.$plan['source']) }}</p>@if ($plan['expires_at'])<p class="hag-broker-muted mt-2">{{ __('platform.expires') }}: <bdi>{{ \Carbon\CarbonImmutable::parse($plan['expires_at'])->setTimezone('Asia/Dubai')->format('Y-m-d H:i') }}</bdi> ({{ __('platform.dubai') }})</p>@endif
+<p class="mt-3 font-semibold">{{ __('platform.current_members') }}: <bdi>{{ $members->count() }} / {{ $plan['seats'] }}</bdi></p>
+@if ($members->count() > $plan['seats'])<p role="status" class="mt-3 font-semibold text-amber-700 dark:text-amber-300">{{ __('platform.over_seats') }}</p>@endif
+<dl class="mt-4 grid gap-4 sm:grid-cols-3">@foreach (['seats','active_opportunities','monthly_applications'] as $key)<div><dt class="hag-broker-muted">{{ __('platform.'.$key) }}</dt><dd class="mt-2 text-xl font-bold">{{ $plan[$key] }}</dd></div>@endforeach</dl><p class="hag-broker-muted mt-4">{{ __('platform.foundation_note') }}</p><p class="hag-broker-muted mt-2">{{ __('platform.expiry_help') }}</p>
+</section>

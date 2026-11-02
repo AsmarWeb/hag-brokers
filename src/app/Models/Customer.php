@@ -17,6 +17,16 @@ class Customer extends Model
         'is_active' => 'boolean',
     ];
 
+
+    protected static function booted(): void
+    {
+        static::deleting(function (Customer $customer): void {
+            if (\Illuminate\Support\Facades\Schema::hasTable('company_workspaces') && CompanyWorkspace::where('customer_id', $customer->id)->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['customer' => __('platform.company_protected')]);
+            }
+        });
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Customer Users

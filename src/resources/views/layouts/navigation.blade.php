@@ -1,3 +1,4 @@
+@php $hasCompanyWorkspace = auth()->check() && \Illuminate\Support\Facades\Schema::hasTable('company_members') && \App\Models\CompanyMember::where('user_id',auth()->id())->exists(); @endphp
 <nav x-data="{ open: false }" class="border-b border-slate-200 bg-white">
 
     {{-- Primary Navigation Menu --}}
@@ -33,6 +34,10 @@
                             @endif
                         </x-nav-link>
                     @endauth
+
+                    @if ($hasCompanyWorkspace)
+                        <x-nav-link :href="route('company.workspace')" :active="request()->routeIs('company.workspace')">{{ __('platform.workspace') }}</x-nav-link>
+                    @endif
 
                     <x-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
                         {{ app()->getLocale() === 'ar' ? 'الفرص' : 'Opportunities' }}
@@ -178,6 +183,9 @@
 
             @auth
 
+                @if ($hasCompanyWorkspace)
+                    <x-responsive-nav-link :href="route('company.workspace')" :active="request()->routeIs('company.workspace')">{{ __('platform.workspace') }}</x-responsive-nav-link>
+                @endif
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('dashboard.dashboard') }}
                 </x-responsive-nav-link>
