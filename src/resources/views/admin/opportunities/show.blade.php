@@ -110,6 +110,7 @@
         ];
 
         $verificationStatuses = [
+            'auto_eligible' => __('market.auto_published'),
             'pending' => $isAr ? 'قيد الانتظار' : 'Pending',
             'under_review' => $isAr ? 'قيد المراجعة' : 'Under Review',
             'verified' => $isAr ? 'موثقة' : 'Verified',
@@ -193,23 +194,9 @@
                     {{ $t['back'] }}
                 </a>
 
-                <a href="{{ route('admin.opportunities.edit', $opportunity) }}"
-                    class="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-amber-300">
-                    {{ $t['edit'] }}
-                </a>
 
-                <form method="POST" action="{{ route('admin.opportunities.destroy', $opportunity) }}"
-                    onsubmit="return confirm('{{ $t['confirm_delete'] }}')">
 
-                    @csrf
-                    @method('DELETE')
 
-                    <button type="submit"
-                        class="rounded-xl bg-red-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-400">
-                        {{ $t['delete'] }}
-                    </button>
-
-                </form>
 
             </div>
         </div>

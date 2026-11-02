@@ -171,12 +171,12 @@
                                     <span
                                         class="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(52,211,153,0.8)]"></span>
 
-                                    {{ $isAr ? 'موثقة' : 'Verified' }}
+                                    {{ __('market.marketplace_label') }}
 
                                 </div>
 
                                 <div class="mt-0.5 text-[11px] text-slate-500">
-                                    {{ $isAr ? 'فرص تمت مراجعتها' : 'Reviewed Opportunities' }}
+                                    {{ $isAr ? 'فرص الشركات' : 'Company Opportunities' }}
                                 </div>
 
                             </div>
@@ -426,7 +426,7 @@
                         <span
                             class="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)]"></span>
 
-                        {{ $isAr ? 'فرص تمت مراجعتها' : 'Reviewed opportunities' }}
+                        {{ $isAr ? 'فرص الشركات' : 'Company opportunities' }}
 
                     </div>
                 @endif
@@ -604,7 +604,7 @@
                                                 d="M9 12l2 2 4-4m5.5 2a8.5 8.5 0 11-17 0 8.5 8.5 0 0117 0z" />
                                         </svg>
 
-                                        {{ $isAr ? 'موثقة' : 'Verified' }}
+                                        {{ __('market.marketplace_label') }}
 
                                     </span>
 
@@ -951,8 +951,8 @@
 
                             <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-500">
                                 {{ $isAr
-                                    ? 'أرسل تفاصيل الفرصة والصور أو الفيديو. سيقوم فريق HAG Brokers بمراجعتها والتحقق منها قبل نشرها.'
-                                    : 'Submit the opportunity details, images or video. The HAG Brokers team will review and verify it before publication.' }}
+                                    ? 'أرسل تفاصيل الفرصة والصور أو الفيديو. تُنشر تلقائيًا عند استيفاء شروط الشركة والباقة.'
+                                    : 'Submit the opportunity details, images or video. It is published automatically when company and plan requirements are met.' }}
                             </p>
 
                         </div>

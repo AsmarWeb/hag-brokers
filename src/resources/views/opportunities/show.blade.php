@@ -302,7 +302,7 @@
                                 <span
                                     class="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
 
-                                {{ $isAr ? 'تمت المراجعة بواسطة HAG' : 'HAG Reviewed' }}
+                                {{ $opportunity->verification_status === 'verified' ? ($isAr ? 'تمت المراجعة بواسطة HAG' : 'HAG Reviewed') : __('market.auto_published') }}
 
                             </span>
 
@@ -821,39 +821,6 @@
                     NOTES
                     ================================================== --}}
 
-                    @if ($opportunity->notes)
-                        <section
-                            class="rounded-3xl border border-amber-400/10 bg-amber-400/[0.025] p-6 backdrop-blur-xl md:p-8">
-
-                            <div class="flex items-start gap-3">
-
-                                <div
-                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300">
-
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
-                                            d="M12 9v4m0 4h.01M10.3 3.8L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.8a2 2 0 00-3.4 0z" />
-                                    </svg>
-
-                                </div>
-
-                                <div>
-
-                                    <h2 class="font-bold text-amber-200">
-                                        {{ $isAr ? 'ملاحظات إضافية' : 'Additional Notes' }}
-                                    </h2>
-
-                                    <div class="mt-3 whitespace-pre-line text-sm leading-7 text-slate-400">
-                                        {{ $opportunity->notes }}
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </section>
-                    @endif
-
                 </div>
 
 
@@ -1160,11 +1127,12 @@
                                 <p class="mt-3 text-sm leading-7 text-slate-400">
                                     {{ $isAr
                                         ? 'أرسل اهتمامك وسيتواصل معك فريق HAG Brokers لمناقشة التفاصيل والخطوات التالية.'
-                                        : 'Send your interest and the HAG Brokers team can follow up with you about the opportunity and next steps.' }}
+                                        : 'Send your company application directly to the opportunity owner.' }}
                                 </p>
 
 
-                                <a href="{{ route('opportunities.interest', $opportunity) }}"
+                                @if ($opportunity->company_workspace_id)
+<a href="{{ route('opportunities.interest', $opportunity) }}"
                                     class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 px-5 py-3.5 text-sm font-black text-slate-950 shadow-lg shadow-cyan-500/10 transition hover:bg-cyan-300">
 
                                     {{ $isAr ? 'أنا مهتم بهذه الفرصة' : "I'm Interested" }}
@@ -1176,6 +1144,7 @@
                                     </svg>
 
                                 </a>
+@else<p class="mt-4 text-sm text-slate-400">{{ __('market.legacy_listing') }}</p>@endif
 
                             </div>
 
@@ -1237,8 +1206,8 @@
 
                             <p class="text-xs leading-6 text-slate-500">
                                 {{ $isAr
-                                    ? 'تقوم HAG Brokers بمراجعة الفرص قبل نشرها في السوق. أي اتفاق تجاري نهائي يخضع للتحقق والتفاوض بين الأطراف المعنية.'
-                                    : 'HAG Brokers reviews opportunities before publishing them in the marketplace. Any final commercial agreement remains subject to verification and negotiation between the relevant parties.' }}
+                                    ? 'تنشر الشركات الفرص تلقائيًا بعد استيفاء شروط المنصة. النشر التلقائي ليس توثيقًا مستنديًا. أي اتفاق تجاري نهائي يخضع للتحقق والتفاوض بين الأطراف المعنية.'
+                                    : 'Companies publish opportunities automatically after meeting platform requirements. Automatic publication is not documentary verification. Any final commercial agreement remains subject to verification and negotiation between the relevant parties.' }}
                             </p>
 
                         </div>

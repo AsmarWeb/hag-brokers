@@ -2,664 +2,135 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Models\Opportunity;
 use App\Models\OpportunityInterest;
-use App\Models\OpportunityMedia;
-use Illuminate\Http\RedirectResponse;
+use App\Services\Platform\CompanyMarketplaceService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
+use Illuminate\Support\Str;
 
-class OpportunityController extends Controller
+final class OpportunityController extends Controller
 {
-    /**
-     * Display public opportunities.
-     */
-    public function index(Request $request): View
+    public function index(Request $request, CompanyMarketplaceService $service)
     {
-        $query = Opportunity::query()
-            ->with([
-                'originPort',
-                'destinationPort',
-                'media',
-            ])
-            ->where('visibility', 'public')
-            ->where('verification_status', 'verified')
-            ->whereNotNull('published_at')
-            ->where(function ($query) {
-                $query->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            });
-
+        $query = $service->publicQuery()->with(['originPort', 'destinationPort', 'media']);
         if ($request->filled('search')) {
-            $search = $request->string('search')->trim()->toString();
-
-            $query->where(function ($query) use ($search) {
-                $query->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%")
-                    ->orWhere('cargo_type', 'like', "%{$search}%");
-            });
+            $term = $request->string('search')->trim()->toString();
+            $query->where(fn ($q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('description', 'like', '%'.$term.'%'));
         }
-
-        if ($request->filled('type')) {
-            $query->where(
-                'opportunity_type',
-                $request->string('type')->trim()->toString()
-            );
+        foreach (['type' => 'opportunity_type', 'category' => 'category', 'country' => 'country'] as $input => $field) {
+            if ($request->filled($input)) {
+                $query->where($field, $request->string($input)->toString());
+            }
         }
-
-        if ($request->filled('category')) {
-            $query->where(
-                'category',
-                $request->string('category')->trim()->toString()
-            );
-        }
-
-        if ($request->filled('country')) {
-            $query->where(
-                'country',
-                $request->string('country')->trim()->toString()
-            );
-        }
-
-        $opportunities = $query
-            ->latest('published_at')
-            ->paginate(12)
-            ->withQueryString();
+        $opportunities = $query->latest('published_at')->paginate(12)->withQueryString();
 
         return view('opportunities.index', compact('opportunities'));
     }
 
-    /**
-     * Show create opportunity form.
-     */
-    public function create(): View
+    public function create(Request $request, CompanyMarketplaceService $service)
     {
-        abort_unless(Auth::check(), 403);
+        $service->actor($request->user(), true);
 
-        return view('opportunities.create');
+        return view('opportunities.create', ['requestKey' => (string) Str::uuid()]);
     }
 
-    /**
-     * Store a new opportunity submitted by a user.
-     */
-    public function store(Request $request): RedirectResponse
+    private function publicationData(Request $request): array
     {
-        $validated = $request->validate([
-            /*
-        |--------------------------------------------------------------------------
-        | Opportunity
-        |--------------------------------------------------------------------------
-        */
-            'title' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'opportunity_type' => [
-                'required',
-                'string',
-                'max:50',
-            ],
-
-            'category' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-
-            'description' => [
-                'required',
-                'string',
-                'min:20',
-            ],
-
-            /*
-        |--------------------------------------------------------------------------
-        | Logistics
-        |--------------------------------------------------------------------------
-        */
-            'cargo_type' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
-            'container_type' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
-            'origin_port_id' => [
-                'nullable',
-                'exists:ports,id',
-            ],
-
-            'destination_port_id' => [
-                'nullable',
-                'exists:ports,id',
-            ],
-
-            'country' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-
-            'city' => [
-                'nullable',
-                'string',
-                'max:100',
-            ],
-
-            /*
-        |--------------------------------------------------------------------------
-        | Financial
-        |--------------------------------------------------------------------------
-        */
-            'estimated_value' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            'required_capital' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            'min_investment' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            'currency' => [
-                'required',
-                'string',
-                'size:3',
-            ],
-
-            /*
-        |--------------------------------------------------------------------------
-        | Commission
-        |--------------------------------------------------------------------------
-        */
-            'commission_type' => [
-                'required',
-                'in:percentage,fixed',
-            ],
-
-            'commission_rate' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            /*
-        |--------------------------------------------------------------------------
-        | Timeline
-        |--------------------------------------------------------------------------
-        */
-            'expected_close_date' => [
-                'nullable',
-                'date',
-            ],
-
-            'expires_at' => [
-                'nullable',
-                'date',
-                'after_or_equal:today',
-            ],
-
-            /*
-        |--------------------------------------------------------------------------
-        | Notes
-        |--------------------------------------------------------------------------
-        */
-            'notes' => [
-                'nullable',
-                'string',
-            ],
-
-            /*
-        |--------------------------------------------------------------------------
-        | Media
-        |--------------------------------------------------------------------------
-        */
-            'media' => [
-                'nullable',
-                'array',
-                'max:10',
-            ],
-
-            'media.*' => [
-                'file',
-                'mimes:jpg,jpeg,png,webp,mp4,mov,webm',
-                'max:20480',
-            ],
+        $data = $request->validate([
+            'request_key' => ['required', 'uuid'], 'title' => ['required', 'string', 'max:255'],
+            'opportunity_type' => ['required', 'in:business,investment,trade,procurement,distribution,logistics,partnership,vessel_brokerage,other'],
+            'description' => ['required', 'string', 'min:20', 'max:20000'], 'category' => ['nullable', 'string', 'max:100'],
+            'cargo_type' => ['nullable', 'string', 'max:255'], 'container_type' => ['nullable', 'string', 'max:255'],
+            'origin_port_id' => ['nullable', 'integer', 'exists:ports,id'], 'destination_port_id' => ['nullable', 'integer', 'exists:ports,id'],
+            'country' => ['nullable', 'string', 'max:100'], 'city' => ['nullable', 'string', 'max:100'],
+            'estimated_value' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
+            'required_capital' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
+            'min_investment' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
+            'currency' => ['required', 'regex:/^[A-Za-z]{3}$/D'], 'commission_type' => ['required', 'in:percentage,fixed'],
+            'commission_rate' => ['nullable', 'decimal:0,2', 'min:0', ($request->input('commission_type') === 'percentage' ? 'max:100' : 'max:999999.99')],
+            'expected_close_date' => ['nullable', 'date_format:Y-m-d'],
+            'expires_at' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:'.now('Asia/Dubai')->toDateString()],
+            'notes' => ['nullable', 'string', 'max:5000'], 'media' => ['nullable', 'array', 'max:10'],
+            'media.*' => ['file', 'mimes:jpg,jpeg,png,webp,mp4,mov,webm', 'max:20480'],
+            'vessel' => ['required_if:opportunity_type,vessel_brokerage', 'array'],
+            'vessel.listing_type' => ['required_if:opportunity_type,vessel_brokerage', 'in:sale,wanted,charter'],
+            'vessel.vessel_category' => ['required_if:opportunity_type,vessel_brokerage', 'in:yacht,commercial_vessel,boat'],
+            'vessel.vessel_type' => ['nullable', 'string', 'max:80'], 'vessel.vessel_name' => ['nullable', 'string', 'max:255'],
+            'vessel.builder' => ['nullable', 'string', 'max:255'], 'vessel.year_built' => ['nullable', 'integer', 'between:1800,2100'],
+            'vessel.length_m' => ['nullable', 'numeric', 'gt:0', 'max:99999'], 'vessel.imo_number' => ['nullable', 'digits:7'],
         ]);
-
-
-        // Vessel brokerage validation
-        if ($request->input('opportunity_type') === 'vessel_brokerage') {
-            $vessel = $request->validate([
-                'vessel.listing_type' => 'required|in:sale,wanted,charter',
-                'vessel.vessel_category' => 'required|in:yacht,commercial_vessel,boat',
-                'vessel.vessel_type' => 'nullable|string|max:80',
-                'vessel.vessel_name' => 'nullable|string|max:255',
-                'vessel.builder' => 'nullable|string|max:255',
-                'vessel.year_built' => 'nullable|integer|between:1800,2100',
-                'vessel.length_m' => 'nullable|numeric|gt:0',
-                'vessel.imo_number' => 'nullable|digits:7',
-            ]);
-
-            $validated['vessel'] = $vessel['vessel'];
+        unset($data['request_key'],$data['media']);
+        if ($data['opportunity_type'] !== 'vessel_brokerage') {
+            unset($data['vessel']);
+        } elseif (isset($data['vessel'])) {
+            $data['vessel'] = array_intersect_key($data['vessel'], array_flip(['listing_type', 'vessel_category', 'vessel_type', 'vessel_name', 'builder', 'year_built', 'length_m', 'imo_number']));
         }
+        $data['currency'] = strtoupper($data['currency']);
+        // The submitted calendar date means the whole day in Dubai.
+        $data['expires_at'] = CarbonImmutable::parse($data['expires_at'] ?? now('Asia/Dubai')->addDays(30)->toDateString(), 'Asia/Dubai')->endOfDay()->utc()->format('Y-m-d H:i:s');
 
-        $user = Auth::user();
+        return $data;
+    }
 
-        /*
-    |--------------------------------------------------------------------------
-    | Find / Create Customer
-    |--------------------------------------------------------------------------
-    */
-
-        $customer = Customer::firstOrCreate(
-            [
-                'email' => $user->email,
-            ],
-            [
-                'company_name' => $user->name,
-                'contact_person' => $user->name,
-                'email' => $user->email,
-                'is_active' => true,
-            ]
-        );
-
-        $storedMediaPaths = [];
-
+    public function store(Request $request, CompanyMarketplaceService $service)
+    {
+        $service->actor($request->user(), true);
+        $data = $this->publicationData($request);
+        $media = [];
         try {
-            $opportunity = DB::transaction(function () use (
-                $validated,
-                $customer,
-                $request,
-                &$storedMediaPaths
-            ) {
-                /*
-            |--------------------------------------------------------------------------
-            | Create Opportunity
-            |--------------------------------------------------------------------------
-            */
-
-                $opportunity = Opportunity::create([
-                    'customer_id' => $customer->id,
-
-                    'contact_id' => null,
-                    'assigned_to' => null,
-
-                    'title' => $validated['title'],
-
-                    'opportunity_type' =>
-                    $validated['opportunity_type'],
-
-                    'category' =>
-                    $validated['category'] ?? null,
-
-                    'description' =>
-                    $validated['description'],
-
-                    'cargo_type' =>
-                    $validated['cargo_type'] ?? null,
-
-                    'container_type' =>
-                    $validated['container_type'] ?? null,
-
-                    'origin_port_id' =>
-                    $validated['origin_port_id'] ?? null,
-
-                    'destination_port_id' =>
-                    $validated['destination_port_id'] ?? null,
-
-                    'country' =>
-                    $validated['country'] ?? null,
-
-                    'city' =>
-                    $validated['city'] ?? null,
-
-                    'estimated_value' =>
-                    $validated['estimated_value'] ?? null,
-
-                    'required_capital' =>
-                    $validated['required_capital'] ?? null,
-
-                    'min_investment' =>
-                    $validated['min_investment'] ?? null,
-
-                    'currency' =>
-                    strtoupper($validated['currency']),
-
-                    'commission_type' =>
-                    $validated['commission_type'],
-
-                    'commission_rate' =>
-                    $validated['commission_rate'] ?? null,
-
-                    /*
-                |--------------------------------------------------------------------------
-                | Pipeline
-                |--------------------------------------------------------------------------
-                */
-
-                    'stage' => 'new',
-
-                    'probability' => 0,
-
-                    /*
-                |--------------------------------------------------------------------------
-                | Marketplace Protection
-                |--------------------------------------------------------------------------
-                */
-
-                    'visibility' => 'private',
-
-                    'verification_status' => 'pending',
-
-                    'expected_close_date' =>
-                    $validated['expected_close_date'] ?? null,
-
-                    'published_at' => null,
-
-                    'expires_at' =>
-                    $validated['expires_at'] ?? null,
-
-                    'notes' =>
-                    $validated['notes'] ?? null,
-                ]);
-
-                /*
-            |--------------------------------------------------------------------------
-            | Store Media
-            |--------------------------------------------------------------------------
-            */
-
-                if ($request->hasFile('media')) {
-                    $sortOrder = 0;
-                    $primarySet = false;
-
-                    foreach ($request->file('media') as $file) {
-                        if (!$file->isValid()) {
-                            continue;
-                        }
-
-                        $mimeType = $file->getMimeType();
-
-                        $type = str_starts_with($mimeType, 'video/')
-                            ? 'video'
-                            : 'image';
-
-                        $path = $file->store(
-                            "opportunities/{$opportunity->id}",
-                            'public'
-                        );
-
-                        $storedMediaPaths[] = $path;
-
-                        OpportunityMedia::create([
-                            'opportunity_id' => $opportunity->id,
-
-                            'type' => $type,
-
-                            'path' => $path,
-
-                            'mime_type' => $mimeType,
-
-                            'size' => $file->getSize(),
-
-                            'original_name' =>
-                            $file->getClientOriginalName(),
-
-                            'sort_order' => $sortOrder++,
-
-                            /*
-                        |--------------------------------------------------------------------------
-                        | First image becomes primary
-                        |--------------------------------------------------------------------------
-                        */
-
-                            'is_primary' =>
-                            $type === 'image' && !$primarySet,
-                        ]);
-
-                        if ($type === 'image' && !$primarySet) {
-                            $primarySet = true;
-                        }
-                    }
+            foreach ($request->file('media', []) as $file) {
+                $mime = $file->getMimeType();
+                $path = $file->storeAs('opportunities/company', (string) Str::uuid().'.'.$file->guessExtension(), 'public');
+                if (! $path) {
+                    throw new \RuntimeException('Unable to store opportunity media.');
                 }
-
-
-                if (
-                    $validated['opportunity_type'] === 'vessel_brokerage'
-                    && isset($validated['vessel'])
-                ) {
-                    $opportunity->vessel()->create($validated['vessel']);
-                }
-
-                return $opportunity;
-            });
-        } catch (\Throwable $e) {
-
-            /*
-        |--------------------------------------------------------------------------
-        | Cleanup uploaded files if transaction fails
-        |--------------------------------------------------------------------------
-        */
-
-            foreach ($storedMediaPaths as $path) {
-                Storage::disk('public')->delete($path);
+                $media[] = ['path' => $path, 'type' => str_starts_with($mime, 'video/') ? 'video' : 'image', 'mime_type' => $mime, 'size' => $file->getSize(), 'original_name' => $file->getClientOriginalName(), 'sha256' => hash_file('sha256', $file->getRealPath())];
             }
-
-            throw $e;
+            $result = $service->publish($request->user(), $data, $request->string('request_key')->toString(), $media);
+            if (! $result['created']) {
+                foreach ($media as $file) {
+                    Storage::disk('public')->delete($file['path']);
+                }
+            }
+        } catch (\Throwable $e) {
+            foreach ($media as $file) {
+                Storage::disk('public')->delete($file['path']);
+            }throw $e;
         }
 
-        return redirect()
-            ->route('opportunities.index')
-            ->with(
-                'success',
-                app()->getLocale() === 'ar'
-                    ? 'تم إرسال الفرصة بنجاح، وستتم مراجعتها من فريق HAG Brokers قبل نشرها.'
-                    : 'Your opportunity has been submitted successfully and will be reviewed by HAG Brokers before publication.'
-            );
+        return redirect()->route('company.marketplace')->with('success', __('market.published'));
     }
 
-    /**
-     * Display opportunity details.
-     */
-    public function show(Opportunity $opportunity): View
+    public function show(Opportunity $opportunity, CompanyMarketplaceService $service)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Public visibility protection
-        |--------------------------------------------------------------------------
-        */
+        abort_unless($service->isPublic($opportunity), 404);
+        $opportunity->load(['originPort', 'destinationPort', 'media']);
 
-        abort_unless(
-            $opportunity->visibility === 'public'
-                && $opportunity->verification_status === 'verified'
-                && $opportunity->published_at !== null
-                && (
-                    $opportunity->expires_at === null
-                    || $opportunity->expires_at->isFuture()
-                ),
-            404
-        );
-
-        $opportunity->load([
-            'originPort',
-            'destinationPort',
-            'media' => function ($query) {
-                $query->orderBy('sort_order');
-            },
-        ]);
-
-        return view(
-            'opportunities.show',
-            compact('opportunity')
-        );
+        return view('opportunities.show', compact('opportunity'));
     }
 
-    /**
-     * Show interest form.
-     */
-    public function interest(Opportunity $opportunity): View
+    public function interest(Request $request, Opportunity $opportunity, CompanyMarketplaceService $service)
     {
-        abort_unless(
-            $opportunity->visibility === 'public'
-                && $opportunity->verification_status === 'verified'
-                && $opportunity->published_at !== null
-                && (
-                    $opportunity->expires_at === null
-                    || $opportunity->expires_at->isFuture()
-                ),
-            404
-        );
+        $w = $service->actor($request->user());
+        abort_unless($service->isPublic($opportunity) && $opportunity->company_workspace_id, 404);
+        abort_if((int) $opportunity->customer_id === (int) $w->customer_id, 403);
+        $existingInterest = OpportunityInterest::where('opportunity_id', $opportunity->id)->where('company_workspace_id', $w->id)->first();
 
-        $opportunity->load([
-            'originPort',
-            'destinationPort',
-            'media',
-        ]);
-
-        $existingInterest = OpportunityInterest::where(
-            'opportunity_id',
-            $opportunity->id
-        )
-            ->where('user_id', Auth::id())
-            ->first();
-
-        return view(
-            'opportunities.interest',
-            compact(
-                'opportunity',
-                'existingInterest'
-            )
-        );
+        return view('opportunities.interest', ['opportunity' => $opportunity, 'existingInterest' => $existingInterest, 'requestKey' => (string) Str::uuid()]);
     }
 
-    /**
-     * Store user's interest.
-     */
-    public function storeInterest(
-        Request $request,
-        Opportunity $opportunity
-    ): RedirectResponse {
-        abort_unless(
-            $opportunity->visibility === 'public'
-                && $opportunity->verification_status === 'verified'
-                && $opportunity->published_at !== null
-                && (
-                    $opportunity->expires_at === null
-                    || $opportunity->expires_at->isFuture()
-                ),
-            404
-        );
+    public function storeInterest(Request $request, Opportunity $opportunity, CompanyMarketplaceService $service)
+    {
+        $service->actor($request->user());
+        $data = $request->validate(['request_key' => ['required', 'uuid'], 'role' => ['required', 'string', 'max:100'],
+            'available_capital' => ['nullable', 'decimal:0,2', 'min:0', 'max:9999999999999.99'],
+            'currency' => ['required', 'regex:/^[A-Za-z]{3}$/D'], 'message' => ['required', 'string', 'min:10', 'max:5000']]);
+        unset($data['request_key']);
+        $data['currency'] = strtoupper($data['currency']);
+        $service->apply($request->user(), $opportunity, $data, $request->string('request_key')->toString());
 
-        $validated = $request->validate([
-            'role' => [
-                'required',
-                'string',
-                'max:100',
-            ],
-
-            'available_capital' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            'currency' => [
-                'required',
-                'string',
-                'size:3',
-            ],
-
-            'message' => [
-                'required',
-                'string',
-                'min:10',
-                'max:5000',
-            ],
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Prevent duplicate interest
-        |--------------------------------------------------------------------------
-        */
-
-        $existingInterest = OpportunityInterest::where(
-            'opportunity_id',
-            $opportunity->id
-        )
-            ->where('user_id', Auth::id())
-            ->first();
-
-        if ($existingInterest) {
-            return redirect()
-                ->route(
-                    'opportunities.show',
-                    $opportunity
-                )
-                ->with(
-                    'info',
-                    app()->getLocale() === 'ar'
-                        ? 'لقد قمت بالفعل بإبداء اهتمامك بهذه الفرصة.'
-                        : 'You have already expressed interest in this opportunity.'
-                );
-        }
-
-        OpportunityInterest::create([
-            'opportunity_id' => $opportunity->id,
-
-            'user_id' => Auth::id(),
-
-            'role' => $validated['role'],
-
-            'available_capital' =>
-            $validated['available_capital'] ?? null,
-
-            'currency' =>
-            strtoupper($validated['currency']),
-
-            'message' =>
-            $validated['message'],
-
-            'status' => 'pending',
-
-            'reviewed_at' => null,
-
-            'reviewed_by' => null,
-        ]);
-
-        return redirect()
-            ->route(
-                'opportunities.show',
-                $opportunity
-            )
-            ->with(
-                'success',
-                app()->getLocale() === 'ar'
-                    ? 'تم إرسال اهتمامك بنجاح. سيقوم فريق HAG Brokers بمراجعة طلبك والتواصل معك.'
-                    : 'Your interest has been submitted successfully. HAG Brokers will review your request and contact you.'
-            );
+        return redirect()->route('company.marketplace')->with('success',__('market.delivered'));
     }
 }

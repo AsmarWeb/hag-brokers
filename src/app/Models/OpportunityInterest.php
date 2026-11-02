@@ -11,6 +11,7 @@ class OpportunityInterest extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company_workspace_id',
 
         // =====================================================
         // Relationships

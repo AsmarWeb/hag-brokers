@@ -1,0 +1,6 @@
+<x-app-layout><div class="mx-auto max-w-4xl space-y-6 px-4 py-8" dir="{{ app()->getLocale()==='ar'?'rtl':'ltr' }}"><h1 class="text-2xl font-bold">{{ __('market.edit') }}</h1><p class="hag-broker-muted">{{ __('market.edit_help') }}</p>@include('admin.platform.messages')
+<form method="POST" action="{{ route('company.opportunities.update',$opportunity) }}" class="hag-broker-card space-y-5">@csrf @method('PATCH')
+@foreach (['title','country','city'] as $field)<div><label for="{{ $field }}" class="block font-bold">{{ __('market.field_'.$field) }}</label><input id="{{ $field }}" name="{{ $field }}" value="{{ old($field,$opportunity->$field) }}" maxlength="{{ $field==='title'?255:100 }}" @required($field==='title') class="mt-2 w-full rounded-xl dark:bg-slate-900"></div>@endforeach
+@foreach (['description','notes'] as $field)<div><label for="{{ $field }}" class="block font-bold">{{ __('market.field_'.$field) }}</label><textarea id="{{ $field }}" name="{{ $field }}" rows="6" maxlength="{{ $field==='description'?20000:5000 }}" @required($field==='description') class="mt-2 w-full rounded-xl dark:bg-slate-900">{{ old($field,$opportunity->$field) }}</textarea></div>@endforeach
+<button class="hag-broker-action">{{ __('market.save') }}</button><a href="{{ route('company.marketplace') }}" class="hag-broker-action">{{ __('market.back') }}</a>
+</form></div></x-app-layout>

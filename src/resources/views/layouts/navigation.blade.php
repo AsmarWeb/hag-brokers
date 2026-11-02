@@ -36,7 +36,7 @@
                     @endauth
 
                     @if ($hasCompanyWorkspace)
-                        <x-nav-link :href="route('company.workspace')" :active="request()->routeIs('company.workspace')">{{ __('platform.workspace') }}</x-nav-link>
+                        <x-nav-link :href="route('company.marketplace')" :active="request()->routeIs('company.*')">{{ __('platform.workspace') }}</x-nav-link>
                     @endif
 
                     <x-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
@@ -184,7 +184,7 @@
             @auth
 
                 @if ($hasCompanyWorkspace)
-                    <x-responsive-nav-link :href="route('company.workspace')" :active="request()->routeIs('company.workspace')">{{ __('platform.workspace') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('company.marketplace')" :active="request()->routeIs('company.*')">{{ __('platform.workspace') }}</x-responsive-nav-link>
                 @endif
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('dashboard.dashboard') }}
