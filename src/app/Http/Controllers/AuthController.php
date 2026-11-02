@@ -91,6 +91,8 @@ class AuthController extends Controller
                 'phone' => $validated['phone'],
             ]);
 
+            app(\App\Services\Platform\CompanyWorkspaceService::class)->activateNewRegistration($customer, $user);
+
             return $user;
         });
 
@@ -135,6 +137,12 @@ class AuthController extends Controller
             } catch (\Throwable $exception) {
                 report($exception);
             }
+        }
+
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $exception) {
+            report($exception);
         }
 
         Auth::login($user);

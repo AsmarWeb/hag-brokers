@@ -29,7 +29,7 @@
                     <p class="mt-3 text-sm leading-7 text-slate-300">{{ $isAr ? 'تابع الفرص التجارية وأطرافها وعروض الأسعار من مكان واحد، وانتقل إلى التنفيذ عندما تصبح الأعمال جاهزة.' : 'Follow commercial opportunities, business contacts and quotations in one place, then move ready business into execution.' }}</p>
                 </div>
                 @if ($can('opportunities.create'))
-                    <a class="hag-broker-action shrink-0" href="{{ route('admin.opportunities.create') }}">+ {{ $isAr ? 'إضافة فرصة تجارية' : 'New commercial opportunity' }}</a>
+
                 @endif
             </div>
         </header>

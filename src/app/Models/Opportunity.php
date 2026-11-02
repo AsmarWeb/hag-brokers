@@ -14,6 +14,7 @@ class Opportunity extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company_workspace_id', 'submitted_by', 'marketplace_state',
 
         // =====================================================
         // CRM Relationships

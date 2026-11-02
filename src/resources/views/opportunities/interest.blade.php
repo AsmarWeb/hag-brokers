@@ -60,8 +60,8 @@
 
                 <p class="mt-3 max-w-2xl text-sm leading-7 text-slate-400">
                     {{ $isAr
-                        ? 'أخبرنا عن اهتمامك وسيتولى فريق HAG Brokers مراجعة طلبك والتواصل معك.'
-                        : 'Tell us about your interest and the HAG Brokers team will review your request and follow up with you.' }}
+                        ? 'أرسل اهتمام شركتك مباشرة إلى الشركة صاحبة الفرصة.'
+                        : 'Send your company application directly to the opportunity owner.' }}
                 </p>
 
             </div>
@@ -87,8 +87,8 @@
 
                             <p class="mt-2 text-sm leading-7 text-slate-400">
                                 {{ $isAr
-                                    ? 'لقد قمت بالفعل بإبداء اهتمامك بهذه الفرصة. سيقوم فريق HAG Brokers بمراجعة طلبك.'
-                                    : 'You have already expressed interest in this opportunity. HAG Brokers will review your request.' }}
+                                    ? 'يوجد تقديم من شركتك لهذه الفرصة. يمكن متابعة قرار صاحب الفرصة من حساب الشركة.'
+                                    : 'You have already expressed interest in this opportunity. The opportunity owner receives your request directly.' }}
                             </p>
 
 
@@ -97,7 +97,7 @@
                                 @if ($existingInterest->status === 'pending')
                                     <span
                                         class="rounded-full bg-amber-400/10 px-3 py-1.5 text-xs font-semibold text-amber-300">
-                                        {{ $isAr ? 'قيد المراجعة' : 'Pending Review' }}
+                                        {{ $isAr ? 'بانتظار الشركة صاحبة الفرصة' : 'Awaiting listing owner' }}
                                     </span>
                                 @elseif ($existingInterest->status === 'approved')
                                     <span
@@ -240,6 +240,7 @@
                     @submit="submitting = true">
 
                     @csrf
+                    <input type="hidden" name="request_key" value="{{ old('request_key', $requestKey) }}">
 
 
                     {{-- =================================================
@@ -488,8 +489,8 @@
 
                                     <p class="mt-2 text-sm leading-7 text-slate-400">
                                         {{ $isAr
-                                            ? 'سيتم إرسال طلب اهتمامك إلى فريق HAG Brokers للمراجعة. إبداء الاهتمام لا يعني إتمام الصفقة أو ضمان العائد.'
-                                            : 'Your request will be sent to HAG Brokers for review. Expressing interest does not guarantee a transaction or return.' }}
+                                            ? 'يصل اهتمام شركتك مباشرة إلى صاحب الفرصة. إبداء الاهتمام لا يعني إتمام الصفقة أو ضمان العائد.'
+                                            : 'Your request is delivered directly to the opportunity owner. Applying does not guarantee a transaction or return.' }}
                                     </p>
 
                                 </div>

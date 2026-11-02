@@ -80,8 +80,8 @@
 
                 <p class="mt-4 max-w-3xl text-sm leading-7 text-slate-400 sm:text-base">
                     {{ $isAr
-                        ? 'أدخل المعلومات الأساسية فقط، وأضف صورًا أو فيديو إذا كانت متوفرة. سنقوم بمراجعة الفرصة قبل نشرها.'
-                        : 'Provide the essential information, add images or a video if available, and our team will review the opportunity before publishing it.' }}
+                        ? 'أدخل معلومات الفرصة وأضف وسائط عامة إذا رغبت. تُنشر تلقائيًا ضمن باقة شركتك.'
+                        : 'Add your listing details and optional public media. Publish automatically within your company plan.' }}
                 </p>
 
             </div>
@@ -293,6 +293,7 @@
                         @submit="handleSubmit($event)">
 
                         @csrf
+                    <input type="hidden" name="request_key" value="{{ old('request_key', $requestKey) }}">
 
                         {{-- =============================================
                             STEP 1
@@ -784,7 +785,7 @@
                                 <div class="md:col-span-2">
 
                                     <label class="mb-2 block text-sm font-semibold text-slate-300">
-                                        {{ $isAr ? 'تفاصيل إضافية' : 'Additional Details' }}
+                                        {{ $isAr ? 'ملاحظات داخلية — لا تُنشر' : 'Internal notes — not published' }}
                                     </label>
 
                                     <textarea name="notes" x-model="form.notes" rows="5"
@@ -1285,8 +1286,8 @@
 
                                     <p class="mt-2 text-sm leading-7 text-slate-500">
                                         {{ $isAr
-                                            ? 'راجع المعلومات سريعًا ثم أرسل الفرصة لفريق HAG Brokers.'
-                                            : 'Quickly review the information and submit your opportunity to HAG Brokers.' }}
+                                            ? 'راجع المعلومات ثم انشر الفرصة من حساب شركتك.'
+                                            : 'Review your information and publish from your company account.' }}
                                     </p>
 
                                 </div>
@@ -1606,8 +1607,8 @@
 
                                         <p class="mt-2 text-sm leading-7 text-slate-400">
                                             {{ $isAr
-                                                ? 'سيتم حفظ الفرصة كطلب قيد المراجعة. سيقوم فريق HAG Brokers بمراجعة البيانات والوسائط قبل ظهورها للعامة.'
-                                                : 'Your opportunity will be saved as a pending submission. HAG Brokers will review the information and media before it becomes publicly visible.' }}
+                                                ? 'تظهر الفرصة ووسائطها للعامة فور استيفاء الشروط. النشر التلقائي ليس توثيقًا مستنديًا من HAG.'
+                                                : 'The listing and its media become public once requirements are met. Automatic publication is not documentary verification by HAG.' }}
                                         </p>
 
                                     </div>
@@ -1687,7 +1688,7 @@
                                     </svg>
 
                                     <span x-show="!submitting">
-                                        {{ $isAr ? 'إرسال للمراجعة' : 'Submit for Review' }}
+                                        {{ $isAr ? 'نشر الفرصة' : 'Publish opportunity' }}
                                     </span>
 
                                     <span x-show="submitting">

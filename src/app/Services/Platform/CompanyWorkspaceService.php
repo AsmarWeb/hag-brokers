@@ -74,6 +74,23 @@ final class CompanyWorkspaceService
         }, 3);
     }
 
+
+    public function activateNewRegistration(Customer $customer, User $owner): CompanyWorkspace
+    {
+        // Only the registration controller calls this for the customer it just created.
+        abort_unless((int) $owner->customer_id === (int) $customer->id && $customer->users()->count() === 1, 403);
+        $free = PlatformPlan::firstOrCreate(['code' => 'free'], [
+            'name_ar' => 'مجانية', 'name_en' => 'Free', 'monthly_amount_minor' => 0, 'currency' => 'AED',
+            'seats' => 1, 'active_opportunities' => 1, 'monthly_applications' => 3, 'is_available' => true,
+        ]);
+        if (! $free->is_available || $free->seats < 1) $this->fail('plans_missing');
+        $workspace = CompanyWorkspace::create(['customer_id' => $customer->id, 'status' => 'active']);
+        CompanyMember::create(['company_workspace_id' => $workspace->id, 'user_id' => $owner->id, 'role' => 'owner']);
+        CompanyAccessGrant::create(['company_workspace_id' => $workspace->id, 'source' => 'free', 'plan_snapshot' => $this->snapshot($free), 'expires_at' => null, 'reason' => 'Company self registration', 'created_by' => $owner->id, 'created_at' => now('UTC')->format('Y-m-d H:i:s')]);
+        $this->audit($workspace, $owner, 'activated', ['customer_id' => $customer->id, 'owner_id' => $owner->id, 'source' => 'registration']);
+        return $workspace;
+    }
+
     public function workspaceFor(User $user): CompanyWorkspace
     {
         $member = CompanyMember::where('user_id', $user->id)->first();

@@ -215,12 +215,12 @@ Route::get('/opportunities', [
 Route::get('/opportunities/create', [
     OpportunityController::class,
     'create',
-])->middleware('auth')->name('opportunities.create');
+])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.create');
 
 Route::post('/opportunities', [
     OpportunityController::class,
     'store',
-])->middleware('auth')->name('opportunities.store');
+])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.store');
 
 Route::get('/opportunities/{opportunity}', [
     OpportunityController::class,
@@ -230,12 +230,12 @@ Route::get('/opportunities/{opportunity}', [
 Route::get('/opportunities/{opportunity}/interest', [
     OpportunityController::class,
     'interest',
-])->middleware('auth')->name('opportunities.interest');
+])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest');
 
 Route::post('/opportunities/{opportunity}/interest', [
     OpportunityController::class,
     'storeInterest',
-])->middleware('auth')->name('opportunities.interest.store');
+])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest.store');
 
 
 Route::get('/bring-a-deal', [LeadController::class, 'create'])
@@ -306,7 +306,7 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
         Route::resource('tasks', \App\Http\Controllers\Admin\AdminTaskController::class);
 
-        Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class);
+        Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class)->only(['index', 'show']);
 
 
         // Phase 9B: approve agreement and lock commission.
@@ -527,3 +527,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 require __DIR__ . '/auth.php';
 
 Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified'])->name('company.workspace');
+
+Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
+    Route::get('/marketplace', [\App\Http\Controllers\CompanyMarketplaceController::class, 'index'])->name('marketplace');
+    Route::get('/opportunities/{opportunity}/edit', [\App\Http\Controllers\CompanyMarketplaceController::class, 'edit'])->name('opportunities.edit');
+    Route::patch('/opportunities/{opportunity}', [\App\Http\Controllers\CompanyMarketplaceController::class, 'update'])->name('opportunities.update');
+    Route::post('/opportunities/{opportunity}/close', [\App\Http\Controllers\CompanyMarketplaceController::class, 'close'])->name('opportunities.close');
+    Route::post('/applications/{interest}/decision', [\App\Http\Controllers\CompanyMarketplaceController::class, 'decide'])->name('applications.decide');
+});

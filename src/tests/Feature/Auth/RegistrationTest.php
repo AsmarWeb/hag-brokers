@@ -153,6 +153,7 @@ class RegistrationTest extends TestCase
             'disabled-mail@example.test'
         ))->assertSessionHasNoErrors();
 
-        \Illuminate\Support\Facades\Mail::assertNothingOutgoing();
+        \Illuminate\Support\Facades\Mail::assertNotQueued(\App\Mail\WelcomeAccountMail::class);
+        \Illuminate\Support\Facades\Mail::assertNotSent(\App\Mail\WelcomeAccountMail::class);
     }
 }
