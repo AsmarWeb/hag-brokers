@@ -275,6 +275,13 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         Route::post('/commissions/{commission}/invoice-draft', [\App\Http\Controllers\Admin\AdminInvoiceDraftController::class, 'store'])->name('invoice-drafts.store');
 
         // Phase 9D.2B: explicit review and immutable invoice issuance.
+        Route::get('/platform/companies', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'index'])->name('platform.index');
+        Route::post('/platform/companies', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'store'])->name('platform.store');
+        Route::get('/platform/companies/{workspace}', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'show'])->name('platform.show');
+        Route::post('/platform/companies/{workspace}/members', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'member'])->name('platform.members');
+        Route::delete('/platform/companies/{workspace}/members/{member}', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'remove'])->name('platform.members.remove');
+        Route::post('/platform/companies/{workspace}/trial', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'trial'])->name('platform.trial');
+        Route::post('/platform/companies/{workspace}/status', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'status'])->name('platform.status');
         Route::get('/invoices', [\App\Http\Controllers\Admin\AdminInvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}/payments', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'show'])->name('invoices.payments');
         Route::post('/invoices/{invoice}/payments', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'store'])->name('invoices.payments.store');
@@ -518,3 +525,5 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 */
 
 require __DIR__ . '/auth.php';
+
+Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified'])->name('company.workspace');

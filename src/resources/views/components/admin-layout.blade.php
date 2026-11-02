@@ -934,6 +934,10 @@
                     @endif
 
 
+                    @if ($isAdmin)
+                        <a href="{{ route('admin.platform.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition {{ request()->routeIs('admin.platform.*') ? 'bg-cyan-400 text-slate-950' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}"><span>{{ __('platform.title') }}</span></a>
+                    @endif
+
                     {{-- Phase 9D financial reports: administrative financial data only. --}}
                     @if ($isAdmin)
                         <a href="{{ route('admin.finance.index') }}"
