@@ -275,6 +275,7 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         Route::post('/commissions/{commission}/invoice-draft', [\App\Http\Controllers\Admin\AdminInvoiceDraftController::class, 'store'])->name('invoice-drafts.store');
 
         // Phase 9D.2B: explicit review and immutable invoice issuance.
+        Route::get('/platform/billing', [\App\Http\Controllers\Admin\AdminCompanyBillingController::class, 'index'])->name('platform.billing');
         Route::get('/platform/companies', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'index'])->name('platform.index');
         Route::post('/platform/companies', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'store'])->name('platform.store');
         Route::get('/platform/companies/{workspace}', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'show'])->name('platform.show');
@@ -534,4 +535,12 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
     Route::patch('/opportunities/{opportunity}', [\App\Http\Controllers\CompanyMarketplaceController::class, 'update'])->name('opportunities.update');
     Route::post('/opportunities/{opportunity}/close', [\App\Http\Controllers\CompanyMarketplaceController::class, 'close'])->name('opportunities.close');
     Route::post('/applications/{interest}/decision', [\App\Http\Controllers\CompanyMarketplaceController::class, 'decide'])->name('applications.decide');
+});
+
+Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company/billing')->name('company.billing')->group(function () {
+    Route::get('/', [\App\Http\Controllers\CompanyBillingController::class, 'show']);
+    Route::post('/checkout', [\App\Http\Controllers\CompanyBillingController::class, 'checkout'])->middleware('throttle:10,1')->name('.checkout');
+    Route::post('/refresh', [\App\Http\Controllers\CompanyBillingController::class, 'refresh'])->middleware('throttle:10,1')->name('.refresh');
+    Route::post('/cancel', [\App\Http\Controllers\CompanyBillingController::class, 'cancel'])->middleware('throttle:10,1')->name('.cancel');
+    Route::post('/portal', [\App\Http\Controllers\CompanyBillingController::class, 'portal'])->middleware('throttle:10,1')->name('.portal');
 });

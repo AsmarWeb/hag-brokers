@@ -31,6 +31,15 @@ final class CompanyWorkspaceService
 
     public function plan(CompanyWorkspace $w): array
     {
+        $billing = \App\Models\CompanyBillingAccount::where('company_workspace_id', $w->id)->first();
+        if ($billing && ($billing->stripe_subscription_id || in_array($billing->status, ['conflict', 'invalid_price'], true))) {
+            if (app(StripeTestGateway::class)->ready() && in_array($billing->status, ['active', 'past_due'], true) && $billing->paid_until?->isFuture() && is_array($billing->plan_snapshot)) {
+                return $billing->plan_snapshot + ['source' => 'stripe_test', 'expires_at' => $billing->paid_until->toIso8601String()];
+            }
+            $free = PlatformPlan::where('code', 'free')->where('is_available', true)->first();
+            if (! $free) $this->fail('plans_missing');
+            return $this->snapshot($free) + ['source' => 'free', 'expires_at' => null];
+        }
         $grant = CompanyAccessGrant::where('company_workspace_id', $w->id)->latest('id')->first();
         if ($grant && (! $grant->expires_at || $grant->expires_at->isFuture())) {
             return $grant->plan_snapshot + ['source' => $grant->source, 'expires_at' => $grant->expires_at?->toIso8601String()];
@@ -145,6 +154,7 @@ final class CompanyWorkspaceService
         $this->admin($actor);
         DB::transaction(function () use ($workspace, $plan, $days, $reason, $actor): void {
             $w = CompanyWorkspace::whereKey($workspace->id)->lockForUpdate()->firstOrFail();
+            if (\App\Models\CompanyBillingAccount::where('company_workspace_id', $w->id)->whereNotNull('stripe_subscription_id')->exists()) $this->fail('billing_managed');
             $plan = PlatformPlan::findOrFail($plan->id);
             if ($w->status !== 'active' || ! Customer::findOrFail($w->customer_id)->is_active || ! $plan->is_available || $plan->code === 'free' || ! in_array($days, [7, 14, 30], true) || trim($reason) === '') {
                 $this->fail('invalid_trial');

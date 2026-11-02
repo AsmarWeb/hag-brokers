@@ -20,3 +20,5 @@ use App\Http\Controllers\Api\V1\{AuthController, ShipmentController, QuotationCo
 //         Route::put('/profile', [ProfileController::class, 'update']);
 //     });
 // });
+
+Route::post('/platform-billing/stripe/webhook', \App\Http\Controllers\StripeTestWebhookController::class)->name('platform-billing.webhook');

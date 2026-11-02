@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'billing_managed' => 'This company is linked to Stripe billing. Subscription access is managed through billing without a trial overriding its state.',
+    'source_stripe_test' => 'Confirmed Stripe subscription — test',
     'action_application_decided' => 'Listing owner decision',
     'action_opportunity_applied' => 'Company application sent',
     'action_opportunity_closed' => 'Company listing closed',
@@ -11,7 +13,7 @@ return [
     'over_seats' => 'Current membership exceeds the free limit. Existing members are retained; reduce membership or obtain a suitable plan before adding more.',
     'title' => 'Companies and plans',
     'workspace' => 'Company workspace',
-    'foundation_note' => 'Company team, active listing and monthly application limits are enforced. Payments and recurring subscriptions are not enabled yet.',
+    'foundation_note' => 'Team, listing and application limits follow the current company plan. Subscription payments in this phase are test-only.',
     'plans' => 'Proposed plans',
     'prices_note' => 'Monthly prototype prices for testing, not a purchase offer or final tax-inclusive quotation. No charges or automatic renewal.',
     'plan' => 'Plan',
@@ -31,9 +33,9 @@ return [
     'current_plan' => 'Current plan',
     'source_free' => 'Free access',
     'source_manual_trial' => 'Temporary admin trial — no payment',
-    'expires' => 'Trial ends',
+    'expires' => 'Access validity',
     'dubai' => 'Dubai time',
-    'expiry_help' => 'After trial expiry, free limits apply. Existing data and memberships are retained; adding seats is blocked when the limit is reached or exceeded.',
+    'expiry_help' => 'When access expires, free limits apply without deleting existing data or members. New actions cannot exceed the limits.',
     'team' => 'Company team',
     'team_help' => 'Members must already belong to this company. Company roles are separate from platform administration. Team management is admin-controlled in this phase.',
     'user' => 'User',
