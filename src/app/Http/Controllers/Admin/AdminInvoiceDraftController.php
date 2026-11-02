@@ -29,7 +29,7 @@ final class AdminInvoiceDraftController extends Controller
 
     public function show(InvoiceDraft $invoiceDraft, InvoiceDraftService $service): View
     {
-        $invoiceDraft->load(['deal', 'agreement']);
+        $invoiceDraft->load(['deal', 'agreement', 'issuedInvoice']);
         return view('admin.invoice-drafts.show', [
             'draft' => $invoiceDraft,
             'snapshotValid' => $service->hasValidSnapshot($invoiceDraft),

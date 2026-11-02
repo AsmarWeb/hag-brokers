@@ -267,7 +267,7 @@ class InvoiceDraftsTest extends TestCase
             ->assertOk()->assertSee(route('admin.invoice-drafts.show', $draft), false);
     }
 
-    public function test_drafts_have_no_delete_or_issue_endpoints(): void
+    public function test_drafts_have_no_delete_endpoint(): void
     {
         $admin = $this->admin();
         $draft = $this->draft($admin);

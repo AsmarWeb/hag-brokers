@@ -37,4 +37,5 @@ return [
     'edit_note' => 'Only notes and the proposed due date can be edited. Formal issuance and customer access are not enabled in this step.',
     'notes' => 'Internal notes',
     'save' => 'Save draft notes',
+    'already_issued' => 'An invoice has already been issued from this draft; editing is locked.',
 ];
