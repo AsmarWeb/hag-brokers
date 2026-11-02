@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'pdf_ar' => 'Download Arabic PDF',
+    'pdf_en' => 'Download English PDF',
     'title' => 'Issued invoices',
     'issued' => 'Issued',
     'list_note' => 'Approved invoice records, fixed at issuance. Issuance does not record a payment.',
