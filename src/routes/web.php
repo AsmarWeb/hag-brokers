@@ -315,6 +315,7 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
         Route::resource('tasks', \App\Http\Controllers\Admin\AdminTaskController::class);
 
+        Route::post('/opportunities/{opportunity}/moderation', [\App\Http\Controllers\Admin\AdminOpportunityController::class, 'moderate'])->middleware('throttle:30,1')->name('opportunities.moderate');
         Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class)->only(['index', 'show']);
 
 

@@ -33,9 +33,15 @@ class CompanyMarketplaceController extends Controller
 
     public function update(Request $request, Opportunity $opportunity, CompanyMarketplaceService $service)
     {
+        $w = $service->actor($request->user(), true);
+        abort_unless((int) $opportunity->company_workspace_id === (int) $w->id, 404);
+        $marine = OpportunityCatalog::isMarine($opportunity->opportunity_type, $request->input('category'), (array) $request->input('commercial_details', []));
         $data = $request->validate(['title' => ['required', 'string', 'max:255'], 'description' => ['required', 'string', 'min:20', 'max:20000'],
             'country' => ['nullable', 'string', 'max:100'], 'city' => ['nullable', 'string', 'max:100'], 'notes' => ['nullable', 'string', 'max:5000'],
-            'category' => ['nullable', Rule::in(array_merge(OpportunityCatalog::CATEGORIES, [$opportunity->category]))]] + OpportunityCatalog::detailRules());
+            'category' => ['nullable', Rule::in(array_merge(OpportunityCatalog::CATEGORIES, [$opportunity->category]))]] + OpportunityCatalog::detailRules($request->input('category')) + OpportunityCatalog::vesselRules($marine, $request->input('commercial_details.subcategory')));
+        if (! $marine) {
+            unset($data['vessel']);
+        }
         $service->update($request->user(), $opportunity, $data);
 
         return redirect()->route('company.marketplace')->with('success', __('market.saved'));

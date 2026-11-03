@@ -67,7 +67,7 @@ final class PublicSeo
         $route = $request->route()?->getName();
         $language = app()->getLocale() === 'ar' ? 'ar' : 'en';
         $public = in_array($route, ['home', 'opportunities.index', 'opportunities.show'], true);
-        $filtered = $route === 'opportunities.index' && collect(['search', 'type', 'category', 'country'])->contains(fn ($key) => $request->filled($key));
+        $filtered = $route === 'opportunities.index' && collect(['search', 'type', 'category', 'country', 'subcategory', 'vessel_category', 'currency', 'min_price', 'max_price', 'sort'])->contains(fn ($key) => $request->filled($key));
         $parameters = [];
         $opportunity = $request->route('opportunity');
         if ($route === 'opportunities.show' && $opportunity instanceof Opportunity) {

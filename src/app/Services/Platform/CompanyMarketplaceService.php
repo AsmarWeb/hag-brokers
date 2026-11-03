@@ -35,7 +35,7 @@ final class CompanyMarketplaceService
 
     public function publicQuery()
     {
-        return Opportunity::query()->where('visibility', 'public')->whereIn('verification_status', ['verified', 'auto_eligible'])
+        return Opportunity::query()->whereDoesntHave('moderation', fn ($q) => $q->where('hidden', true))->where('visibility', 'public')->whereIn('verification_status', ['verified', 'auto_eligible'])
             ->whereNotNull('published_at')->where('published_at', '<=', now())
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->where(fn ($q) => $q->whereNull('marketplace_state')->orWhere('marketplace_state', 'published'))
@@ -77,7 +77,19 @@ final class CompanyMarketplaceService
     {
         // Commercial detail object key order must not invalidate a safe retry.
         if (isset($data['commercial_details']) && is_array($data['commercial_details'])) {
-            ksort($data['commercial_details']);
+            $sort = function (array $values) use (&$sort): array {
+                if (! array_is_list($values)) {
+                    ksort($values);
+                }
+                foreach ($values as &$value) {
+                    if (is_array($value)) {
+                        $value = $sort($value);
+                    }
+                }
+
+                return $values;
+            };
+            $data['commercial_details'] = $sort($data['commercial_details']);
         }
         ksort($data);
 
@@ -161,6 +173,10 @@ final class CompanyMarketplaceService
                 $this->fail('closed');
             }
             $o->update(array_intersect_key($data, array_flip(['title', 'description', 'country', 'city', 'notes', 'category', 'commercial_details'])));
+            if (isset($data['vessel'])) {
+                $o->vessel()->updateOrCreate([], array_intersect_key($data['vessel'], array_flip(OpportunityCatalog::VESSEL_FIELDS)));
+                $o->forceFill(['seo_updated_at' => now()])->save();
+            }
             $this->audit($w, $actor, 'opportunity_updated', ['opportunity_id' => $o->id]);
 
             return $o;

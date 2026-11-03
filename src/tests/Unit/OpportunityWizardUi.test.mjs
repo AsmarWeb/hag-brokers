@@ -64,3 +64,14 @@ test('unsupported files, file count and total size limits preserve the previousl
         state.mergeMedia(incoming); assert.equal(state.files.length, 1); assert.deepEqual(input.files, [original]); assert.equal(state.mediaError, 'Invalid media');
     }
 });
+
+test('sector changes clear an incompatible child category and toggle marine specifications', () => {
+    const state = wizard({ type: 'sell', category: 'marine', subcategory: 'yachts', subcategories: {marine:['yachts','boats'], food:['fresh_food']} });
+    let categoryChanged;
+    state.$watch = (name, callback) => { assert.equal(name, 'category'); categoryChanged = callback; };
+    state.init(); assert.equal(state.marine, true);
+    state.category = 'food'; categoryChanged(); assert.equal(state.subcategory, ''); assert.equal(state.marine, false);
+    state.category = 'marine'; state.subcategory = 'boats'; categoryChanged(); assert.equal(state.subcategory, 'boats'); assert.equal(state.marine, true);
+    state.type = 'service_offer'; assert.equal(state.marine, false);
+    state.type = 'vessel_brokerage'; assert.equal(state.marine, true);
+});

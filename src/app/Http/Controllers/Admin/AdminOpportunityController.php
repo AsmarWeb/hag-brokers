@@ -3,161 +3,112 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyWorkspace;
 use App\Models\Customer;
 use App\Models\Opportunity;
+use App\Models\OpportunityInterest;
+use App\Models\User;
+use App\Services\Platform\CompanyMarketplaceService;
+use App\Services\Platform\OpportunityCatalog;
+use App\Services\Platform\OpportunityModerationService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdminOpportunityController extends Controller
 {
-    /**
-     * Display a listing of opportunities.
-     */
-    public function index(Request $request): View
+    public function index(Request $request, CompanyMarketplaceService $market): View
     {
-        $query = Opportunity::with([
-            'customer',
-            'contact',
-            'assignedTo',
-            'originPort',
-            'destinationPort',
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:150'], 'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
+            'opportunity_type' => ['nullable', Rule::in(OpportunityCatalog::TYPES)], 'category' => ['nullable', Rule::in(OpportunityCatalog::CATEGORIES)],
+            'subcategory' => ['nullable', Rule::in(OpportunityCatalog::SUBCATEGORIES[$request->input('category')] ?? [])],
+            'review' => ['nullable', 'in:hidden,clear'], 'publication' => ['nullable', 'in:public,unavailable'],
+            'verification_status' => ['nullable', 'in:pending,under_review,verified,rejected,auto_eligible'],
+            'visibility' => ['nullable', 'in:public,private,invite_only'], 'stage' => ['nullable', 'in:new,qualified,quotation,negotiation,won,lost'],
+            'from' => ['nullable', 'date_format:Y-m-d'], 'to' => ['nullable', 'date_format:Y-m-d', Rule::when($request->filled('from'), 'after_or_equal:from')],
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Search
-        |--------------------------------------------------------------------------
-        */
-        if ($request->filled('search')) {
-            $search = $request->string('search')->toString();
-
+        $query = Opportunity::with(['customer', 'vessel', 'moderation'])->withCount('interests');
+        if ($search = trim($filters['search'] ?? '')) {
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('cargo_type', 'like', "%{$search}%")
-                    ->orWhere('container_type', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%")
-                    ->orWhere('city', 'like', "%{$search}%")
-                    ->orWhere('notes', 'like', "%{$search}%")
-
-                    ->orWhereHas('customer', function ($customer) use ($search) {
-                        $customer->where(
-                            'company_name',
-                            'like',
-                            "%{$search}%"
-                        );
-                    })
-
-                    ->orWhereHas('contact', function ($contact) use ($search) {
-                        $contact->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone', 'like', "%{$search}%");
-                    });
+                $q->where('title', 'like', '%'.$search.'%')->orWhere('slug', 'like', '%'.$search.'%')->orWhereHas('customer', fn ($c) => $c->where('company_name', 'like', '%'.$search.'%'));
             });
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Customer Filter
-        |--------------------------------------------------------------------------
-        */
-        if ($request->filled('customer_id')) {
-            $query->where(
-                'customer_id',
-                $request->integer('customer_id')
-            );
+        foreach (['customer_id', 'opportunity_type', 'category', 'verification_status', 'visibility', 'stage'] as $field) {
+            if ($filters[$field] ?? null) {
+                $query->where($field, $filters[$field]);
+            }
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Stage Filter
-        |--------------------------------------------------------------------------
-        */
-        if ($request->filled('stage')) {
-            $query->where(
-                'stage',
-                $request->string('stage')->toString()
-            );
+        if ($filters['subcategory'] ?? null) {
+            $query->where('commercial_details->subcategory', $filters['subcategory']);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Opportunity Type Filter
-        |--------------------------------------------------------------------------
-        */
-        if ($request->filled('opportunity_type')) {
-            $query->where(
-                'opportunity_type',
-                $request->string('opportunity_type')->toString()
-            );
+        if (($filters['review'] ?? '') === 'hidden') {
+            $query->whereHas('moderation', fn ($q) => $q->where('hidden', true));
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Verification Filter
-        |--------------------------------------------------------------------------
-        */
-        if ($request->filled('verification_status')) {
-            $query->where(
-                'verification_status',
-                $request->string('verification_status')->toString()
-            );
+        if (($filters['review'] ?? '') === 'clear') {
+            $query->whereDoesntHave('moderation', fn ($q) => $q->where('hidden', true));
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Visibility Filter
-        |--------------------------------------------------------------------------
-        */
-        if ($request->filled('visibility')) {
-            $query->where(
-                'visibility',
-                $request->string('visibility')->toString()
-            );
+        $publicIds = fn () => $market->publicQuery()->select('opportunities.id');
+        if (($filters['publication'] ?? '') === 'public') {
+            $query->whereIn('id', $publicIds());
         }
+        if (($filters['publication'] ?? '') === 'unavailable') {
+            $query->whereNotIn('id', $publicIds());
+        }
+        if ($filters['from'] ?? null) {
+            $query->where('created_at', '>=', CarbonImmutable::parse($filters['from'], 'Asia/Dubai')->startOfDay()->utc());
+        }
+        if ($filters['to'] ?? null) {
+            $query->where('created_at', '<', CarbonImmutable::parse($filters['to'], 'Asia/Dubai')->addDay()->startOfDay()->utc());
+        }
+        $stats = ['total' => Opportunity::count(), 'public' => $market->publicQuery()->count(), 'hidden' => Opportunity::whereHas('moderation', fn ($q) => $q->where('hidden', true))->count(), 'interests' => OpportunityInterest::count()];
+        $opportunities = $query->latest('id')->paginate(20)->withQueryString();
+        $publicOnPage = $market->publicQuery()->whereIn('id', $opportunities->modelKeys())->pluck('id')->all();
+        $customers = Customer::orderBy('company_name')->get(['id', 'company_name']);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Opportunities
-        |--------------------------------------------------------------------------
-        */
-        $opportunities = $query
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Customers for filter
-        |--------------------------------------------------------------------------
-        */
-        $customers = Customer::where('is_active', true)
-            ->orderBy('company_name')
-            ->get();
-
-        return view('admin.opportunities.index', compact(
-            'opportunities',
-            'customers'
-        ));
+        return view('admin.opportunities.index', compact('opportunities', 'customers', 'stats', 'publicOnPage'));
     }
 
-    /** Read-only platform oversight. */
-    public function show(Opportunity $opportunity): View
+    public function show(Opportunity $opportunity, CompanyMarketplaceService $market): View
     {
-        $opportunity->load([
-            'customer',
-            'contact',
-            'assignedTo',
-            'originPort',
-            'destinationPort',
-            'interests.user',
-            'interests.reviewer',
-        ]);
+        $opportunity->load(['customer', 'contact', 'assignedTo', 'originPort', 'destinationPort', 'vessel', 'media', 'moderation']);
+        $interests = $opportunity->interests()->with(['user.customer', 'reviewer'])->latest('id')->paginate(10, ['*'], 'interests_page')->withQueryString();
+        $events = $opportunity->moderationEvents()->with('actor')->latest('version')->paginate(10, ['*'], 'history_page')->withQueryString();
+        $public = $market->isPublic($opportunity);
+        $submitter = User::find($opportunity->submitted_by);
+        $workspace = CompanyWorkspace::find($opportunity->company_workspace_id);
+        $blockers = [];
+        if ($opportunity->moderation?->hidden) {
+            $blockers[] = 'hidden';
+        }
+        if ($opportunity->visibility !== 'public') {
+            $blockers[] = 'visibility';
+        }
+        if (! in_array($opportunity->verification_status, ['verified', 'auto_eligible'], true)) {
+            $blockers[] = 'eligibility';
+        }
+        if (! $opportunity->published_at || $opportunity->published_at->isFuture()) {
+            $blockers[] = 'publication_date';
+        }
+        if ($opportunity->expires_at && ! $opportunity->expires_at->isFuture()) {
+            $blockers[] = 'expiry';
+        }
+        if ($opportunity->marketplace_state !== null && $opportunity->marketplace_state !== 'published') {
+            $blockers[] = 'closed';
+        }
+        if ($opportunity->company_workspace_id && (! $workspace || $workspace->status !== 'active' || ! Customer::whereKey($workspace->customer_id)->where('is_active', true)->exists())) {
+            $blockers[] = 'company';
+        }
 
-        return view(
-            'admin.opportunities.show',
-            compact('opportunity')
-        );
+        return view('admin.opportunities.show', compact('opportunity', 'interests', 'events', 'public', 'submitter', 'workspace', 'blockers'));
+    }
+
+    public function moderate(Request $request, Opportunity $opportunity, OpportunityModerationService $service)
+    {
+        $data = $request->validate(['action' => ['required', 'in:hide,restore,note'], 'reason' => ['required', 'string', 'min:10', 'max:2000'], 'version' => ['required', 'integer', 'min:0'], 'confirmed' => ['required', 'accepted']]);
+        $service->apply($request->user(),$opportunity,$data);
+
+        return redirect()->route('admin.opportunities.show',$opportunity)->with('success',__('admin_opportunities.saved'));
     }
 }
