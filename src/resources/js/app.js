@@ -10,3 +10,5 @@ Alpine.data("bringDeal", bringDeal);
 window.Alpine = Alpine;
 
 Alpine.start();
+
+import "./trade-room-live";
