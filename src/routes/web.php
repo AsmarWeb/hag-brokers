@@ -397,6 +397,8 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
 
 
+        Route::get('/mobile-app', [\App\Http\Controllers\Admin\AdminMobileAppController::class, 'edit'])->name('mobile-app.edit');
+        Route::put('/mobile-app', [\App\Http\Controllers\Admin\AdminMobileAppController::class, 'update'])->name('mobile-app.update');
         Route::get('/settings', [AdminSettingController::class, 'edit'])
             ->name('settings.edit');
 
