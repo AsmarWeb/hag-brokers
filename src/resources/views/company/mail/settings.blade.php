@@ -1,0 +1,9 @@
+<x-app-layout>
+<x-slot name="header"><div class="cp-dashboard-heading"><div><p>HAG · COMPANY WORKSPACE</p><h1>{{ __('company_mail.title') }}</h1></div><a href="{{ route('company.marketplace') }}">{{ __('market.title') }} ↗</a></div></x-slot>
+<div class="cp-studio"><div class="cp-studio-intro"><div><h2>{{ __('company_mail.heading') }}</h2><p>{{ __('company_mail.intro') }}</p></div></div>
+@include('admin.platform.messages')
+@if(!$ready)<p class="cp-privacy-note">{{ __('company_mail.not_ready') }}</p>@endif
+<form class="cp-editor-panel" action="{{ route('company.mail.update') }}" method="POST">@csrf @method('PUT')
+<div class="cp-fields">@foreach(['enabled','offers','messages'] as $key)<div class="cp-field"><label for="mail-{{ $key }}">{{ __('company_mail.fields.'.$key) }}</label><select id="mail-{{ $key }}" name="{{ $key }}"><option value="0" @selected(!old($key,$preference->$key))>{{ __('company_mail.off') }}</option><option value="1" @selected(old($key,$preference->$key))>{{ __('company_mail.on') }}</option></select></div>@endforeach<div class="cp-field"><label for="mail-locale">{{ __('company_mail.fields.locale') }}</label><select id="mail-locale" name="locale">@foreach(['ar'=>'العربية','en'=>'English'] as $locale=>$label)<option value="{{ $locale }}" @selected(old('locale',$preference->locale)===$locale)>{{ $label }}</option>@endforeach</select></div></div>
+<p class="cp-privacy-note">{{ __('company_mail.privacy') }}</p><button class="cp-button cp-button-gold">{{ __('company_mail.save') }}</button></form>
+<section class="cp-editor-panel"><h2>{{ __('company_mail.delivery') }}</h2><p class="cp-disclaimer">{{ __('company_mail.delivery_help') }}</p><dl class="cp-fields">@foreach(['pending','processing','sent','skipped','failed'] as $status)<div><dt>{{ __('company_mail.status.'.$status) }}</dt><dd><bdi>{{ $counts[$status]??0 }}</bdi></dd></div>@endforeach</dl></section></div></x-app-layout>

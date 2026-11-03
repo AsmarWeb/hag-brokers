@@ -8,3 +8,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 \Illuminate\Support\Facades\Schedule::command('platform:billing-reconcile')->everyFiveMinutes()->withoutOverlapping();
+
+\Illuminate\Support\Facades\Schedule::command('platform:company-mail')->everyMinute()->withoutOverlapping();
