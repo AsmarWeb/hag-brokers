@@ -2,10 +2,13 @@
 
 namespace App\Services\Platform;
 
+use App\Models\CompanyMember;
+use App\Models\CompanyWorkspace;
 use App\Models\Opportunity;
 use App\Models\OpportunityModeration;
 use App\Models\OpportunityModerationEvent;
 use App\Models\User;
+use App\Notifications\AdminPlatformNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -30,7 +33,26 @@ final class OpportunityModerationService
             }
             $state ??= new OpportunityModeration(['opportunity_id' => $o->id]);
             $state->fill(['hidden' => $next, 'version' => $version + 1])->save();
-            OpportunityModerationEvent::create(['opportunity_id' => $o->id, 'actor_id' => $actor->id, 'action' => $data['action'], 'reason' => $data['reason'], 'was_hidden' => $hidden, 'is_hidden' => $next, 'version' => $version + 1, 'created_at' => now()]);
+            $event = OpportunityModerationEvent::create(['opportunity_id' => $o->id, 'actor_id' => $actor->id, 'action' => $data['action'], 'reason' => $data['reason'], 'was_hidden' => $hidden, 'is_hidden' => $next, 'version' => $version + 1, 'created_at' => now()]);
+            if ($data['action'] !== 'note' && $o->company_workspace_id) {
+                $workspace = CompanyWorkspace::find($o->company_workspace_id);
+                if ($workspace) {
+                    $leaders = CompanyMember::where('company_workspace_id', $workspace->id)->whereIn('role', ['owner', 'manager'])->select('user_id');
+                    foreach (User::where('customer_id', $workspace->customer_id)->whereIn('id', $leaders)->get() as $recipient) {
+                        if ($recipient->hasRole(['admin', 'super-admin'])) {
+                            continue;
+                        }
+                        $recipient->notify(new AdminPlatformNotification(
+                            type: 'marketplace.moderation.'.$data['action'],
+                            title: $next ? 'تحديث حالة الفرصة / Listing visibility update' : 'رفع الإخفاء الإداري / Administrative hold removed',
+                            message: $o->title,
+                            url: '/company/marketplace',
+                            extra: ['opportunity_id' => $o->id, 'moderation_event_id' => $event->id, 'hidden' => $next]
+                        ));
+                    }
+                }
+            }
+
         }, 3);
     }
 }
