@@ -1,5 +1,6 @@
 <x-app-layout>
 
+    @if(in_array($opportunity->opportunity_type, \App\Services\Platform\CompanyTradeOfferService::TYPES, true))<div class="trade-panel"><a class="trade-button" href="{{ route('company.trade-offers.create',$opportunity) }}">{{ __('rfq.new') }}</a><p>{{ __('rfq.help') }}</p></div>@endif
     @php
         $isAr = app()->getLocale() === 'ar';
         $dir = $isAr ? 'rtl' : 'ltr';

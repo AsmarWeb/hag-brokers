@@ -316,6 +316,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
         Route::resource('tasks', \App\Http\Controllers\Admin\AdminTaskController::class);
 
         Route::post('/opportunities/{opportunity}/moderation', [\App\Http\Controllers\Admin\AdminOpportunityController::class, 'moderate'])->middleware('throttle:30,1')->name('opportunities.moderate');
+        Route::get('/opportunities/{opportunity}/offers',[\App\Http\Controllers\CompanyTradeOfferController::class,'adminComparison'])->name('trade-offers.comparison');
+        Route::get('/trade-offers/{offer}',[\App\Http\Controllers\CompanyTradeOfferController::class,'adminShow'])->name('trade-offers.show');
+        Route::get('/trade-offers/{offer}/attachments/{file}',[\App\Http\Controllers\CompanyTradeOfferController::class,'adminDownload'])->whereNumber('file')->name('trade-offers.download');
         Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class)->only(['index', 'show']);
 
 
@@ -539,6 +542,13 @@ require __DIR__ . '/auth.php';
 Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified'])->name('company.workspace');
 
 Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
+    Route::get('/trade-offers',[\App\Http\Controllers\CompanyTradeOfferController::class,'index'])->name('trade-offers.index');
+    Route::get('/trade-offers/{offer}',[\App\Http\Controllers\CompanyTradeOfferController::class,'show'])->name('trade-offers.show');
+    Route::post('/trade-offers/{offer}/decision',[\App\Http\Controllers\CompanyTradeOfferController::class,'decide'])->middleware('throttle:30,1')->name('trade-offers.decide');
+    Route::get('/trade-offers/{offer}/attachments/{file}',[\App\Http\Controllers\CompanyTradeOfferController::class,'download'])->whereNumber('file')->name('trade-offers.download');
+    Route::get('/opportunities/{opportunity}/offers',[\App\Http\Controllers\CompanyTradeOfferController::class,'comparison'])->name('trade-offers.comparison');
+    Route::get('/opportunities/{opportunity}/offer',[\App\Http\Controllers\CompanyTradeOfferController::class,'create'])->name('trade-offers.create');
+    Route::post('/opportunities/{opportunity}/offer',[\App\Http\Controllers\CompanyTradeOfferController::class,'store'])->middleware('throttle:15,1')->name('trade-offers.store');
     Route::get('/marketplace', [\App\Http\Controllers\CompanyMarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/opportunities/{opportunity}/edit', [\App\Http\Controllers\CompanyMarketplaceController::class, 'edit'])->name('opportunities.edit');
     Route::patch('/opportunities/{opportunity:slug}', [\App\Http\Controllers\CompanyMarketplaceController::class, 'update'])->name('opportunities.update');
