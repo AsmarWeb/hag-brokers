@@ -1,6 +1,9 @@
 export default function tradeOpportunity(config) {
     return {
         title: config.title || '', description: config.description || '', type: config.type || 'sell',
+        subcategory: config.subcategory || '',
+        init() { this.$watch('category', () => { if (!(config.subcategories?.[this.category] || []).includes(this.subcategory)) this.subcategory = ''; }); },
+        get marine() { return this.type === 'vessel_brokerage' || (['sell','buy'].includes(this.type) && this.category === 'marine' && ['yachts','boats','sailboats','commercial_vessels'].includes(this.subcategory)); },
         showAllSectors: false, category: config.category || '', step: config.step || 1,
         stepLabels: config.stepLabels || [], summary: {}, files: [], mediaError: '', dragging: false, mediaSequence: 0,
         get selectedTypeLabel() { return config.typeLabels?.[this.type] || this.type; },

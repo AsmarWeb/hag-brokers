@@ -115,6 +115,24 @@ class Opportunity extends Model
         'expires_at' => 'datetime',
     ];
 
+    public function moderation(): HasOne
+    {
+        return $this->hasOne(OpportunityModeration::class);
+    }
+
+    public function moderationEvents(): HasMany
+    {
+        return $this->hasMany(OpportunityModerationEvent::class);
+    }
+
+    public function isLuxuryMarineListing(): bool
+    {
+        return in_array($this->opportunity_type, ['sell', 'vessel_brokerage'], true)
+            && ($this->opportunity_type === 'vessel_brokerage' || $this->category === 'marine')
+            && $this->vessel && $this->vessel->listing_type === 'sale'
+            && in_array($this->vessel->vessel_category, ['yacht', 'boat'], true);
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Opportunity $opportunity): void {

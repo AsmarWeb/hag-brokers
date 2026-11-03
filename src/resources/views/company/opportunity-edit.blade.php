@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-market-layout>
 @section('title', __('trade.marketplace'))
 @section('meta_description', __('trade.intro'))
 <div class="trade-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
@@ -8,4 +8,4 @@
 @include('admin.platform.messages')
 @include('opportunities.partials.form', ['editing' => true])
 </div></div>
-</x-app-layout>
+</x-market-layout>

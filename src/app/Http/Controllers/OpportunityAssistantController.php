@@ -22,7 +22,7 @@ final class OpportunityAssistantController extends Controller
             'opportunity_type' => ['required', Rule::in(OpportunityCatalog::TYPES)],
             'category' => ['nullable', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'], 'city' => ['nullable', 'string', 'max:100'],
-        ] + OpportunityCatalog::detailRules());
+        ] + OpportunityCatalog::detailRules($request->input('category')));
         app()->setLocale($data['language']);
         if ($data['mode'] === 'guide') {
             return response()->json($assistant->guide($data));
