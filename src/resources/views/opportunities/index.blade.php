@@ -120,4 +120,4 @@
             </section>
         </div>
     </div>
-</x-market-layout>س
+</x-market-layout>
