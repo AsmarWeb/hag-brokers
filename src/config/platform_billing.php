@@ -4,6 +4,7 @@ $mode = env('PLATFORM_BILLING_MODE', 'test');
 $live = $mode === 'live';
 
 return [
+    'free_launch' => (bool) env('PLATFORM_FREE_LAUNCH', true),
     'mode' => $mode,
     'strict_proof_test' => (bool) env('PLATFORM_BILLING_STRICT_PROOF_TEST_ENABLED', false),
     'enabled' => (bool) ($live ? env('PLATFORM_BILLING_LIVE_ENABLED', false) : env('PLATFORM_BILLING_TEST_ENABLED', false)),

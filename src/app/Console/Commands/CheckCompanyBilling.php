@@ -17,7 +17,8 @@ class CheckCompanyBilling extends Command
     {
         $this->line('Mode: '.config('platform_billing.mode', 'test'));
         $this->line('Gateway configured: '.($gateway->ready() ? 'YES' : 'NO'));
-        $this->line('New live checkout: '.(config('platform_billing.checkout_enabled') ? 'ENABLED' : 'DISABLED'));
+        $this->line('Free launch: '.(config('platform_billing.free_launch', true) ? 'ON' : 'OFF'));
+        $this->line('New live checkout: '.(config('platform_billing.checkout_enabled') && ! config('platform_billing.free_launch', true) ? 'ENABLED' : 'DISABLED'));
         $tables = $gateway->live() ? ['company_live_billing_accounts', 'company_live_billing_events', 'company_live_billing_receipts'] : ['company_billing_accounts', 'company_billing_events', 'company_billing_receipts'];
         foreach ($tables as $table) {
             if (! Schema::hasTable($table)) {

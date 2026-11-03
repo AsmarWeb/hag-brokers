@@ -23,6 +23,9 @@ abstract class TestCase extends BaseTestCase
             );
         }
 
+        // Each feature suite selects launch policy explicitly; do not inherit runtime rollout flags.
+        $app['config']->set('platform_billing.free_launch', false);
+
         return $app;
     }
 }
