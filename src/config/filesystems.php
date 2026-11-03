@@ -29,6 +29,7 @@ return [
     */
 
     'disks' => [
+        'rfq_private' => ['driver'=>'local','root'=>storage_path('app/rfq-private'),'visibility'=>'private','throw'=>true,'serve'=>false],
 
         'local' => [
             'driver' => 'local',
