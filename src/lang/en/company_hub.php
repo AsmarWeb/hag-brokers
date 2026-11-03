@@ -1,0 +1,22 @@
+<?php
+
+return ['title' => 'Your company marketplace',
+    'intro' => 'Manage your opportunities and follow company enquiries from one workspace. Public availability is shown separately from your publishing quota.',
+    'notifications' => 'Notifications',
+    'navigation' => 'Company marketplace navigation',
+    'quota_help' => 'An administrative hold does not release a publishing slot. Expiry or closing your listing releases the active slot under your current plan.',
+    'filter' => 'Listing visibility',
+    'filter_help' => 'Filters can overlap: a hidden listing may also be expired or closed. Counters cover your company, independently of the selected filter.',
+    'hidden_help' => 'This opportunity is hidden by the platform. Editing it does not remove the administrative hold. Internal review notes are not displayed here.',
+    'unavailable_help' => 'This listing is currently unavailable to public visitors. Check its closing date and company publication status.',
+    'public_page' => 'Open public listing',
+    'empty_help' => 'Try another filter, or prepare a new opportunity if you have permission to publish.',
+    'metrics' => ['total' => 'Your opportunities',
+        'visible' => 'Visible to buyers',
+        'hidden' => 'Administrative holds',
+        'pending' => 'Awaiting your decision'],
+    'status' => ['visible' => 'Visible in marketplace',
+        'hidden' => 'Administratively hidden',
+        'closed' => 'Closed by company',
+        'expired' => 'Expired',
+        'unavailable' => 'Not publicly available']];
