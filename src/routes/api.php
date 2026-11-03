@@ -22,3 +22,5 @@ use App\Http\Controllers\Api\V1\{AuthController, ShipmentController, QuotationCo
 // });
 
 Route::post('/platform-billing/stripe/webhook', \App\Http\Controllers\StripeTestWebhookController::class)->name('platform-billing.webhook');
+
+Route::post('/platform-billing/stripe/live/webhook', \App\Http\Controllers\StripeLiveWebhookController::class)->name('platform-billing.live-webhook');

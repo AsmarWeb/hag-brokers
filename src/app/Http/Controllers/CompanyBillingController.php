@@ -25,7 +25,7 @@ class CompanyBillingController extends Controller
     {
         $d = $request->validate(['plan' => ['required', 'in:business,professional']]);
         try {
-            $url = $service->checkout($request->user(), $d['plan']);
+            $url = $service->checkout($request->user(), $d['plan'], $request->boolean('confirmed'));
         } catch (\RuntimeException $e) {
             if ($e instanceof HttpExceptionInterface) {
                 throw $e;

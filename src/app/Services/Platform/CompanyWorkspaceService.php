@@ -34,7 +34,7 @@ final class CompanyWorkspaceService
         $billing = \App\Models\CompanyBillingAccount::where('company_workspace_id', $w->id)->first();
         if ($billing && ($billing->stripe_subscription_id || in_array($billing->status, ['conflict', 'invalid_price'], true))) {
             if (app(StripeTestGateway::class)->ready() && in_array($billing->status, ['active', 'past_due'], true) && $billing->paid_until?->isFuture() && is_array($billing->plan_snapshot)) {
-                return $billing->plan_snapshot + ['source' => 'stripe_test', 'expires_at' => $billing->paid_until->toIso8601String()];
+                return $billing->plan_snapshot + ['source' => (app(StripeTestGateway::class)->live() ? 'stripe_live' : 'stripe_test'), 'expires_at' => $billing->paid_until->toIso8601String()];
             }
             $free = PlatformPlan::where('code', 'free')->where('is_available', true)->first();
             if (! $free) $this->fail('plans_missing');

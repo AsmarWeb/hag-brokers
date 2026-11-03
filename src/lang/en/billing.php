@@ -1,10 +1,17 @@
 <?php
 
 return [
+    'payment_review' => 'Stripe has a subscription, but paid access is not currently confirmed. Refresh or contact support to review payment or refund status.',
+    'live_mode' => 'Live billing — automatic monthly renewal',
+    'checkout_live' => 'Subscribe and pay with Stripe',
+    'live_confirmation' => 'I understand this is a paid monthly subscription that renews until canceled, and will review the final amount and tax on Stripe before paying.',
+    'live_confirmed' => 'Payment confirmation required',
+    'live_confirmation_error' => 'Please confirm the paid subscription; new checkout may also be temporarily disabled.',
+
     'title' => 'Company subscription and billing',
     'test_only' => 'Test mode only — no real charges',
     'help' => 'The company owner subscribes to increase team, listing and application limits. Card details are entered on Stripe hosted pages, not in this platform.',
-    'unavailable' => 'Test billing is disabled or not configured. Ask the system administrator to configure test keys and prices.',
+    'unavailable' => 'Billing is disabled or not configured. Contact the platform team.',
     'return_note' => 'Returning from Checkout does not confirm payment. Features activate after Stripe confirmation; refresh the status if the webhook is delayed.',
     'current' => 'Subscription status',
     'paid_until' => 'Confirmed access until — Dubai time',
@@ -14,10 +21,10 @@ return [
     'resume' => 'Resume renewal',
     'portal' => 'Payment method and Stripe invoices',
     'month' => 'month',
-    'tax_note' => 'Reference plan amount in test mode. Checkout displays the final amount and tax according to Stripe Tax configuration.',
+    'tax_note' => 'Monthly base amount. Stripe displays the final amount and tax before payment confirmation.',
     'checkout' => 'Subscribe with Stripe — test',
     'change_note' => 'Mid-period plan changes and prorations are not available in this phase. Cancel renewal, then choose a new plan when the subscription ends. Deal and commission records are unchanged.',
-    'receipts' => 'Confirmed subscription invoices — test',
+    'receipts' => 'Confirmed subscription invoices',
     'empty' => 'No records yet.',
     'back' => 'Back to company marketplace',
     'price_mismatch' => 'The Stripe price does not match the platform plan, monthly interval or tax configuration. Checkout was blocked.',

@@ -7,9 +7,43 @@ use Illuminate\Support\Facades\Http;
 
 final class StripeTestGateway
 {
+    // Historical class name retained for backwards compatibility; mode is explicit.
+    public function live(): bool
+    {
+        return config('platform_billing.mode', 'test') === 'live';
+    }
+
+    public function strictProof(): bool
+    {
+        return $this->live() || (bool) config('platform_billing.strict_proof_test', false);
+    }
+
     public function ready(): bool
     {
-        return config('platform_billing.enabled') && str_starts_with((string) config('platform_billing.secret'), 'sk_test_');
+        if (! in_array(config('platform_billing.mode', 'test'), ['test', 'live'], true) || ! config('platform_billing.enabled')) {
+            return false;
+        }
+        $prefix = $this->live() ? 'sk_live_' : 'sk_test_';
+        $restricted = $this->live() ? 'rk_live_' : 'rk_test_';
+        $key = (string) config('platform_billing.secret');
+        if (! str_starts_with($key, $prefix) && ! str_starts_with($key, $restricted)) {
+            return false;
+        }
+        if (! $this->live()) {
+            return true;
+        }
+        $url = parse_url((string) config('app.url'));
+
+        return app()->environment(['production', 'testing']) && ! config('app.debug') && ($url['scheme'] ?? '') === 'https' && ! empty($url['host']) && ! isset($url['user']) && ! isset($url['pass']) && ! isset($url['query']) && ! isset($url['fragment'])
+            && str_starts_with((string) config('platform_billing.webhook_secret'), 'whsec_')
+            && str_starts_with((string) config('platform_billing.prices.business'), 'price_')
+            && str_starts_with((string) config('platform_billing.prices.professional'), 'price_')
+            && config('platform_billing.prices.business') !== config('platform_billing.prices.professional');
+    }
+
+    public function sessionPrefix(): string
+    {
+        return $this->live() ? 'cs_live_' : 'cs_test_';
     }
 
     public function call(string $method, string $path, array $params = [], ?string $key = null): array
@@ -22,10 +56,10 @@ final class StripeTestGateway
         try {
             $r = $method === 'GET' ? $http->get('https://api.stripe.com/v1/'.$path, $params) : $http->post('https://api.stripe.com/v1/'.$path, $params);
         } catch (ConnectionException $exception) {
-            throw new \RuntimeException('Stripe test API connection failed.', 0, $exception);
+            throw new \RuntimeException('Stripe API connection failed.', 0, $exception);
         }
         if (! $r->successful() || ! is_array($r->json())) {
-            throw new \RuntimeException('Stripe test API request failed.');
+            throw new \RuntimeException('Stripe API request failed.');
         }
 
         return $r->json();
@@ -33,8 +67,8 @@ final class StripeTestGateway
 
     public function testObject(array $o): void
     {
-        if (($o['livemode'] ?? null) !== false) {
-            throw new \RuntimeException('Only Stripe test objects are accepted.');
+        if (($o['livemode'] ?? null) !== $this->live()) {
+            throw new \RuntimeException('Stripe object mode mismatch.');
         }
     }
 
@@ -81,7 +115,7 @@ final class StripeTestGateway
         } catch (\JsonException) {
             abort(400);
         }
-        abort_unless(is_array($event) && ($event['livemode'] ?? null) === false && is_string($event['id'] ?? null) && is_string($event['type'] ?? null), 400);
+        abort_unless(is_array($event) && ($event['livemode'] ?? null) === $this->live() && is_string($event['id'] ?? null) && is_string($event['type'] ?? null), 400);
         $this->id($event['id'], 'evt_');
 
         return $event;
