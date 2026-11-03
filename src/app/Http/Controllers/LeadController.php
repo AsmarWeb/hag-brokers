@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
+use App\Services\Platform\LeadIntakeCatalog;
+use App\Services\Platform\OpportunityCatalog;
+use App\Services\Revenue\ReportMoney;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class LeadController extends Controller
@@ -36,6 +40,7 @@ class LeadController extends Controller
             ],
 
             'email' => [
+                'required_if:preferred_contact,email',
                 'nullable',
                 'email',
                 'max:255',
@@ -49,14 +54,12 @@ class LeadController extends Controller
 
             'deal_type' => [
                 'required',
-                'string',
-                'max:50',
+                Rule::in(LeadIntakeCatalog::TYPES),
             ],
 
             'category' => [
                 'nullable',
-                'string',
-                'max:100',
+                Rule::in(OpportunityCatalog::CATEGORIES),
             ],
 
             'title' => [
@@ -74,14 +77,14 @@ class LeadController extends Controller
 
             'estimated_value' => [
                 'nullable',
-                'numeric',
+                'decimal:0,2',
                 'min:0',
+                'max:9999999999999.99',
             ],
 
             'currency' => [
                 'required',
-                'string',
-                'size:3',
+                Rule::in(OpportunityCatalog::CURRENCIES),
             ],
 
             'country' => [
@@ -98,8 +101,7 @@ class LeadController extends Controller
 
             'preferred_contact' => [
                 'nullable',
-                'string',
-                'max:50',
+                Rule::in(LeadIntakeCatalog::CONTACTS),
             ],
         ]);
 
@@ -132,28 +134,31 @@ class LeadController extends Controller
          */
         $notes = [];
 
-        $notes[] = 'Deal Title: ' . $validated['title'];
-        $notes[] = 'Deal Type: ' . $validated['deal_type'];
+        $notes[] = 'Deal Title: '.$validated['title'];
+        $notes[] = 'Deal Type: '.$validated['deal_type'];
 
-        if (!empty($validated['category'])) {
-            $notes[] = 'Category: ' . $validated['category'];
+        if (! empty($validated['category'])) {
+            $notes[] = 'Category: '.$validated['category'];
         }
 
         $notes[] = '';
+        if (! empty($validated['country'])) {
+            $notes[] = 'Country: '.$validated['country'];
+        }
         $notes[] = 'Description:';
         $notes[] = $validated['description'];
 
-        if (!empty($validated['estimated_value'])) {
+        if (isset($validated['estimated_value'])) {
             $notes[] = '';
             $notes[] = 'Estimated Value: '
-                . number_format((float) $validated['estimated_value'], 2)
-                . ' '
-                . strtoupper($validated['currency']);
+                .ReportMoney::format((string) $validated['estimated_value'])
+                .' '
+                .strtoupper($validated['currency']);
         }
 
-        if (!empty($validated['preferred_contact'])) {
+        if (! empty($validated['preferred_contact'])) {
             $notes[] = '';
-            $notes[] = 'Preferred Contact: ' . $validated['preferred_contact'];
+            $notes[] = 'Preferred Contact: '.$validated['preferred_contact'];
         }
 
         /*
@@ -161,8 +166,6 @@ class LeadController extends Controller
          * AdminLeadController.
          */
         Lead::create([
-            'user_id' => auth()->id(),
-
             'company_name' => $companyName,
 
             'contact_person' => $validated['name'],
