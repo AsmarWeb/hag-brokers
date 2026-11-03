@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CompanyNotificationApiController;
 use App\Http\Controllers\Api\V1\CompanyOpportunityController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\MobileAuthController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\PublicMarketplaceController;
 use App\Http\Controllers\Api\V1\QuotationController;
 use App\Http\Controllers\Api\V1\ShipmentController;
+use App\Http\Controllers\Api\V1\TradeOfferApiController;
 use App\Http\Controllers\StripeLiveWebhookController;
 use App\Http\Controllers\StripeTestWebhookController;
 use App\Http\Middleware\MobileApi;
@@ -51,6 +53,20 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware('signed')->name('api.v1.verify');
     Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
+        $offers = TradeOfferApiController::class;
+        $notices = CompanyNotificationApiController::class;
+        Route::get('/company/trade-offers', [$offers, 'index']);
+        Route::get('/company/opportunities/{opportunityId}/offers', [$offers, 'comparison'])->whereNumber('opportunityId');
+        Route::post('/company/opportunities/{opportunityId}/offers', [$offers, 'store'])->whereNumber('opportunityId')->middleware('throttle:15,1,mobile-offers:');
+        Route::get('/company/trade-offers/{offerId}', [$offers, 'show'])->whereNumber('offerId');
+        Route::get('/company/trade-offers/{offerId}/events', [$offers, 'events'])->whereNumber('offerId');
+        Route::post('/company/trade-offers/{offerId}/decision', [$offers, 'decide'])->whereNumber('offerId')->middleware('throttle:30,1,mobile-offer-decision:');
+        Route::get('/company/trade-offers/{offerId}/attachments/{file}', [$offers, 'download'])->whereNumber(['offerId', 'file']);
+        Route::get('/company/trade-offers/{offerId}/messages', [$offers, 'messages'])->whereNumber('offerId');
+        Route::post('/company/trade-offers/{offerId}/messages', [$offers, 'send'])->whereNumber('offerId')->middleware('throttle:30,1,mobile-message:');
+        Route::post('/company/trade-offers/{offerId}/read', [$offers, 'read'])->whereNumber('offerId')->middleware('throttle:60,1,mobile-read:');
+        Route::get('/company/notifications', [$notices, 'index']);
+        Route::patch('/company/notifications/{notificationId}/read', [$notices, 'read'])->whereUuid('notificationId')->middleware('throttle:60,1,mobile-notice-read:');
         $opportunities = CompanyOpportunityController::class;
         Route::get('/company/opportunities', [$opportunities, 'index']);
         Route::post('/company/opportunities', [$opportunities, 'store'])->middleware('throttle:15,1,mobile-publish:');
