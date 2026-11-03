@@ -42,7 +42,7 @@ Route::get('/language/{locale}', function (string $locale) {
 
     session(['locale' => $locale]);
 
-    return redirect()->back();
+    return redirect(app(\App\Services\Seo\PublicSeo::class)->languageReturn(request(), $locale));
 })->name('language.switch');
 
 
@@ -207,6 +207,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
+Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'index'])->name('seo.sitemap.index');
+Route::get('/sitemaps/pages.xml', [\App\Http\Controllers\SeoController::class, 'pages'])->name('seo.sitemap.pages');
+Route::get('/sitemaps/opportunities-{page}.xml', [\App\Http\Controllers\SeoController::class, 'opportunities'])->where('page', '[1-9][0-9]{0,5}')->name('seo.sitemap.opportunities');
+
 Route::get('/opportunities', [
     OpportunityController::class,
     'index',
@@ -225,17 +230,17 @@ Route::post('/opportunities', [
 Route::post('/company/opportunity-assistant', \App\Http\Controllers\OpportunityAssistantController::class)
     ->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:4,1'])->name('company.opportunity-assistant');
 
-Route::get('/opportunities/{opportunity}', [
+Route::get('/opportunities/{opportunity:slug}', [
     OpportunityController::class,
     'show',
 ])->name('opportunities.show');
 
-Route::get('/opportunities/{opportunity}/interest', [
+Route::get('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'interest',
 ])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest');
 
-Route::post('/opportunities/{opportunity}/interest', [
+Route::post('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'storeInterest',
 ])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest.store');
@@ -535,7 +540,7 @@ Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceControll
 Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
     Route::get('/marketplace', [\App\Http\Controllers\CompanyMarketplaceController::class, 'index'])->name('marketplace');
     Route::get('/opportunities/{opportunity}/edit', [\App\Http\Controllers\CompanyMarketplaceController::class, 'edit'])->name('opportunities.edit');
-    Route::patch('/opportunities/{opportunity}', [\App\Http\Controllers\CompanyMarketplaceController::class, 'update'])->name('opportunities.update');
+    Route::patch('/opportunities/{opportunity:slug}', [\App\Http\Controllers\CompanyMarketplaceController::class, 'update'])->name('opportunities.update');
     Route::post('/opportunities/{opportunity}/close', [\App\Http\Controllers\CompanyMarketplaceController::class, 'close'])->name('opportunities.close');
     Route::post('/applications/{interest}/decision', [\App\Http\Controllers\CompanyMarketplaceController::class, 'decide'])->name('applications.decide');
 });

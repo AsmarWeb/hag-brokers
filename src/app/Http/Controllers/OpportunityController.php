@@ -123,9 +123,17 @@ final class OpportunityController extends Controller
         return redirect()->route('company.marketplace')->with('success', __('market.published'));
     }
 
-    public function show(Opportunity $opportunity, CompanyMarketplaceService $service)
+    public function show(Request $request, Opportunity $opportunity, CompanyMarketplaceService $service)
     {
         abort_unless($service->isPublic($opportunity), 404);
+        if (ctype_digit((string) $request->route()->originalParameter('opportunity'))) {
+            $parameters = ['opportunity' => $opportunity];
+            if (in_array($request->query('lang'), ['ar', 'en'], true)) {
+                $parameters['lang'] = $request->query('lang');
+            }
+
+            return redirect(app(\App\Services\Seo\PublicSeo::class)->url('opportunities.show', $parameters), 301);
+        }
         $opportunity->load(['originPort', 'destinationPort', 'media', 'customer', 'vessel']);
 
         return view('opportunities.show', compact('opportunity'));

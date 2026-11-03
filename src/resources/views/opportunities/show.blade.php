@@ -2,7 +2,7 @@
 @section('title', e($opportunity->title))
 @section('meta_description', e(\Illuminate\Support\Str::limit($opportunity->description, 150)))
 <div class="trade-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"><div class="trade-wrap">
-<a class="trade-link" href="{{ route('opportunities.index') }}">{{ __('trade.browse') }}</a>
+<nav aria-label="{{ app()->getLocale() === 'ar' ? 'مسار التصفح' : 'Breadcrumb' }}"><ol class="flex flex-wrap items-center gap-2 text-sm"><li><a class="trade-link" href="{{ app(\App\Services\Seo\PublicSeo::class)->url('home', [], app()->getLocale()) }}">{{ app()->getLocale() === 'ar' ? 'الرئيسية' : 'Home' }}</a></li><li aria-hidden="true">/</li><li><a class="trade-link" href="{{ app(\App\Services\Seo\PublicSeo::class)->url('opportunities.index', [], app()->getLocale()) }}">{{ __('trade.browse') }}</a></li><li aria-hidden="true">/</li><li aria-current="page">{{ \Illuminate\Support\Str::limit($opportunity->title, 60) }}</li></ol></nav>
 <header class="trade-hero"><p class="trade-eyebrow">HAG BROKERS · B2B</p><div class="trade-badges"><span>{{ \Illuminate\Support\Facades\Lang::has('trade.types.'.$opportunity->opportunity_type) ? __('trade.types.'.$opportunity->opportunity_type) : $opportunity->opportunity_type }}</span>@if ($opportunity->category)<span>{{ \Illuminate\Support\Facades\Lang::has('trade.categories.'.$opportunity->category) ? __('trade.categories.'.$opportunity->category) : $opportunity->category }}</span>@endif</div><h1>{{ $opportunity->title }}</h1><p>{{ $opportunity->city }} · {{ $opportunity->country }}</p></header>
 <div class="trade-layout"><div class="trade-sections">
 <section class="trade-panel"><h2>{{ __('trade.description') }}</h2><p class="trade-prose">{{ $opportunity->description }}</p></section>

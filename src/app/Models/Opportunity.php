@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Services\Seo\OpportunitySlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Validation\ValidationException;
 
 class Opportunity extends Model
 {
@@ -96,6 +98,7 @@ class Opportunity extends Model
 
     protected $casts = [
         'commercial_details' => 'array',
+        'seo_updated_at' => 'immutable_datetime',
 
         // Financial
         'estimated_value' => 'decimal:2',
@@ -111,6 +114,32 @@ class Opportunity extends Model
         'published_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Opportunity $opportunity): void {
+            $opportunity->slug = OpportunitySlug::make($opportunity->title);
+            $opportunity->seo_updated_at = now('UTC');
+        });
+        static::updating(function (Opportunity $opportunity): void {
+            if ($opportunity->isDirty('slug')) {
+                throw ValidationException::withMessages(['slug' => 'Published URL identifiers cannot be changed.']);
+            }
+            if ($opportunity->isDirty(['title', 'description', 'opportunity_type', 'category', 'commercial_details', 'country', 'city', 'currency', 'estimated_value', 'required_capital', 'min_investment', 'commission_rate', 'visibility', 'verification_status', 'published_at', 'expires_at', 'marketplace_state'])) {
+                $opportunity->seo_updated_at = now('UTC');
+            }
+        });
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        // Only public routes opt into slug binding. Admin/company routes retain IDs.
+        if ($field === 'slug' && ctype_digit((string) $value)) {
+            return parent::resolveRouteBindingQuery($query, $value, 'id');
+        }
+
+        return parent::resolveRouteBindingQuery($query, $value, $field);
+    }
 
     // =========================================================
     // CRM Relationships
