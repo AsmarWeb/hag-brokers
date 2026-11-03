@@ -12,7 +12,7 @@ use Laratrust\Traits\HasRolesAndPermissions;
 
 class User extends Authenticatable implements LaratrustUser
 {
-    use HasFactory, HasRolesAndPermissions, Notifiable;
+    use HasFactory, HasRolesAndPermissions, \Laravel\Sanctum\HasApiTokens, Notifiable;
 
     protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone'];
 
