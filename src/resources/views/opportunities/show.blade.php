@@ -1,4 +1,5 @@
 <x-market-layout>
+@include('company.profile.opportunity-link')
 @section('title', e($opportunity->title))
 @section('meta_description', e(\Illuminate\Support\Str::limit($opportunity->description, 150)))
 <div class="trade-page" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"><div class="trade-wrap">

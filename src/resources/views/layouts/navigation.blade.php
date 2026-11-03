@@ -36,7 +36,10 @@
                     @endauth
 
                     @if ($hasCompanyWorkspace)
-                        <x-nav-link :href="route('company.marketplace')" :active="request()->routeIs('company.*')">{{ __('platform.workspace') }}</x-nav-link>
+                        <x-nav-link :href="route('company.marketplace')" :active="request()->routeIs('company.*') && !request()->routeIs('company.profile.*')">{{ __('platform.workspace') }}</x-nav-link>
+                        @if(\App\Models\CompanyMember::where('user_id',auth()->id())->whereIn('role',['owner','manager'])->exists())
+                        <x-nav-link :href="route('company.profile.edit')" :active="request()->routeIs('company.profile.*')">{{ __('company_profile.title') }}</x-nav-link>
+                        @endif
                     @endif
 
                     <x-nav-link :href="route('opportunities.index')" :active="request()->routeIs('opportunities.*')">
@@ -184,7 +187,10 @@
             @auth
 
                 @if ($hasCompanyWorkspace)
-                    <x-responsive-nav-link :href="route('company.marketplace')" :active="request()->routeIs('company.*')">{{ __('platform.workspace') }}</x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('company.marketplace')" :active="request()->routeIs('company.*') && !request()->routeIs('company.profile.*')">{{ __('platform.workspace') }}</x-responsive-nav-link>
+                        @if(\App\Models\CompanyMember::where('user_id',auth()->id())->whereIn('role',['owner','manager'])->exists())
+                        <x-responsive-nav-link :href="route('company.profile.edit')" :active="request()->routeIs('company.profile.*')">{{ __('company_profile.title') }}</x-responsive-nav-link>
+                        @endif
                 @endif
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('dashboard.dashboard') }}

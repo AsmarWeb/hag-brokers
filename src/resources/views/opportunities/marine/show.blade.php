@@ -1,4 +1,5 @@
 <x-market-layout>
+@include('company.profile.opportunity-link')
 @section('title', e($opportunity->title))
 @section('meta_description', e(\Illuminate\Support\Str::limit($opportunity->description,150)))
 @php $v=$opportunity->vessel; $images=$opportunity->media->where('type','image')->values(); @endphp
