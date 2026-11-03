@@ -1,10 +1,12 @@
-<x-app-layout><div class="mx-auto max-w-6xl space-y-6 px-4 py-8" dir="{{ app()->getLocale()==='ar'?'rtl':'ltr' }}">
-@if (\App\Models\CompanyMember::where('user_id',auth()->id())->where('role','owner')->exists())<a class="hag-broker-action" href="{{ route('company.billing') }}">{{ __('billing.title') }}</a>@endif
-<header><h1 class="text-2xl font-bold">{{ $company->company_name }}</h1><p class="mt-2">{{ __('platform.workspace') }}</p></header>
-@include('company.plan-summary')
-@if(\App\Models\CompanyMember::where('user_id',auth()->id())->whereIn('role',['owner','manager'])->exists())<section class="trade-panel company-profile-invite"><div><h2>{{ __('company_profile.invite') }}</h2><p>{{ __('company_profile.invite_help') }}</p></div><a class="trade-button" href="{{ route('company.profile.edit') }}">{{ __('company_profile.title') }} ↗</a></section>@endif
-
-<section class="hag-broker-card"><h2 class="text-lg font-bold">{{ __('platform.team') }}</h2><ul class="mt-4 space-y-3">@foreach ($members as $member)<li>{{ $member['name'] }} · {{ __('platform.role_'.$member['role']) }}</li>@endforeach</ul><p class="hag-broker-muted mt-4">{{ __('platform.portal_help') }}</p></section>
-<a href="{{ route('company.marketplace') }}" class="hag-broker-action">{{ __('market.title') }}</a>
-<a href="{{ route('opportunities.index') }}" class="hag-broker-action">{{ __('platform.browse') }}</a>
+<x-app-layout>
+@php $cwRole=\App\Models\CompanyMember::where('user_id',auth()->id())->value('role'); $cwLeader=in_array($cwRole,['owner','manager'],true); $cwOwner=$cwRole==='owner'; @endphp
+@section('title', __('company_ui.workspace_heading'))
+<div class="cw-page trade-page">
+@include('company.partials.navigation')
+<header class="cw-hero"><div><p class="cw-eyebrow">HAG · COMPANY MANAGEMENT</p><h1>{{ $company->company_name }}</h1><p>{{ __('company_ui.workspace_intro') }}</p></div><span class="cw-status"><span aria-hidden="true"></span>{{ __('company_ui.company_workspace') }}</span></header>
+<div class="cw-workspace-grid"><div>
+@include('company.partials.plan-card')
+<section class="trade-panel cw-team"><header class="cw-section-heading"><div><p class="cw-eyebrow">{{ __('company_ui.your_people') }}</p><h2>{{ __('platform.team') }}</h2></div><span class="cw-count">{{ $members->count() }}</span></header><div class="cw-member-list">@foreach($members as $member)<article><span class="cw-avatar" aria-hidden="true">{{ mb_substr($member['name'] ?: 'H',0,1) }}</span><div><h3>{{ $member['name'] ?: '—' }}</h3><p>{{ __('platform.role_'.$member['role']) }}</p></div><span class="cw-member-role">{{ __('platform.role_'.$member['role']) }}</span></article>@endforeach</div><p class="cw-help">{{ __('platform.portal_help') }}</p></section>
+</div><aside class="cw-workspace-aside"><section class="cw-identity-card"><span class="cw-identity-monogram" aria-hidden="true">{{ mb_substr($company->company_name,0,1) }}</span><p class="cw-eyebrow">{{ __('company_ui.company_identity') }}</p><h2>{{ $company->company_name }}</h2><p>{{ __('company_ui.profile_intro') }}</p>@if($cwLeader)<a class="cw-button cw-button-gold" href="{{ route('company.profile.edit') }}">{{ __('company_ui.nav.profile') }} ↗</a>@endif</section>
+<section class="trade-panel cw-quick-links"><h2>{{ __('company_ui.quick_actions') }}</h2><a href="{{ route('company.marketplace') }}">{{ __('company_ui.nav.overview') }} <span>↗</span></a>@if($cwOwner)<a href="{{ route('company.billing') }}">{{ __('company_ui.nav.billing') }} <span>↗</span></a>@endif @if($cwLeader)<a href="{{ route('company.mail.edit') }}">{{ __('company_ui.nav.email') }} <span>↗</span></a>@endif<a href="{{ route('opportunities.index') }}">{{ __('company_ui.browse') }} <span>↗</span></a></section></aside></div>
 </div></x-app-layout>

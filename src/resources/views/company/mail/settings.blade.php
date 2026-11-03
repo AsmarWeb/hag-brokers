@@ -1,5 +1,6 @@
 <x-app-layout>
 <x-slot name="header"><div class="cp-dashboard-heading"><div><p>HAG · COMPANY WORKSPACE</p><h1>{{ __('company_mail.title') }}</h1></div><a href="{{ route('company.marketplace') }}">{{ __('market.title') }} ↗</a></div></x-slot>
+@include('company.partials.navigation')
 <div class="cp-studio"><div class="cp-studio-intro"><div><h2>{{ __('company_mail.heading') }}</h2><p>{{ __('company_mail.intro') }}</p></div></div>
 @include('admin.platform.messages')
 @if(!$ready)<p class="cp-privacy-note">{{ __('company_mail.not_ready') }}</p>@endif
