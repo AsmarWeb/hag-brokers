@@ -575,3 +575,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/company/profile/preview', [\App\Http\Controllers\CompanyProfileController::class, 'preview'])->name('company.profile.preview');
 });
 Route::get('/companies/{slug}', [\App\Http\Controllers\CompanyProfileController::class, 'show'])->where('slug', 'company-[a-f0-9-]{36}')->name('companies.show');
+
+Route::middleware(['auth','verified'])->group(function(){
+    Route::get('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'edit'])->name('company.mail.edit');
+    Route::put('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'update'])->middleware('throttle:20,1')->name('company.mail.update');
+});
