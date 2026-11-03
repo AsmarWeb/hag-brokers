@@ -19,6 +19,7 @@
 
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
+            <a href="{{ route('admin.mobile-app.edit') }}" class="mb-6 inline-flex rounded-xl bg-slate-900 px-6 py-3 text-white dark:bg-slate-700">{{ app()->isLocale('ar') ? 'إدارة تطبيق الهاتف' : 'Mobile app content' }}</a>
             {{-- Success --}}
             @if (session('success'))
                 <div
