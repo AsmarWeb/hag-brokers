@@ -567,3 +567,11 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
     Route::post('/cancel', [\App\Http\Controllers\CompanyBillingController::class, 'cancel'])->middleware('throttle:10,1')->name('.cancel');
     Route::post('/portal', [\App\Http\Controllers\CompanyBillingController::class, 'portal'])->middleware('throttle:10,1')->name('.portal');
 });
+
+// Company-controlled public profile; no internal customer identifiers are accepted.
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/company/profile', [\App\Http\Controllers\CompanyProfileController::class, 'edit'])->name('company.profile.edit');
+    Route::put('/company/profile', [\App\Http\Controllers\CompanyProfileController::class, 'update'])->middleware('throttle:20,1')->name('company.profile.update');
+    Route::get('/company/profile/preview', [\App\Http\Controllers\CompanyProfileController::class, 'preview'])->name('company.profile.preview');
+});
+Route::get('/companies/{slug}', [\App\Http\Controllers\CompanyProfileController::class, 'show'])->where('slug', 'company-[a-f0-9-]{36}')->name('companies.show');
