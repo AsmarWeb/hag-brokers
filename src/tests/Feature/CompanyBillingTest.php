@@ -40,6 +40,8 @@ class CompanyBillingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // This legacy fixture suite intentionally exercises the original test-mode proof.
+        config(['platform_billing.mode' => 'test', 'platform_billing.strict_proof_test' => false]);
         config(['platform_billing.enabled' => true, 'platform_billing.secret' => 'sk_test_local_fake', 'platform_billing.webhook_secret' => 'whsec_local_fake', 'platform_billing.prices' => ['business' => 'price_business', 'professional' => 'price_professional'], 'platform_billing.portal_configuration' => 'bpc_test']);
         $this->price = ['id' => 'price_business', 'livemode' => false, 'active' => true, 'currency' => 'aed', 'unit_amount' => 19900, 'tax_behavior' => 'exclusive', 'recurring' => ['interval' => 'month', 'interval_count' => 1]];
         $this->session = ['id' => 'cs_test_hag', 'livemode' => false, 'customer' => 'cus_hag', 'mode' => 'subscription', 'url' => 'https://checkout.stripe.com/c/pay/test', 'status' => 'open', 'subscription' => null];

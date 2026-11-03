@@ -5,6 +5,7 @@
     $checks=$profile->completion(); $completed=count(array_filter($checks));
     $errorStep=$errors->hasAny(['about_ar','about_en','specialties','markets']) ? 2 : ($errors->has('is_published') ? 3 : 1);
 @endphp
+@include('company.partials.navigation')
 <div class="cp-studio" x-data="{step:{{ $errorStep }}}">
 <div class="cp-studio-intro"><div><span class="cp-overline">{{ __('company_profile.studio') }}</span><h2>{{ __('company_profile.studio_headline') }}</h2><p>{{ __('company_profile.intro') }}</p></div><span @class(['cp-status','cp-status-live'=>$profile->is_published])><span aria-hidden="true"></span>{{ $profile->is_published ? __('company_profile.public') : __('company_profile.draft') }}</span></div>
 @include('admin.platform.messages')
