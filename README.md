@@ -24,7 +24,7 @@ PHP / Laravel 12, SQLite for tests, configurable MySQL for deployment, Sanctum, 
 
 - `src/` — Laravel application and tests
 - `docker/`, `docker-compose.yml` — local containers
-- `flutter/` — client/mobile scaffolding, not a released app
+- Mobile client: React Native / Expo is maintained separately (planned repository: `AsmarWeb/hag-brokers-mobile`).
 - `docs/` — implementation and architecture notes
 
 ## Development
