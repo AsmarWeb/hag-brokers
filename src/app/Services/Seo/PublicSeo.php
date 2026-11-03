@@ -82,6 +82,10 @@ final class PublicSeo
         if ($route === 'opportunities.index') {
             $title = ($language === 'ar' ? 'سوق الفرص التجارية' : 'Business opportunities marketplace').' | HAG Brokers';
         }
+        if ($route === 'leads.create') {
+            $title = __('bring_deal.page_title');
+            $description = __('bring_deal.intro');
+        }
         $image = trim((string) config('seo.social_image'));
         if ($image !== '' && ! str_starts_with($image, 'https://') && ! str_starts_with($image, 'http://')) {
             $image = $this->base().'/'.ltrim($image, '/');
