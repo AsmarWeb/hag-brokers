@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'live' => 'Auto-update connected',
+    'offline' => 'Connection interrupted · retrying',
+    'connecting' => 'Connecting…',
+    'send_error' => 'Delivery could not be confirmed. Your message is preserved; please retry.',
+    'title' => 'Negotiation room',
+    'intro' => 'A private conversation linked to the original commercial offer.',
+    'offer' => 'Original offer',
+    'refresh' => 'Refresh messages',
+    'body' => 'Your message',
+    'body_help' => 'Up to 4,000 characters. Your message is visible to authorized representatives of both companies and platform administrators.',
+    'send' => 'Send message',
+    'sent' => 'Message sent.',
+    'empty' => 'No messages yet. Start by clarifying the specifications or delivery terms.',
+    'notice' => 'Messages do not amend the original offer, extend its validity, select an offer, create a contract or authorize payment. Record offer decisions on the original offer page.',
+    'read_only' => 'This room is read-only because the offer is declined/withdrawn, the opportunity is unavailable or one company is inactive. Previous messages remain available to authorized viewers.',
+    'admin_notice' => 'Administrative oversight: read only. Viewing here does not mark messages as read by either company.',
+    'read' => 'Read by a representative of the other company',
+    'unread' => 'Sent · not yet marked read',
+    'mark_read' => 'Mark conversation read through this page',
+    'read_help' => 'Read status is shared at company level. Use this button after reviewing the messages; it confirms review up to the last message shown. It does not mean every company member has read them.',
+    'read_saved' => 'Company read status updated.',
+    'unread_count' => 'New messages for your company',
+    'history_help' => 'Messages refresh every 5 seconds while this page is visible. Mark read after reviewing the conversation.',
+    'empty_body' => 'Please enter a message.',
+    'replay' => 'This request was already used for a different message. Reload before sending.'];

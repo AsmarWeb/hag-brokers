@@ -1,0 +1,4 @@
+<div class="room-messages">@forelse($messages->getCollection()->reverse() as $message)
+@php $own=!$admin && (int)$message->workspace_id===(int)$w->id; $sender=(int)$message->workspace_id===(int)$offer->sender_workspace_id ? $offer->snapshot['sender'] : $offer->snapshot['publisher']; @endphp
+<article @class(['room-message','room-message-own'=>$own])><header><strong>{{ $sender }}</strong><small>{{ $message->author_name }}</small></header><p class="room-body">{{ $message->body }}</p><footer><bdi>{{ $message->created_at->setTimezone('Asia/Dubai')->format('Y-m-d H:i') }}</bdi>@if($own)<span>{{ $otherRead >= $message->id ? __('trade_room.read') : __('trade_room.unread') }}</span>@endif</footer></article>
+@empty<p class="room-empty">{{ __('trade_room.empty') }}</p>@endforelse</div><div class="trade-pagination">{{ $messages->links() }}</div>
