@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'source_stripe_live' => 'Confirmed Stripe subscription — live billing',
     'billing_managed' => 'This company is linked to Stripe billing. Subscription access is managed through billing without a trial overriding its state.',
     'source_stripe_test' => 'Confirmed Stripe subscription — test',
     'action_application_decided' => 'Listing owner decision',
@@ -13,9 +14,9 @@ return [
     'over_seats' => 'Current membership exceeds the free limit. Existing members are retained; reduce membership or obtain a suitable plan before adding more.',
     'title' => 'Companies and plans',
     'workspace' => 'Company workspace',
-    'foundation_note' => 'Team, listing and application limits follow the current company plan. Subscription payments in this phase are test-only.',
+    'foundation_note' => 'Team, listing and application limits follow the current company plan. Manage billing and renewal on the subscription page.',
     'plans' => 'Proposed plans',
-    'prices_note' => 'Monthly prototype prices for testing, not a purchase offer or final tax-inclusive quotation. No charges or automatic renewal.',
+    'prices_note' => 'These are base monthly plan amounts. Checkout shows final totals and tax; the subscription page clearly identifies test or live billing.',
     'plan' => 'Plan',
     'proposed_price' => 'Proposed monthly price',
     'seats' => 'Team seats (including owner)',

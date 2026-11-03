@@ -11,12 +11,12 @@ class ReconcileCompanyBilling extends Command
 {
     protected $signature = 'platform:billing-reconcile';
 
-    protected $description = 'Reconcile test company billing from Stripe without extending unproven access.';
+    protected $description = 'Reconcile current-mode company billing from Stripe without extending unproven access.';
 
     public function handle(CompanyBillingService $service, StripeTestGateway $gateway): int
     {
         if (! $gateway->ready()) {
-            $this->info('Stripe test billing is disabled.');
+            $this->info('Stripe billing is disabled or not configured.');
 
             return self::SUCCESS;
         }

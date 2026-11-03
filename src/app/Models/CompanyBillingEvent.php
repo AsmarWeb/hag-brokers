@@ -8,6 +8,12 @@ class CompanyBillingEvent extends Model
 {
     protected $guarded = [];
 
+    public function __construct(array $attributes = [])
+    {
+        $this->setTable(config('platform_billing.mode', 'test') === 'live' ? 'company_live_billing_events' : 'company_billing_events');
+        parent::__construct($attributes);
+    }
+
     protected $casts = ['created_at' => 'immutable_datetime'];
 
     public $timestamps = false;

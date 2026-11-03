@@ -19,6 +19,11 @@ final class CompanyBillingService
 {
     public function __construct(private StripeTestGateway $gateway) {}
 
+    private function billingUrl(): string
+    {
+        return $this->gateway->live() ? rtrim(config('app.url'), '/').'/company/billing' : route('company.billing');
+    }
+
     private function fail(string $key): never
     {
         throw ValidationException::withMessages(['billing' => __('billing.'.$key)]);
@@ -42,15 +47,21 @@ final class CompanyBillingService
         return $p->only(['code', 'name_ar', 'name_en', 'monthly_amount_minor', 'currency', 'seats', 'active_opportunities', 'monthly_applications']);
     }
 
-    public function checkout(User $u, string $code): string
+    public function checkout(User $u, string $code, bool $confirmed = false): string
     {
         $w = $this->owner($u);
         abort_unless($this->gateway->ready(), 503, __('billing.unavailable'));
+        if ($this->gateway->live() && (! config('platform_billing.checkout_enabled') || ! $confirmed)) {
+            $this->fail('live_confirmation_error');
+        }
         $p = PlatformPlan::where('code', $code)->where('is_available', true)->where('monthly_amount_minor', '>', 0)->firstOrFail();
         $priceId = $this->gateway->id(config('platform_billing.prices.'.$code), 'price_');
         $price = $this->gateway->call('GET', 'prices/'.$priceId);
         $this->gateway->testObject($price);
         if (($price['id'] ?? null) !== $priceId || ($price['active'] ?? null) !== true || ($price['currency'] ?? null) !== strtolower($p->currency) || ($price['unit_amount'] ?? null) !== $p->monthly_amount_minor || data_get($price, 'recurring.interval') !== 'month' || data_get($price, 'recurring.interval_count') !== 1 || ! in_array($price['tax_behavior'] ?? null, ['exclusive', 'inclusive'], true)) {
+            $this->fail('price_mismatch');
+        }
+        if ($this->gateway->strictProof() && (($price['tax_behavior'] ?? null) !== 'exclusive' || $p->currency !== 'AED')) {
             $this->fail('price_mismatch');
         }
         $account = $this->account($w);
@@ -69,7 +80,7 @@ final class CompanyBillingService
         $this->sync($account->fresh());
         $account->refresh();
         if ($account->checkout_session_id && $account->checkout_expires_at?->isPast()) {
-            $previous = $this->gateway->call('GET', 'checkout/sessions/'.$this->gateway->id($account->checkout_session_id, 'cs_test_'));
+            $previous = $this->gateway->call('GET', 'checkout/sessions/'.$this->gateway->id($account->checkout_session_id, $this->gateway->sessionPrefix()));
             $this->gateway->testObject($previous);
             if (($previous['customer'] ?? null) !== $account->stripe_customer_id) {
                 throw new \RuntimeException('Session binding conflict.');
@@ -101,12 +112,13 @@ final class CompanyBillingService
         }
         $session = $this->gateway->call('POST', 'checkout/sessions', [
             'mode' => 'subscription', 'customer' => $attempt->stripe_customer_id, 'client_reference_id' => (string) $w->id,
-            'line_items' => [['price' => $attempt->price_id, 'quantity' => 1]], 'success_url' => route('company.billing').'?checkout=returned', 'cancel_url' => route('company.billing').'?checkout=canceled',
+            'line_items' => [['price' => $attempt->price_id, 'quantity' => 1]], 'success_url' => $this->billingUrl().'?checkout=returned', 'cancel_url' => $this->billingUrl().'?checkout=canceled',
+            'payment_method_types' => ['card'],
             'expires_at' => $attempt->checkout_expires_at->timestamp, 'billing_address_collection' => 'required', 'customer_update' => ['address' => 'auto', 'name' => 'auto'],
             'tax_id_collection' => ['enabled' => 'true'], 'automatic_tax' => ['enabled' => 'true'], 'allow_promotion_codes' => 'false',
-        ], 'hag-checkout-'.$attempt->attempt_key);
+        ] + ($this->gateway->live() ? ['consent_collection' => ['terms_of_service' => 'required']] : []), 'hag-checkout-'.$attempt->attempt_key);
         $this->gateway->testObject($session);
-        $id = $this->gateway->id($session['id'] ?? null, 'cs_test_');
+        $id = $this->gateway->id($session['id'] ?? null, $this->gateway->sessionPrefix());
         $url = $this->gateway->checkoutUrl($session['url'] ?? '');
         if (($session['customer'] ?? null) !== $attempt->stripe_customer_id || ($session['mode'] ?? null) !== 'subscription') {
             throw new \RuntimeException('Checkout binding mismatch.');
@@ -124,6 +136,7 @@ final class CompanyBillingService
     public function sync(CompanyBillingAccount $account): void
     {
         abort_unless($this->gateway->ready(), 503);
+        abort_unless($account->getTable() === (new CompanyBillingAccount)->getTable(), 409);
         for ($attempt = 0; $attempt < 5; $attempt++) {
             // Provider requests must never hold a database transaction open.
             $before = CompanyBillingAccount::findOrFail($account->id);
@@ -150,7 +163,18 @@ final class CompanyBillingService
                     $this->gateway->testObject($invoices[$invoiceId]);
                 }
             }
-            $applied = $this->databaseWrite(function () use ($before, $list, $invoices): bool {
+            $liveProofs = [];
+            $priorReceipt = null;
+            if ($this->gateway->strictProof()) {
+                $priorReceipt = CompanyBillingReceipt::where('company_billing_account_id', $before->id)->orderByDesc('paid_until')->first();
+                if ($priorReceipt && $before->paid_until?->isFuture() && ! isset($invoices[$priorReceipt->stripe_invoice_id])) {
+                    $invoices[$priorReceipt->stripe_invoice_id] = $this->gateway->call('GET', 'invoices/'.$this->gateway->id($priorReceipt->stripe_invoice_id, 'in_'));
+                }
+                foreach ($invoices as $invoiceId => $invoice) {
+                    $liveProofs[$invoiceId] = app(StripeLiveInvoiceProof::class)->verify($invoice, $before);
+                }
+            }
+            $applied = $this->databaseWrite(function () use ($before, $list, $invoices, $liveProofs, $priorReceipt): bool {
                 // SQLite has no row-level FOR UPDATE. Reserve its writer before
                 // reading, so this transaction never upgrades a stale read lock.
                 if (DB::connection()->getDriverName() === 'sqlite') {
@@ -160,6 +184,9 @@ final class CompanyBillingService
                 $a = CompanyBillingAccount::whereKey($before->id)->lockForUpdate()->firstOrFail();
                 if ($a->getRawOriginal() !== $before->getRawOriginal()) {
                     return false; // Another request won; fetch fresh provider state.
+                }
+                if ($this->gateway->live()) {
+                    $a->increment('sync_revision');
                 }
                 if (! is_array($list['data'] ?? null) || ($list['has_more'] ?? true) !== false) {
                     throw new \RuntimeException('Incomplete subscription listing.');
@@ -202,6 +229,9 @@ final class CompanyBillingService
                 $end = (int) ($item['current_period_end'] ?? 0);
                 $start = (int) ($item['current_period_start'] ?? 0);
                 $until = $a->paid_until;
+                if ($this->gateway->strictProof() && $until && (! $priorReceipt || ! ($liveProofs[$priorReceipt->stripe_invoice_id] ?? false))) {
+                    $until = null;
+                }
                 if ($until && ($until->timestamp > $end)) {
                     $until = CarbonImmutable::createFromTimestampUTC($end);
                 }
@@ -218,6 +248,7 @@ final class CompanyBillingService
                      && in_array($invoice['billing_reason'] ?? null, ['subscription_create', 'subscription_cycle'], true)
                      && count(data_get($invoice, 'lines.data', [])) === 1 && data_get($invoice, 'lines.has_more') === false
                      && data_get($line, 'period.start') === $start && data_get($line, 'period.end') === $end && $end > $start;
+                    $proof = $proof && (! $this->gateway->strictProof() || ($liveProofs[$invoiceId] ?? false));
                     if ($proof) {
                         $until = CarbonImmutable::createFromTimestampUTC($end);
                         $receipt = CompanyBillingReceipt::firstOrCreate(['stripe_invoice_id' => $invoiceId], ['company_billing_account_id' => $a->id, 'stripe_subscription_id' => $subId, 'amount_paid_minor' => $invoice['amount_paid'], 'currency' => strtoupper($invoice['currency']), 'paid_until' => $until, 'plan_snapshot' => $a->plan_snapshot, 'created_at' => now('UTC')]);
@@ -277,19 +308,25 @@ final class CompanyBillingService
         if (! $a->stripe_customer_id) {
             $this->fail('no_subscription');
         }
-        $portal = $this->gateway->call('POST', 'billing_portal/sessions', ['customer' => $a->stripe_customer_id, 'configuration' => $configuration, 'return_url' => route('company.billing')]);
+        $portal = $this->gateway->call('POST', 'billing_portal/sessions', ['customer' => $a->stripe_customer_id, 'configuration' => $configuration, 'return_url' => $this->billingUrl()]);
 
         return $this->gateway->checkoutUrl($portal['url'] ?? '', 'billing.stripe.com');
     }
 
     public function webhook(array $event, string $raw): void
     {
+        $this->gateway->testObject($event);
         $id = $event['id'];
         if (CompanyBillingEvent::where('stripe_event_id', $id)->exists()) {
             return;
         }
-        if (in_array($event['type'], ['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted', 'invoice.paid', 'invoice.payment_failed', 'invoice.payment_action_required'], true)) {
+        if (in_array($event['type'], ['checkout.session.completed', 'checkout.session.async_payment_succeeded', 'customer.subscription.created', 'customer.subscription.updated', 'customer.subscription.deleted', 'invoice.paid', 'invoice.payment_failed', 'invoice.payment_action_required', 'charge.refunded', 'charge.dispute.created', 'charge.dispute.closed'], true)) {
             $customer = data_get($event, 'data.object.customer');
+            if ($this->gateway->strictProof() && str_starts_with($event['type'], 'charge.dispute.')) {
+                $charge = $this->gateway->call('GET', 'charges/'.$this->gateway->id(data_get($event, 'data.object.charge'), 'ch_'));
+                $this->gateway->testObject($charge);
+                $customer = $charge['customer'] ?? null;
+            }
             if (is_string($customer)) {
                 $account = CompanyBillingAccount::where('stripe_customer_id', $customer)->first();
                 if ($account) {
