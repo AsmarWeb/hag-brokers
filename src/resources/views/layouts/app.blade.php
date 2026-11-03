@@ -6,21 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- SEO -->
-    <meta name="description"
-        content="@hasSection('meta_description')@yield('meta_description')@else{{ __('Sea Freight Solutions in UAE. Reliable shipping, freight forwarding and logistics services from Dubai and the UAE.') }}@endif">
-    <meta name="keywords"
-        content="Sea Freight UAE, Sea Freight Dubai, Shipping UAE, Freight Forwarding Dubai, Logistics UAE">
-    <meta name="author" content="Sea Freight Solutions">
-
-    <!-- Title -->
-    <title>
-        @hasSection('title')
-            @yield('title') | HAG Brokers
-        @else
-            {{ config('app.name', 'Sea Freight Solutions') }}
-        @endif
-    </title>
+    @include('seo.head')
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('storage/favicon.png') }}">

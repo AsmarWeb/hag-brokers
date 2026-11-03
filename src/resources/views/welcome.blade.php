@@ -10,114 +10,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    @php
-        $siteName = 'HAG Brokers';
-        $siteUrl = rtrim(config('app.url', url('/')), '/');
-        $canonicalUrl = url()->current();
-        $isDemo = true; // Set false only after connecting verified live operational statistics.
-        $faviconUrl = asset('storage/favicon.png');
-        $logoUrl = asset('storage/favicon.png');
-        $ogImage = asset('storage/hag-brokers-og.png');
+    @php $faviconUrl = asset('storage/favicon.png'); @endphp
 
-        $seoTitle = $isAr ? 'HAG Brokers | وسيط الشحن البحري في الخليج' : 'HAG Brokers | Gulf Sea Freight Brokerage';
-
-        $seoDescription = $isAr
-            ? 'HAG Brokers منصة لوساطة وتنسيق الشحن البحري في الخليج، تربط المستوردين والمصدرين بخيارات الناقلين والشركاء اللوجستيين المتاحة.'
-            : 'HAG Brokers is a Gulf-focused sea freight brokerage platform connecting importers and exporters with available carriers and logistics partners.';
-
-        $seoKeywords = $isAr
-            ? 'HAG Brokers, الشحن البحري, وساطة الشحن, شحن الخليج, شحن الإمارات, دبي, جبل علي, عروض الشحن, تتبع الشحنات, شركات الشحن'
-            : 'HAG Brokers, sea freight, freight brokerage, Gulf shipping, UAE shipping, Dubai, Jebel Ali, freight quotes, shipment tracking, shipping carriers';
-    @endphp
-
-    <title>{{ $seoTitle }}</title>
-    <meta name="description" content="{{ $seoDescription }}">
-    <meta name="keywords" content="{{ $seoKeywords }}">
-    <meta name="author" content="HAG Brokers">
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    @include('seo.head')
     <meta name="theme-color" content="#050d18">
     <meta name="color-scheme" content="dark light">
-    <meta name="application-name" content="HAG Brokers">
-    <link rel="canonical" href="{{ $canonicalUrl }}">
-
-    {{-- Only publish hreflang when permanent, indexable localized URLs are available.
-         Language-switch actions backed by sessions are not suitable hreflang destinations. --}}
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="64x64" href="{{ $faviconUrl }}?v=2">
-    <link rel="shortcut icon" href="{{ $faviconUrl }}?v=2">
-    <link rel="apple-touch-icon" sizes="64x64" href="{{ $faviconUrl }}?v=2">
-
-    <!-- Open Graph / WhatsApp / Facebook / LinkedIn -->
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="{{ $siteName }}">
-    <meta property="og:title" content="{{ $seoTitle }}">
-    <meta property="og:description" content="{{ $seoDescription }}">
-    <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:locale" content="{{ $isAr ? 'ar_AE' : 'en_AE' }}">
-
-    <!-- Social Sharing Image -->
-    <meta property="og:image" content="{{ $ogImage }}">
-    <meta property="og:image:secure_url" content="{{ $ogImage }}">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="HAG Brokers - Gulf Sea Freight Brokerage">
-
-    <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $seoTitle }}">
-    <meta name="twitter:description" content="{{ $seoDescription }}">
-    <meta name="twitter:image" content="{{ $ogImage }}">
-    <meta name="twitter:image:alt" content="HAG Brokers - Gulf Sea Freight Brokerage">
-
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {!! json_encode([
-        '@context' => 'https://schema.org',
-        '@type' => 'Organization',
-        '@id' => $siteUrl . '/#organization',
-        'name' => $siteName,
-        'url' => $siteUrl,
-        'logo' => $logoUrl,
-        'description' => $seoDescription,
-        'areaServed' => [
-            '@type' => 'Place',
-            'name' => 'Gulf Cooperation Council'
-        ],
-        'knowsAbout' => [
-            'Sea freight',
-            'Freight brokerage',
-            'Shipment tracking',
-            'Gulf ports'
-        ]
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-    </script>
-
-    <script type="application/ld+json">
-    {!! json_encode([
-        '@context' => 'https://schema.org',
-        '@type' => 'WebSite',
-        'name' => $siteName,
-        'url' => $siteUrl,
-        'description' => $seoDescription,
-        'inLanguage' => $isAr ? 'ar-AE' : 'en-AE'
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-    </script>
-
-    <script type="application/ld+json">
-    {!! json_encode([
-        '@context' => 'https://schema.org',
-        '@type' => 'Service',
-        '@id' => $siteUrl . '/#sea-freight-brokerage',
-        'name' => $isAr ? 'وساطة وتنسيق الشحن البحري' : 'Sea Freight Brokerage & Coordination',
-        'description' => $seoDescription,
-        'serviceType' => 'Sea freight brokerage',
-        'provider' => ['@id' => $siteUrl . '/#organization'],
-        'areaServed' => ['@type' => 'Place', 'name' => 'Gulf Cooperation Council'],
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
-    </script>
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
 
     @include('components.public-theme')
 
