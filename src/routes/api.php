@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CompanyOpportunityController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\MobileAuthController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -50,6 +51,12 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware('signed')->name('api.v1.verify');
     Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
+        $opportunities = CompanyOpportunityController::class;
+        Route::get('/company/opportunities', [$opportunities, 'index']);
+        Route::post('/company/opportunities', [$opportunities, 'store'])->middleware('throttle:15,1,mobile-publish:');
+        Route::get('/company/opportunities/{opportunityId}', [$opportunities, 'show'])->whereNumber('opportunityId');
+        Route::patch('/company/opportunities/{opportunityId}', [$opportunities, 'update'])->whereNumber('opportunityId')->middleware('throttle:30,1,mobile-edit:');
+        Route::post('/company/opportunities/{opportunityId}/close', [$opportunities, 'close'])->whereNumber('opportunityId')->middleware('throttle:30,1,mobile-close:');
         Route::get('/me', [$auth, 'me']);
         Route::get('/company/workspace', [$auth, 'workspace']);
         Route::post('/auth/logout', [$auth, 'logout']);

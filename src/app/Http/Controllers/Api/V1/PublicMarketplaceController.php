@@ -27,6 +27,9 @@ class PublicMarketplaceController extends Controller
         if ($detail) {
             $data['description'] = $o->description;
             $data['commercial_details'] = array_intersect_key((array) $o->commercial_details, array_flip(OpportunityCatalog::FIELDS));
+            $details = (array) $o->commercial_details;
+            $data['commercial_details']['features'] = array_values(array_intersect((array) ($details['features'] ?? []), OpportunityCatalog::FEATURES));
+            $data['commercial_details']['attributes'] = array_intersect_key((array) ($details['attributes'] ?? []), array_flip(OpportunityCatalog::ATTRIBUTES[$o->category] ?? []));
             $data['vessel'] = $o->vessel?->only(OpportunityCatalog::VESSEL_FIELDS);
         }
 
