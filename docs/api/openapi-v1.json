@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "HAG Brokers Mobile & Integration API",
-    "version": "1.0.0",
-    "description": "Foundation release: authentication and public marketplace reads. Publishing, RFQ, chat, payments and partner credentials are not yet API features. JSON request/response; UTC ISO 8601 timestamps; decimal money strings. Errors follow Laravel message/errors format. 120 requests/min/IP overall; login/register/reset 5/min/IP each, forgot/resend 3/min/IP each. Store Bearer secrets in OS secure storage. Render user content as text. Native bearer authentication only; cookie sessions are insufficient."
+    "version": "1.1.0",
+    "description": "Authentication, public marketplace reads and company opportunity publishing/editing/closing. RFQ, chat, payments and partner credentials are not yet API features. JSON request/response; UTC ISO 8601 timestamps; decimal money strings. Errors follow Laravel message/errors format. 120 requests/min/IP overall; login/register/reset 5/min/IP each, forgot/resend 3/min/IP each. Store Bearer secrets in OS secure storage. Render user content as text. Native bearer authentication only; cookie sessions are insufficient."
   },
   "servers": [
     {
@@ -1218,6 +1218,463 @@
         ],
         "description": "Explicit public fields only: slug, localized name/about, sector, country, city, specialties, markets, website and up to 12 eligible opportunities. No private registration documents or customer contact records."
       }
+    },
+    "/company/opportunities": {
+      "get": {
+        "summary": "List own company opportunities including nonpublic state",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CompanyOpportunity"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "per_page": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "last_page": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "usage": {
+                      "type": "object",
+                      "properties": {
+                        "active": {
+                          "type": "integer"
+                        },
+                        "active_limit": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token missing/expired"
+          },
+          "403": {
+            "description": "Verified active company owner/manager required"
+          },
+          "404": {
+            "description": "Not owned or missing"
+          },
+          "409": {
+            "description": "Revision changed; reload and review"
+          },
+          "422": {
+            "description": "Validation, immutable field, quota or idempotency conflict"
+          },
+          "429": {
+            "description": "Rate limit; respect Retry-After"
+          }
+        },
+        "parameters": [
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "published",
+                "closed"
+              ]
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            }
+          }
+        ]
+      },
+      "post": {
+        "summary": "Publish company opportunity",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyOpportunity"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "created": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token missing/expired"
+          },
+          "403": {
+            "description": "Verified active company owner/manager required"
+          },
+          "404": {
+            "description": "Not owned or missing"
+          },
+          "409": {
+            "description": "Revision changed; reload and review"
+          },
+          "422": {
+            "description": "Validation, immutable field, quota or idempotency conflict"
+          },
+          "429": {
+            "description": "Rate limit; respect Retry-After"
+          },
+          "200": {
+            "description": "Identical retry: existing opportunity, meta.created=false",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyOpportunity"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "created": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyOpportunityCreate"
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyOpportunityCreate"
+              }
+            }
+          }
+        },
+        "description": "Owner/manager only. Same business quotas, storage cleanup and immutable audit as website. Publish rate 15/min/IP. No charge, deal, invoice or payment is created."
+      }
+    },
+    "/company/opportunities/{opportunityId}": {
+      "get": {
+        "summary": "Own company opportunity and current revision",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyOpportunity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token missing/expired"
+          },
+          "403": {
+            "description": "Verified active company owner/manager required"
+          },
+          "404": {
+            "description": "Not owned or missing"
+          },
+          "409": {
+            "description": "Revision changed; reload and review"
+          },
+          "422": {
+            "description": "Validation, immutable field, quota or idempotency conflict"
+          },
+          "429": {
+            "description": "Rate limit; respect Retry-After"
+          }
+        },
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            }
+          }
+        ],
+        "description": "Private leader-only route; numeric internal ID. Revision covers stored opportunity, marine specification, media identity and moderation state, including same-second changes. Stale update/close returns 409. Read again before retrying; never automatically replace revision after a conflict. Closed/expired opportunities cannot be edited or reopened. Edits cannot clear administrative hold. 30 writes/min/IP per action."
+      },
+      "patch": {
+        "summary": "Edit allowed fields with optimistic concurrency",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyOpportunity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token missing/expired"
+          },
+          "403": {
+            "description": "Verified active company owner/manager required"
+          },
+          "404": {
+            "description": "Not owned or missing"
+          },
+          "409": {
+            "description": "Revision changed; reload and review"
+          },
+          "422": {
+            "description": "Validation, immutable field, quota or idempotency conflict"
+          },
+          "429": {
+            "description": "Rate limit; respect Retry-After"
+          }
+        },
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompanyOpportunityEdit"
+              }
+            }
+          }
+        },
+        "description": "Private leader-only route; numeric internal ID. Revision covers stored opportunity, marine specification, media identity and moderation state, including same-second changes. Stale update/close returns 409. Read again before retrying; never automatically replace revision after a conflict. Closed/expired opportunities cannot be edited or reopened. Edits cannot clear administrative hold. 30 writes/min/IP per action."
+      }
+    },
+    "/company/opportunities/{opportunityId}/close": {
+      "post": {
+        "summary": "Close without deleting opportunity or history",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/CompanyOpportunity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token missing/expired"
+          },
+          "403": {
+            "description": "Verified active company owner/manager required"
+          },
+          "404": {
+            "description": "Not owned or missing"
+          },
+          "409": {
+            "description": "Revision changed; reload and review"
+          },
+          "422": {
+            "description": "Validation, immutable field, quota or idempotency conflict"
+          },
+          "429": {
+            "description": "Rate limit; respect Retry-After"
+          }
+        },
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "revision": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "confirmation": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                },
+                "required": [
+                  "revision",
+                  "confirmation"
+                ]
+              }
+            }
+          }
+        },
+        "description": "Private leader-only route; numeric internal ID. Revision covers stored opportunity, marine specification, media identity and moderation state, including same-second changes. Stale update/close returns 409. Read again before retrying; never automatically replace revision after a conflict. Closed/expired opportunities cannot be edited or reopened. Edits cannot clear administrative hold. 30 writes/min/IP per action."
+      }
     }
   },
   "components": {
@@ -1562,6 +2019,1160 @@
               "type": "array",
               "items": {
                 "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CompanyOpportunityCreate": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 20000
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "opportunity_type": {
+            "type": "string",
+            "enum": [
+              "sell",
+              "buy",
+              "service_offer",
+              "service_request",
+              "partnership",
+              "distribution",
+              "procurement",
+              "trade",
+              "business",
+              "investment",
+              "logistics",
+              "vessel_brokerage",
+              "other"
+            ]
+          },
+          "cargo_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "container_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Za-z]{3}$"
+          },
+          "commission_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "estimated_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "required_capital": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "min_investment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "commission_rate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "origin_port_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "destination_port_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date",
+            "description": "Required on creation. Inclusive calendar day in Asia/Dubai; response uses stored UTC timestamp."
+          },
+          "expected_close_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "commercial_details": {
+            "type": "object",
+            "description": "Complete replacement when supplied. Allowed nested keys and industry-specific attributes are listed in OpportunityCatalog; invalid nested keys are rejected.",
+            "properties": {
+              "subcategory": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "product_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "specifications": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "quantity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,3})?$"
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unit_price": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "price_basis": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "min_order_quantity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,3})?$"
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "delivery_terms": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payment_terms": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "lead_time_days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 3650
+              },
+              "target_market": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "certifications": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "vessel": {
+            "type": "object",
+            "description": "Required for marine vessel listings. Contains only public vessel fields. If supplied on PATCH, replaces the provided vessel specification as validated; omitted vessel keeps current specification.",
+            "properties": {
+              "listing_type": {
+                "type": "string",
+                "enum": [
+                  "sale",
+                  "wanted",
+                  "charter"
+                ]
+              },
+              "vessel_category": {
+                "type": "string",
+                "enum": [
+                  "yacht",
+                  "boat",
+                  "commercial_vessel"
+                ]
+              },
+              "vessel_name": {
+                "type": "string"
+              },
+              "builder": {
+                "type": "string"
+              },
+              "length_m": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              "year_built": {
+                "type": "integer"
+              },
+              "vessel_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "engine_make": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "imo_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "flag_state": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "classification_society": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "beam_m": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "draft_m": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "gross_tonnage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "deadweight_tonnage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "cabins": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "guest_capacity": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "crew_capacity": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "engine_hours": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "price_on_request": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "request_key": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Persist once per publication; resend unchanged complete payload and identical media in same order after uncertain response."
+          },
+          "media": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "format": "binary"
+            },
+            "description": "Multipart media[]: jpg/jpeg/png/webp or mp4/mov/webm, up to 10 files, 20 MiB each and 20 MiB total. Creation only; no arbitrary file URL/path accepted."
+          }
+        },
+        "required": [
+          "request_key",
+          "title",
+          "description",
+          "opportunity_type",
+          "currency",
+          "expires_at"
+        ]
+      },
+      "CompanyOpportunityEdit": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 20000
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "commercial_details": {
+            "type": "object",
+            "description": "Complete replacement when supplied. Allowed nested keys and industry-specific attributes are listed in OpportunityCatalog; invalid nested keys are rejected.",
+            "properties": {
+              "subcategory": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "product_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "specifications": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "quantity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,3})?$"
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unit_price": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "price_basis": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "min_order_quantity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,3})?$"
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "delivery_terms": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payment_terms": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "lead_time_days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 3650
+              },
+              "target_market": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "certifications": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "vessel": {
+            "type": "object",
+            "description": "Required for marine vessel listings. Contains only public vessel fields. If supplied on PATCH, replaces the provided vessel specification as validated; omitted vessel keeps current specification.",
+            "properties": {
+              "listing_type": {
+                "type": "string",
+                "enum": [
+                  "sale",
+                  "wanted",
+                  "charter"
+                ]
+              },
+              "vessel_category": {
+                "type": "string",
+                "enum": [
+                  "yacht",
+                  "boat",
+                  "commercial_vessel"
+                ]
+              },
+              "vessel_name": {
+                "type": "string"
+              },
+              "builder": {
+                "type": "string"
+              },
+              "length_m": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              "year_built": {
+                "type": "integer"
+              },
+              "vessel_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "engine_make": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "imo_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "flag_state": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "classification_society": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "beam_m": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "draft_m": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "gross_tonnage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "deadweight_tonnage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "cabins": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "guest_capacity": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "crew_capacity": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "engine_hours": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "price_on_request": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "revision"
+        ],
+        "description": "PATCH. Omitted top-level fields retained. Full nested commercial_details when supplied. Ownership, type, prices, currency, commission, dates, state and media cannot be modified here."
+      },
+      "CompanyOpportunity": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 20000
+          },
+          "category": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "opportunity_type": {
+            "type": "string",
+            "enum": [
+              "sell",
+              "buy",
+              "service_offer",
+              "service_request",
+              "partnership",
+              "distribution",
+              "procurement",
+              "trade",
+              "business",
+              "investment",
+              "logistics",
+              "vessel_brokerage",
+              "other"
+            ]
+          },
+          "cargo_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "container_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Za-z]{3}$"
+          },
+          "commission_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "estimated_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "required_capital": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "min_investment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "commission_rate": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "origin_port_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "destination_port_id": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "expires_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "expected_close_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "commercial_details": {
+            "type": "object",
+            "description": "Complete replacement when supplied. Allowed nested keys and industry-specific attributes are listed in OpportunityCatalog; invalid nested keys are rejected.",
+            "properties": {
+              "subcategory": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "product_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "specifications": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "quantity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,3})?$"
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "unit_price": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "price_basis": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "min_order_quantity": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,3})?$"
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "delivery_terms": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payment_terms": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "lead_time_days": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 3650
+              },
+              "target_market": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "certifications": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "attributes": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "string",
+                    "integer",
+                    "null"
+                  ]
+                }
+              }
+            }
+          },
+          "vessel": {
+            "type": "object",
+            "description": "Required for marine vessel listings. Contains only public vessel fields. If supplied on PATCH, replaces the provided vessel specification as validated; omitted vessel keeps current specification.",
+            "properties": {
+              "listing_type": {
+                "type": "string",
+                "enum": [
+                  "sale",
+                  "wanted",
+                  "charter"
+                ]
+              },
+              "vessel_category": {
+                "type": "string",
+                "enum": [
+                  "yacht",
+                  "boat",
+                  "commercial_vessel"
+                ]
+              },
+              "vessel_name": {
+                "type": "string"
+              },
+              "builder": {
+                "type": "string"
+              },
+              "length_m": {
+                "type": "string",
+                "pattern": "^\\d+(\\.\\d{1,2})?$",
+                "description": "Exact decimal; send a string, never a float."
+              },
+              "year_built": {
+                "type": "integer"
+              },
+              "vessel_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "engine_make": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "imo_number": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "flag_state": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "classification_society": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "condition": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "beam_m": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "draft_m": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "gross_tonnage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "deadweight_tonnage": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^\\d+(\\.\\d{1,2})?$"
+              },
+              "cabins": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "guest_capacity": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "crew_capacity": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "engine_hours": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "price_on_request": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          },
+          "id": {
+            "type": "integer"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "marketplace_state": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "is_public": {
+            "type": "boolean"
+          },
+          "administratively_hidden": {
+            "type": "boolean"
+          },
+          "reviewed": {
+            "type": "boolean"
+          },
+          "published_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
               }
             }
           }
