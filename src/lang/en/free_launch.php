@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'plans' => 'Plans',
+    'heading' => 'Start free with HAG Brokers.',
+    'intro' => 'Publish company opportunities and connect with business partners within the free plan limits. Paid plans are coming later.',
+    'available' => 'Available now',
+    'current_help' => 'A place to start and build new business relationships, without a payment card.',
+    'start' => 'Open your workspace',
+    'promise' => 'No fees or automatic upgrades will be activated without your choice and consent.',
+    'plan_heading' => 'Start today. Grow when you are ready.',
+    'free_intro' => 'Your first step to presenting opportunities and connecting with businesses.',
+    'free' => 'Free',
+    'no_card' => 'No payment card or subscription action required.',
+    'current' => 'Your current plan',
+    'soon' => 'Coming soon',
+    'pricing_later' => 'Details at launch',
+    'upcoming_help' => 'Provisional benefits for future growth. Final details will be announced when available.',
+    'limits_help' => 'The free limits shown are your current company limits. The owner counts towards team seats. Existing data and opportunities are preserved when plan limits change.',
+    'banner' => 'The free launch is open',
+    'banner_help' => 'Start within the free plan limits. Paid plans are coming, without automatic upgrades.',
+    'checkout_blocked' => 'Paid subscriptions are unavailable during the free launch.',
+    'trial_blocked' => 'Trial upgrades are paused during the free launch; prior records and grants remain preserved.',
+    'legacy' => 'New purchases are paused during the free launch. If you have an existing real subscription, you can review it and cancel renewal here; this mode does not automatically cancel prior Stripe commitments.',
+];

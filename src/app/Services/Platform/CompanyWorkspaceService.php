@@ -3,6 +3,7 @@
 namespace App\Services\Platform;
 
 use App\Models\CompanyAccessGrant;
+use App\Models\CompanyBillingAccount;
 use App\Models\CompanyMember;
 use App\Models\CompanyPlatformAudit;
 use App\Models\CompanyWorkspace;
@@ -29,16 +30,36 @@ final class CompanyWorkspaceService
         CompanyPlatformAudit::create(['company_workspace_id' => $w->id, 'actor_id' => $actor->id, 'action' => $action, 'details' => $details, 'created_at' => now('UTC')->format('Y-m-d H:i:s')]);
     }
 
+    private function freeLaunchPlan(): array
+    {
+        $free = PlatformPlan::where('code', 'free')->where('is_available', true)->first();
+        if (! $free) {
+            $this->fail('plans_missing');
+        }
+
+        return $this->snapshot($free) + ['source' => 'free', 'expires_at' => null];
+    }
+
     public function plan(CompanyWorkspace $w): array
     {
-        $billing = \App\Models\CompanyBillingAccount::where('company_workspace_id', $w->id)->first();
+        $launch = (bool) config('platform_billing.free_launch', true);
+        if ($launch && ! app(StripeTestGateway::class)->live()) {
+            return $this->freeLaunchPlan();
+        }
+        $billing = CompanyBillingAccount::where('company_workspace_id', $w->id)->first();
         if ($billing && ($billing->stripe_subscription_id || in_array($billing->status, ['conflict', 'invalid_price'], true))) {
             if (app(StripeTestGateway::class)->ready() && in_array($billing->status, ['active', 'past_due'], true) && $billing->paid_until?->isFuture() && is_array($billing->plan_snapshot)) {
                 return $billing->plan_snapshot + ['source' => (app(StripeTestGateway::class)->live() ? 'stripe_live' : 'stripe_test'), 'expires_at' => $billing->paid_until->toIso8601String()];
             }
             $free = PlatformPlan::where('code', 'free')->where('is_available', true)->first();
-            if (! $free) $this->fail('plans_missing');
+            if (! $free) {
+                $this->fail('plans_missing');
+            }
+
             return $this->snapshot($free) + ['source' => 'free', 'expires_at' => null];
+        }
+        if ($launch) {
+            return $this->freeLaunchPlan();
         }
         $grant = CompanyAccessGrant::where('company_workspace_id', $w->id)->latest('id')->first();
         if ($grant && (! $grant->expires_at || $grant->expires_at->isFuture())) {
@@ -83,7 +104,6 @@ final class CompanyWorkspaceService
         }, 3);
     }
 
-
     public function activateNewRegistration(Customer $customer, User $owner): CompanyWorkspace
     {
         // Only the registration controller calls this for the customer it just created.
@@ -92,11 +112,14 @@ final class CompanyWorkspaceService
             'name_ar' => 'مجانية', 'name_en' => 'Free', 'monthly_amount_minor' => 0, 'currency' => 'AED',
             'seats' => 1, 'active_opportunities' => 1, 'monthly_applications' => 3, 'is_available' => true,
         ]);
-        if (! $free->is_available || $free->seats < 1) $this->fail('plans_missing');
+        if (! $free->is_available || $free->seats < 1) {
+            $this->fail('plans_missing');
+        }
         $workspace = CompanyWorkspace::create(['customer_id' => $customer->id, 'status' => 'active']);
         CompanyMember::create(['company_workspace_id' => $workspace->id, 'user_id' => $owner->id, 'role' => 'owner']);
         CompanyAccessGrant::create(['company_workspace_id' => $workspace->id, 'source' => 'free', 'plan_snapshot' => $this->snapshot($free), 'expires_at' => null, 'reason' => 'Company self registration', 'created_by' => $owner->id, 'created_at' => now('UTC')->format('Y-m-d H:i:s')]);
         $this->audit($workspace, $owner, 'activated', ['customer_id' => $customer->id, 'owner_id' => $owner->id, 'source' => 'registration']);
+
         return $workspace;
     }
 
@@ -151,10 +174,16 @@ final class CompanyWorkspaceService
 
     public function trial(CompanyWorkspace $workspace, PlatformPlan $plan, int $days, string $reason, User $actor): void
     {
+
         $this->admin($actor);
+        if (config('platform_billing.free_launch', true)) {
+            throw ValidationException::withMessages(['trial' => __('free_launch.trial_blocked')]);
+        }
         DB::transaction(function () use ($workspace, $plan, $days, $reason, $actor): void {
             $w = CompanyWorkspace::whereKey($workspace->id)->lockForUpdate()->firstOrFail();
-            if (\App\Models\CompanyBillingAccount::where('company_workspace_id', $w->id)->whereNotNull('stripe_subscription_id')->exists()) $this->fail('billing_managed');
+            if (CompanyBillingAccount::where('company_workspace_id', $w->id)->whereNotNull('stripe_subscription_id')->exists()) {
+                $this->fail('billing_managed');
+            }
             $plan = PlatformPlan::findOrFail($plan->id);
             if ($w->status !== 'active' || ! Customer::findOrFail($w->customer_id)->is_active || ! $plan->is_available || $plan->code === 'free' || ! in_array($days, [7, 14, 30], true) || trim($reason) === '') {
                 $this->fail('invalid_trial');
@@ -172,7 +201,7 @@ final class CompanyWorkspaceService
             if (! in_array($status, ['active', 'suspended'], true) || trim($reason) === '') {
                 $this->fail('invalid_status');
             }
-            $this->audit($w,$actor,'status_changed',['from' => $w->status, 'to' => $status, 'reason' => $reason]);
+            $this->audit($w, $actor, 'status_changed', ['from' => $w->status, 'to' => $status, 'reason' => $reason]);
             $w->update(['status' => $status]);
         }, 3);
     }

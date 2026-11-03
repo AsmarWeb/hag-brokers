@@ -50,6 +50,9 @@ final class CompanyBillingService
     public function checkout(User $u, string $code, bool $confirmed = false): string
     {
         $w = $this->owner($u);
+        if (config('platform_billing.free_launch', true)) {
+            throw ValidationException::withMessages(['billing' => __('free_launch.checkout_blocked')]);
+        }
         abort_unless($this->gateway->ready(), 503, __('billing.unavailable'));
         if ($this->gateway->live() && (! config('platform_billing.checkout_enabled') || ! $confirmed)) {
             $this->fail('live_confirmation_error');
@@ -291,6 +294,9 @@ final class CompanyBillingService
     public function cancellation(User $u, bool $cancel): void
     {
         $w = $this->owner($u);
+        if (config('platform_billing.free_launch', true) && ! $cancel) {
+            throw ValidationException::withMessages(['billing' => __('free_launch.checkout_blocked')]);
+        }
         $a = $this->account($w);
         $this->sync($a);
         $a->refresh();
