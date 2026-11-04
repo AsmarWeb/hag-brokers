@@ -17,7 +17,7 @@ class CheckMobileReadiness extends Command
         try {
             $this->line('Database connection: '.DB::getDriverName());
             $ready = true;
-            foreach (['users', 'personal_access_tokens', 'company_workspaces', 'company_members', 'opportunities', 'company_trade_offers', 'trade_offer_messages', 'trade_offer_reads', 'notifications', 'mobile_app_settings', 'mobile_app_setting_audits'] as $table) {
+            foreach (['users', 'personal_access_tokens', 'company_workspaces', 'company_members', 'opportunities', 'company_trade_offers', 'trade_offer_messages', 'trade_offer_reads', 'notifications', 'mobile_app_settings', 'mobile_app_setting_audits', 'freight_request_keys', 'account_deletion_requests', 'platform_legal_documents', 'platform_legal_audits'] as $table) {
                 $ok = Schema::hasTable($table);
                 $ready = $ready && $ok;
                 $this->line($table.': '.($ok ? 'READY' : 'MISSING'));
