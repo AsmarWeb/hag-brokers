@@ -207,6 +207,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
+Route::get('/legal/{slug}', [\App\Http\Controllers\LegalDocumentController::class, 'show'])->where('slug','privacy|terms')->name('legal.show');
+
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'index'])->name('seo.sitemap.index');
 Route::get('/sitemaps/pages.xml', [\App\Http\Controllers\SeoController::class, 'pages'])->name('seo.sitemap.pages');
@@ -397,6 +399,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
 
 
+        Route::get('/account-center', [\App\Http\Controllers\Admin\AdminAccountCenterController::class,'index'])->name('account-center.index');
+        Route::put('/account-center/legal/{slug}', [\App\Http\Controllers\Admin\AdminAccountCenterController::class,'save'])->where('slug','privacy|terms')->name('account-center.legal');
+        Route::post('/account-center/requests/{id}/review', [\App\Http\Controllers\Admin\AdminAccountCenterController::class,'review'])->whereNumber('id')->name('account-center.review');
         Route::get('/mobile-app', [\App\Http\Controllers\Admin\AdminMobileAppController::class, 'edit'])->name('mobile-app.edit');
         Route::put('/mobile-app', [\App\Http\Controllers\Admin\AdminMobileAppController::class, 'update'])->name('mobile-app.update');
         Route::get('/settings', [AdminSettingController::class, 'edit'])

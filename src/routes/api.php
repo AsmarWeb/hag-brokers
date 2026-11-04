@@ -44,6 +44,7 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     $auth = MobileAuthController::class;
     $public = PublicMarketplaceController::class;
     Route::get('/app-config', \App\Http\Controllers\Api\V1\MobileAppConfigController::class);
+    Route::get('/legal/{slug}', [\App\Http\Controllers\LegalDocumentController::class, 'api'])->where('slug','privacy|terms');
     Route::get('/catalog', [$public, 'catalog']);
     Route::get('/opportunities', [$public, 'index']);
     Route::get('/opportunities/{slug}', [$public, 'show']);
@@ -54,6 +55,11 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware('signed')->name('api.v1.verify');
     Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
+        $account = \App\Http\Controllers\Api\V1\AccountCompletionController::class;
+        Route::get('/auth/account', [$account,'show']);
+        Route::put('/auth/account', [$account,'update'])->middleware('throttle:5,1,mobile-account:');
+        Route::get('/auth/deletion-request', [$account,'deletion']);
+        Route::post('/auth/deletion-request', [$account,'requestDeletion'])->middleware('throttle:3,1,mobile-delete:');
         $freight = \App\Http\Controllers\Api\V1\FreightQuotationController::class;
         Route::get('/freight/ports', [$freight, 'ports']);
         Route::get('/freight/quotations', [$freight, 'index']);
