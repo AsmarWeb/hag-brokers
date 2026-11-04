@@ -54,6 +54,11 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware('signed')->name('api.v1.verify');
     Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
+        $freight = \App\Http\Controllers\Api\V1\FreightQuotationController::class;
+        Route::get('/freight/ports', [$freight, 'ports']);
+        Route::get('/freight/quotations', [$freight, 'index']);
+        Route::post('/freight/quotations', [$freight, 'store'])->middleware('throttle:10,1,mobile-freight:');
+        Route::get('/freight/quotations/{quotationId}', [$freight, 'show'])->whereNumber('quotationId');
         $offers = TradeOfferApiController::class;
         $notices = CompanyNotificationApiController::class;
         Route::get('/company/trade-offers', [$offers, 'index']);
