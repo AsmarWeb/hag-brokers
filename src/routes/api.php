@@ -74,6 +74,7 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
         Route::get('/company/opportunities/{opportunityId}', [$opportunities, 'show'])->whereNumber('opportunityId');
         Route::patch('/company/opportunities/{opportunityId}', [$opportunities, 'update'])->whereNumber('opportunityId')->middleware('throttle:30,1,mobile-edit:');
         Route::post('/company/opportunities/{opportunityId}/close', [$opportunities, 'close'])->whereNumber('opportunityId')->middleware('throttle:30,1,mobile-close:');
+        Route::put('/auth/password', [$auth, 'changePassword'])->middleware('throttle:5,1,mobile-password:');
         Route::get('/me', [$auth, 'me']);
         Route::get('/company/workspace', [$auth, 'workspace']);
         Route::post('/auth/logout', [$auth, 'logout']);
