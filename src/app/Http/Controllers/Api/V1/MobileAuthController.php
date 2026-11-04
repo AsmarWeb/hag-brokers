@@ -92,9 +92,28 @@ class MobileAuthController extends Controller
         if (! $u || ! Hash::check($d['password'], $u->password)) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
-        abort_if($u->hasRole(['admin', 'super-admin']), 403);
+        if ($u->hasRole(['admin', 'super-admin'])) {
+            return response()->json(['message' => 'Platform administrator accounts use the web dashboard.', 'error_code' => 'AUTH_ADMIN_WEB_ONLY'], 403);
+        }
 
         return response()->json(['data' => $this->token($u, $d['device_name'])]);
+    }
+
+    public function changePassword(Request $r)
+    {
+        $d = $r->validate(['current_password' => ['required', 'string', 'max:128'],
+            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed', 'different:current_password']]);
+        DB::transaction(function () use ($r, $d) {
+            $user = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
+            if (! Hash::check($d['current_password'], $user->password)) {
+                throw ValidationException::withMessages(['current_password' => ['The current password is incorrect.']]);
+            }
+            $user->forceFill(['password' => Hash::make($d['password']), 'remember_token' => Str::random(60)])->save();
+            // Preserve the authenticated phone and revoke every other API token.
+            $user->tokens()->where('id', '!=', $r->user()->currentAccessToken()->id)->delete();
+        });
+
+        return response()->noContent();
     }
 
     public function me(Request $r)
