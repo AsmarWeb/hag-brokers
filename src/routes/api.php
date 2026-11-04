@@ -55,6 +55,11 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware('signed')->name('api.v1.verify');
     Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
+        $push=\App\Http\Controllers\Api\V1\MobilePushController::class;
+        Route::get('/push/settings',[$push,'settings']);
+        Route::put('/push/device',[$push,'register'])->middleware('throttle:20,1,mobile-push-register:');
+        Route::delete('/push/device',[$push,'remove']);
+        Route::get('/push/resolve',[$push,'resolve']);
         $account = \App\Http\Controllers\Api\V1\AccountCompletionController::class;
         Route::get('/auth/account', [$account,'show']);
         Route::put('/auth/account', [$account,'update'])->middleware('throttle:5,1,mobile-account:');
