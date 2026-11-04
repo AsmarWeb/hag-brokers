@@ -10,3 +10,5 @@ Artisan::command('inspire', function () {
 \Illuminate\Support\Facades\Schedule::command('platform:billing-reconcile')->everyFiveMinutes()->withoutOverlapping();
 
 \Illuminate\Support\Facades\Schedule::command('platform:company-mail')->everyMinute()->withoutOverlapping();
+
+\Illuminate\Support\Facades\Schedule::command('platform:mobile-push')->everyMinute()->withoutOverlapping();
