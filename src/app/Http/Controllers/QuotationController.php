@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Quotation;
 use App\Models\Customer;
+use App\Models\Port;
+use App\Models\Quotation;
+use App\Services\FreightQuotationService;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +19,7 @@ class QuotationController extends Controller
      */
     public function index(Request $request): View
     {
+        app(FreightQuotationService::class)->customer($request->user());
         $quotations = Quotation::where(
             'customer_id',
             $request->user()->customer_id
@@ -33,9 +36,10 @@ class QuotationController extends Controller
     /**
      * Show the quotation request form.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        $ports = \App\Models\Port::query()
+        app(FreightQuotationService::class)->customer($request->user());
+        $ports = Port::query()->where('is_active', true)
             ->orderBy('name')
             ->get();
 
@@ -47,47 +51,7 @@ class QuotationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'origin_port_id' => [
-                'required',
-                'exists:ports,id',
-            ],
-
-            'destination_port_id' => [
-                'required',
-                'different:origin_port_id',
-                'exists:ports,id',
-            ],
-
-            'cargo_type' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'container_type' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'quantity' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
-
-            'weight' => [
-                'nullable',
-                'numeric',
-                'min:0',
-            ],
-
-            'preferred_date' => [
-                'nullable',
-                'date',
-            ],
-        ]);
+        $data = $request->validate(FreightQuotationService::rules());
 
         $customerId = $request->user()->customer_id;
 
@@ -97,13 +61,14 @@ class QuotationController extends Controller
             ]);
         }
 
+        app(FreightQuotationService::class)->customer($request->user());
         $data['customer_id'] = $customerId;
 
         $data['reference_no'] =
-            'QT-' .
-            now()->format('Y') .
-            '-' .
-            strtoupper(str_replace('-', '', (string) \Illuminate\Support\Str::uuid()));
+            'QT-'.
+            now()->format('Y').
+            '-'.
+            strtoupper(str_replace('-', '', (string) Str::uuid()));
 
         $quotation = Quotation::create($data);
 
@@ -111,7 +76,7 @@ class QuotationController extends Controller
             NotificationService::admins(
                 type: 'quotation.created',
                 title: 'New quotation request',
-                message: 'New quotation ' . $quotation->reference_no . ' requires review.',
+                message: 'New quotation '.$quotation->reference_no.' requires review.',
                 model: $quotation,
                 data: [
                     'url' => route('admin.quotations.show', $quotation),
@@ -136,6 +101,7 @@ class QuotationController extends Controller
         Request $request,
         Quotation $quotation
     ): View {
+        app(FreightQuotationService::class)->customer($request->user());
         abort_unless(
             $quotation->customer_id ===
                 $request->user()->customer_id,
