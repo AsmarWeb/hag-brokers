@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "HAG Brokers Mobile & Integration API",
-    "version": "1.4.0",
-    "description": "Authentication, public marketplace, company opportunity operations, RFQ offers, private negotiation messages and scoped company notifications. Native push, standalone media editing, payments and partner credentials are not yet API features. JSON request/response; UTC ISO 8601 timestamps; decimal money strings. Errors follow Laravel message/errors format. 120 requests/min/IP overall; login/register/reset 5/min/IP each, forgot/resend 3/min/IP each. Store Bearer secrets in OS secure storage. Render user content as text. Native bearer authentication only; cookie sessions are insufficient."
+    "version": "1.5.0",
+    "description": "Authentication, public marketplace, company opportunity operations, RFQ offers, private negotiation messages and scoped company notifications. Session-bound mobile push and a public maritime listing-location feed are available. Standalone media editing, payments and partner credentials are not API features. JSON request/response; UTC ISO 8601 timestamps; decimal money strings. Errors follow Laravel message/errors format. 120 requests/min/IP overall; login/register/reset 5/min/IP each, forgot/resend 3/min/IP each. Store Bearer secrets in OS secure storage. Render user content as text. Native bearer authentication only; cookie sessions are insufficient."
   },
   "servers": [
     {
@@ -3455,6 +3455,142 @@
           },
           "404": {
             "description": "Unknown or inaccessible binding/notification"
+          }
+        }
+      }
+    },
+    "/maritime-map": {
+      "get": {
+        "summary": "Public maritime listing locations, not live tracking",
+        "description": "Up to 300 latest eligible sale/charter listings with explicitly published approximate coordinates. Hidden, closed, expired and suspended-company sources are excluded. No private operational vessel or shipment data. Administrator can disable the feed. No-store.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bounded map data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "const": "listing_locations"
+                        },
+                        "live_tracking": {
+                          "const": false
+                        },
+                        "limit": {
+                          "const": 300
+                        },
+                        "truncated": {
+                          "type": "boolean"
+                        },
+                        "listings": {
+                          "type": "array",
+                          "maxItems": 300,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "category": {
+                                "enum": [
+                                  "commercial_vessel",
+                                  "yacht",
+                                  "boat"
+                                ]
+                              },
+                              "listing_type": {
+                                "enum": [
+                                  "sale",
+                                  "charter"
+                                ]
+                              },
+                              "latitude": {
+                                "type": "number",
+                                "minimum": -90,
+                                "maximum": 90
+                              },
+                              "longitude": {
+                                "type": "number",
+                                "minimum": -180,
+                                "maximum": 180
+                              },
+                              "location_label": {
+                                "type": "string"
+                              },
+                              "approximate": {
+                                "const": true
+                              },
+                              "location_updated_at": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "UTC database timestamp"
+                              },
+                              "image": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "url": {
+                                "type": "string",
+                                "format": "uri"
+                              }
+                            }
+                          }
+                        },
+                        "ports": {
+                          "type": "array",
+                          "maxItems": 300,
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "latitude": {
+                                "type": "number"
+                              },
+                              "longitude": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid language"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
           }
         }
       }

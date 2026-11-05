@@ -587,3 +587,21 @@ Route::middleware(['auth','verified'])->group(function(){
     Route::get('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'edit'])->name('company.mail.edit');
     Route::put('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'update'])->middleware('throttle:20,1')->name('company.mail.update');
 });
+
+// Public release landing page; the existing maintenance policy still applies.
+Route::get('/download', [\App\Http\Controllers\PublicExperienceController::class, 'download'])
+    ->middleware('maintenance.check')->name('app.download');
+Route::prefix('admin/public-experience')->name('admin.public-experience.')
+    ->middleware(['auth', 'verified', 'role:super-admin|admin'])->group(function () {
+        $c = \App\Http\Controllers\PublicExperienceController::class;
+        Route::get('/', [$c, 'index'])->name('index');
+        Route::put('/', [$c, 'update'])->name('update');
+        Route::get('/opportunities/{opportunity}/location', [$c, 'location'])->name('location');
+        Route::put('/opportunities/{opportunity}/location', [$c, 'saveLocation'])->name('location.update');
+    });
+Route::prefix('company/map-locations')->name('company.map-location.')
+    ->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->group(function () {
+        $c = \App\Http\Controllers\PublicExperienceController::class;
+        Route::get('/{opportunity}', [$c, 'location'])->name('edit');
+        Route::put('/{opportunity}', [$c, 'saveLocation'])->name('update');
+    });
