@@ -43,6 +43,7 @@ Route::post('/platform-billing/stripe/live/webhook', StripeLiveWebhookController
 Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:'])->group(function () {
     $auth = MobileAuthController::class;
     $public = PublicMarketplaceController::class;
+    Route::get('/maritime-map', [\App\Http\Controllers\PublicExperienceController::class, 'map']);
     Route::get('/app-config', \App\Http\Controllers\Api\V1\MobileAppConfigController::class);
     Route::get('/legal/{slug}', [\App\Http\Controllers\LegalDocumentController::class, 'api'])->where('slug','privacy|terms');
     Route::get('/catalog', [$public, 'catalog']);

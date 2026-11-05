@@ -992,6 +992,7 @@
 
 
                     @if(auth()->user()?->hasRole(['admin', 'super-admin']))
+                        <a href="{{ route('admin.public-experience.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">{{ __('public_experience.admin_title') }}</a>
                         <a href="{{ route('admin.account-center.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">
                             {{ $isAr ? 'الحسابات والسياسات' : 'Accounts & policies' }}
                         </a>
