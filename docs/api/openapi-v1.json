@@ -3594,6 +3594,78 @@
           }
         }
       }
+    },
+    "/freight/sailings": {
+      "get": {
+        "summary": "List published direct Gulf container sailings open for quote requests",
+        "security": [],
+        "parameters": [
+          {
+            "name": "origin_port_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "destination_port_id",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "ready_on",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "container_type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "20ft",
+                "40ft",
+                "40ft_hc"
+              ]
+            }
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sailings with id, revision, origin, destination, carrier, vessel_name, voyage_number, departure_at, arrival_at, cargo_cutoff_at, container_types and availability=on_request. UTC ISO 8601 timestamps and paginated data/meta."
+          },
+          "422": {
+            "description": "Invalid filter. Provide both port IDs or neither."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -5400,6 +5472,17 @@
               "null"
             ],
             "format": "date"
+          },
+          "freight_sailing_id": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Optional sailing from /freight/sailings."
+          },
+          "sailing_revision": {
+            "type": "string",
+            "minLength": 64,
+            "maxLength": 64,
+            "description": "Required with freight_sailing_id. Use the revision returned by search."
           }
         }
       }

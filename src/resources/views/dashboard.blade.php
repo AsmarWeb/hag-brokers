@@ -201,6 +201,12 @@
 
                         <div class="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
 
+                            <a href="{{ route('dashboard.freight.sailings') }}"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-400/50
+                                       bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-cyan-400/20">
+                                {{ __('sailings.title') }}
+                            </a>
+
                             <a href="{{ route('quotations.create') }}"
                                 class="inline-flex items-center justify-center
                                        gap-2 rounded-xl bg-cyan-400

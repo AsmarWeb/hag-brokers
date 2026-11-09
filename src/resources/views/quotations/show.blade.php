@@ -406,4 +406,8 @@
 
     </div>
 
+    @if($quotation->sailing_snapshot)
+        @include('freight.selection-summary', ['snapshot' => $quotation->sailing_snapshot])
+        @include('freight.booking', ['admin' => false])
+    @endif
 </x-app-layout>
