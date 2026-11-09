@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Carrier;
 use App\Models\FreightSailing;
+use App\Models\Vessel;
 use App\Services\Freight\SailingCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -18,7 +19,7 @@ final class AdminFreightSailingController extends Controller
     public function index()
     {
         return view('admin.freight-sailings.index', [
-            'sailings' => FreightSailing::with(['originPort', 'destinationPort', 'carrier'])
+            'sailings' => FreightSailing::with(['originPort', 'destinationPort', 'carrier', 'vessel'])
                 ->latest('departure_at')->latest('id')->paginate(20),
         ]);
     }
@@ -38,6 +39,7 @@ final class AdminFreightSailingController extends Controller
         return view('admin.freight-sailings.form', [
             'sailing' => $sailing,
             'ports' => $catalog->ports()->orderBy('name')->get(),
+            'vessels' => Vessel::whereHas('carrier', fn ($query) => $query->where('is_active', true))->orderBy('name')->get(['id', 'carrier_id', 'name', 'imo']),
             'carriers' => Carrier::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
@@ -66,7 +68,8 @@ final class AdminFreightSailingController extends Controller
             'origin_port_id' => ['required', 'integer', Rule::in($ports)],
             'destination_port_id' => ['required', 'integer', 'different:origin_port_id', Rule::in($ports)],
             'carrier_id' => ['required', 'integer', Rule::exists('carriers', 'id')->where('is_active', true)],
-            'vessel_name' => ['required', 'string', 'max:120'],
+            'vessel_id' => ['nullable', 'integer', Rule::exists('vessels', 'id')->where('carrier_id', $request->integer('carrier_id'))],
+            'vessel_name' => ['required_without:vessel_id', 'nullable', 'string', 'max:120'],
             'voyage_number' => ['required', 'string', 'max:60'],
             'departure_at' => ['required', 'date_format:Y-m-d\TH:i'],
             'arrival_at' => ['required', 'date_format:Y-m-d\TH:i', 'after:departure_at'],
@@ -91,8 +94,17 @@ final class AdminFreightSailingController extends Controller
                 if ($target->exists && ! hash_equals(self::revision($target), $revision ?? '')) {
                     throw ValidationException::withMessages(['revision' => __('sailings.stale')]);
                 }
+                $vesselId = $data['vessel_id'] ?? $target->vessel_id;
+                if ($vesselId) {
+                    $vessel = Vessel::whereKey($vesselId)->where('carrier_id', $data['carrier_id'])->lockForUpdate()->first();
+                    if (! $vessel || mb_strlen($vessel->name) > 120) {
+                        throw ValidationException::withMessages(['vessel_id' => __('sailing_import.invalid_vessel')]);
+                    }
+                    $data['vessel_id'] = $vessel->id;
+                    $data['vessel_name'] = $vessel->name;
+                }
                 $target->fill($data)->save();
-            });
+            }, 3);
         } catch (UniqueConstraintViolationException) {
             throw ValidationException::withMessages(['voyage_number' => __('sailings.duplicate')]);
         }

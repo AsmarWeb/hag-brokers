@@ -274,6 +274,13 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::prefix('freight-sailings/import')->name('freight-sailings.')->middleware('throttle:15,1')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'show'])->name('import');
+            Route::get('/template', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'template'])->name('import.template');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'preview'])->name('import.preview');
+            Route::post('/publish', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'publish'])->name('import.publish');
+        });
+
         Route::resource('freight-sailings', \App\Http\Controllers\Admin\AdminFreightSailingController::class)
             ->parameters(['freight-sailings' => 'sailing'])
             ->only(['index', 'create', 'store', 'edit', 'update']);

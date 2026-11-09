@@ -12,7 +12,7 @@ final class FreightSailing extends Model
     public const STATUSES = ['draft', 'published', 'cancelled'];
 
     protected $fillable = [
-        'origin_port_id', 'destination_port_id', 'carrier_id', 'vessel_name',
+        'origin_port_id', 'destination_port_id', 'carrier_id', 'vessel_id', 'vessel_name',
         'voyage_number', 'departure_at', 'arrival_at', 'cargo_cutoff_at',
         'container_types', 'status',
     ];
@@ -32,6 +32,11 @@ final class FreightSailing extends Model
     public function destinationPort(): BelongsTo
     {
         return $this->belongsTo(Port::class, 'destination_port_id');
+    }
+
+    public function vessel(): BelongsTo
+    {
+        return $this->belongsTo(Vessel::class);
     }
 
     public function carrier(): BelongsTo
