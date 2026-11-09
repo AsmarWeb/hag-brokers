@@ -268,7 +268,7 @@
                 </button>
 
                 <div class="relative" id="language-menu">
-                    <button type="button" onclick="toggleLanguageMenu()"
+                    <button id="language-menu-button" type="button" aria-controls="language-dropdown" aria-expanded="false"
                         class="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-slate-200 transition hover:bg-white/10">
                         <span>🌐</span>
                         <span>{{ $isAr ? 'العربية' : 'English' }}</span>
@@ -332,7 +332,8 @@
 
             <button id="mobile-menu-button" type="button"
                 class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 lg:hidden"
-                aria-label="{{ $isAr ? 'فتح القائمة' : 'Open menu' }}">
+                aria-controls="mobile-menu" aria-expanded="false"
+                aria-label="{{ $isAr ? 'القائمة الرئيسية' : 'Main menu' }}">
 
                 <svg id="menu-open-icon" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -438,7 +439,7 @@
     <main>
 
         {{-- HERO --}}
-        <section class="relative overflow-hidden pt-32 lg:pt-40">
+        <section id="hero" class="relative overflow-hidden pt-32 lg:pt-40">
 
             <div class="hero-grid absolute inset-0 opacity-70"></div>
 
@@ -473,7 +474,7 @@
 
 
                         <div
-                            class="mt-9 flex flex-col gap-3 sm:flex-row {{ $isAr ? 'sm:flex-row-reverse lg:justify-end' : '' }}">
+                            class="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
 
                             {{-- Discover Opportunities --}}
                             <a href="{{ route('opportunities.index') }}"
@@ -486,12 +487,6 @@
 
                             <a href="#quote-request" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-300/30 px-6 py-4 font-bold text-cyan-300 hover:bg-cyan-300/10">
                                 {{ $isAr ? 'اطلب عرض شحن' : 'Request Freight Quote' }}
-                            </a>
-
-                            {{-- Bring a Deal --}}
-                            <a href="{{ route('freight.sailings') }}"
-                                class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 font-bold text-white hover:bg-white/10">
-                                {{ __('sailings.search') }}
                             </a>
 
                             <a href="{{ (Route::has('leads.create') ? route('leads.create') : '#contact') }}"
@@ -1740,8 +1735,11 @@
                         <p class="text-xs font-bold uppercase tracking-widest text-cyan-300">{{ $isAr ? 'وساطة الشحن البحري' : 'SEA FREIGHT BROKERAGE' }}</p>
                         <h2 class="mt-4 text-2xl font-black sm:text-3xl">{{ $isAr ? 'اطلب عرض سعر لشحنتك' : 'Request a Freight Quotation' }}</h2>
                         <p class="mt-4 leading-7 text-slate-400">{{ $isAr ? 'شاركنا ميناء الانطلاق والوصول ونوع البضاعة والحاوية. سنساعدك في تنسيق خيارات الناقلين المتاحة.' : 'Share your origin, destination, cargo and container requirements. We can coordinate available carrier options.' }}</p>
-                        <a href="#contact" class="mt-7 inline-flex rounded-xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 hover:bg-cyan-300">{{ $isAr ? 'ابدأ طلب الشحن' : 'Start Freight Request' }}</a>
-                        <p class="mt-3 text-xs text-slate-500">{{ $isAr ? 'سيتم توجيهك إلى خيارات التواصل والتسجيل الحالية؛ لم يُفعّل نموذج إرسال مباشر بعد.' : 'Uses existing contact and registration options; no direct quote submission is enabled yet.' }}</p>
+                        <a href="{{ route('quotations.create') }}"
+                            class="mt-7 inline-flex rounded-xl bg-cyan-400 px-6 py-3 font-bold text-slate-950 hover:bg-cyan-300">
+                            {{ $isAr ? 'ابدأ طلب الشحن' : 'Start Freight Request' }}
+                        </a>
+                        <p class="mt-3 text-xs text-slate-500">{{ $isAr ? 'سجّل الدخول إلى حساب شركتك لإرسال الطلب ومتابعته.' : 'Sign in to your company account to submit and follow your request.' }}</p>
                     </div>
                     <div class="glass rounded-[2rem] p-7 sm:p-10">
                         <p class="text-xs font-bold uppercase tracking-widest text-cyan-300">{{ $isAr ? 'سوق الفرص' : 'BUSINESS OPPORTUNITIES' }}</p>
@@ -1984,33 +1982,30 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        /*
-                                                                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                                                                    | Language menu
-                                                                                                                                                                    |--------------------------------------------------------------------------
-                                                                                                                                                                    */
+        const languageMenu = document.getElementById('language-menu');
+        const languageButton = document.getElementById('language-menu-button');
+        const languageDropdown = document.getElementById('language-dropdown');
 
-        function toggleLanguageMenu() {
-            const dropdown = document.getElementById('language-dropdown');
-
-            if (dropdown) {
-                dropdown.classList.toggle('hidden');
-            }
+        function setLanguageMenu(open) {
+            languageDropdown.classList.toggle('hidden', !open);
+            languageButton.setAttribute('aria-expanded', String(open));
         }
 
-        document.addEventListener('click', function(event) {
+        languageButton.addEventListener('click', () => {
+            setLanguageMenu(languageDropdown.classList.contains('hidden'));
+        });
 
-            const menu = document.getElementById('language-menu');
-            const dropdown = document.getElementById('language-dropdown');
-
-            if (
-                menu &&
-                dropdown &&
-                !menu.contains(event.target)
-            ) {
-                dropdown.classList.add('hidden');
+        document.addEventListener('click', event => {
+            if (!languageMenu.contains(event.target)) {
+                setLanguageMenu(false);
             }
+        });
 
+        languageMenu.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && languageButton.getAttribute('aria-expanded') === 'true') {
+                setLanguageMenu(false);
+                languageButton.focus();
+            }
         });
 
         /*
@@ -2031,6 +2026,7 @@
                 const hidden = mobileMenu.classList.contains('hidden');
 
                 mobileMenu.classList.toggle('hidden', !hidden);
+                mobileButton.setAttribute('aria-expanded', String(hidden));
 
                 menuOpenIcon?.classList.toggle('hidden', hidden);
 
@@ -2045,6 +2041,7 @@
             link.addEventListener('click', function() {
 
                 mobileMenu?.classList.add('hidden');
+                mobileButton?.setAttribute('aria-expanded', 'false');
 
                 menuOpenIcon?.classList.remove('hidden');
 
