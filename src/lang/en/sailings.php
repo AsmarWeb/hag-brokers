@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'workspace' => 'Freight operations',
+    'admin_intro' => 'Manage routes, sailing dates and publication from one workspace.',
+    'all_sailings' => 'All sailings',
+    'admin_search' => 'Search sailings',
+    'admin_search_hint' => 'Voyage, vessel, carrier or port',
+    'clear_filters' => 'Clear filters',
+    'result_count' => 'Matching sailings: :count',
+    'admin_empty' => 'No sailings match the current filters.',
+    'cancel_short' => 'Cancel sailing',
     'title' => 'Gulf sea freight sailings',
     'intro' => 'Choose your loading and destination ports and find a direct sailing for your containers. HAG checks price and space with the carrier after receiving your request.',
     'admin_title' => 'Manage freight sailings',

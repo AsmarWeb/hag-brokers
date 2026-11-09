@@ -2,11 +2,11 @@
 
     <x-slot name="header">
         <div>
-            <h2 class="text-2xl font-black text-white">
+            <h2 class="text-2xl font-black text-slate-900 dark:text-white">
                 {{ __('admin_ui.label_081') }}
             </h2>
 
-            <p class="mt-1 text-sm text-slate-400">
+            <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
                 {{ __('admin_ui.label_082') }}
             </p>
         </div>
@@ -19,7 +19,7 @@
             @csrf
             @method('PUT')
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-6">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/60 p-6">
 
                 <x-admin.ports.form :port="$port" />
 
@@ -28,7 +28,7 @@
             <div class="mt-6 flex justify-end gap-3">
 
                 <a href="{{ route('admin.ports.index') }}"
-                    class="rounded-xl bg-slate-800 px-5 py-3 text-sm font-bold text-white">
+                    class="rounded-xl bg-slate-100 dark:bg-slate-800 px-5 py-3 text-sm font-bold text-slate-900 dark:text-white">
                     {{ __('admin_ui.label_007') }}
                 </a>
 

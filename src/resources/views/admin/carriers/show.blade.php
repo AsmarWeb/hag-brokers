@@ -9,13 +9,13 @@
 
                 <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
-                    <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-400">
+                    <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-800 dark:hover:text-cyan-400">
                         {{ __('admin_ui.label_016') }}
                     </a>
 
                     <span>/</span>
 
-                    <span class="text-slate-400">
+                    <span class="text-slate-600 dark:text-slate-400">
                         {{ $carrier->name }}
                     </span>
 
@@ -30,7 +30,7 @@
 
                     <div>
 
-                        <h1 class="text-3xl font-black text-white">
+                        <h1 class="text-3xl font-black text-slate-900 dark:text-white">
                             {{ $carrier->name }}
                         </h1>
 
@@ -57,7 +57,7 @@
                 </a>
 
                 <a href="{{ route('admin.carriers.index') }}"
-                    class="rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
+                    class="rounded-xl border border-slate-300 dark:border-slate-700 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white">
                     {{ __('admin_ui.label_030') }}
                 </a>
 
@@ -70,11 +70,11 @@
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
             {{-- Main Info --}}
-            <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-950">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
 
-                <div class="border-b border-slate-800 px-6 py-5">
+                <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
-                    <h2 class="font-black text-white">
+                    <h2 class="font-black text-slate-900 dark:text-white">
                         {{ __('admin_ui.label_065') }}
                     </h2>
 
@@ -89,7 +89,7 @@
                             Carrier Name
                         </p>
 
-                        <p class="mt-2 text-lg font-black text-white">
+                        <p class="mt-2 text-lg font-black text-slate-900 dark:text-white">
                             {{ $carrier->name }}
                         </p>
 
@@ -102,7 +102,7 @@
                             Carrier Code
                         </p>
 
-                        <p class="mt-2 font-mono text-lg font-bold text-cyan-400">
+                        <p class="mt-2 font-mono text-lg font-bold text-cyan-800 dark:text-cyan-400">
                             {{ $carrier->code ?? '—' }}
                         </p>
 
@@ -115,7 +115,7 @@
                             {{ __('admin_ui.label_010') }}
                         </p>
 
-                        <p class="mt-2 font-bold text-white">
+                        <p class="mt-2 font-bold text-slate-900 dark:text-white">
                             {{ $carrier->country ?? '—' }}
                         </p>
 
@@ -128,7 +128,7 @@
                             Country Code
                         </p>
 
-                        <p class="mt-2 font-mono font-bold text-white">
+                        <p class="mt-2 font-mono font-bold text-slate-900 dark:text-white">
                             {{ $carrier->country_code ?? '—' }}
                         </p>
 
@@ -143,7 +143,7 @@
 
                         @if ($carrier->website)
                             <a href="{{ $carrier->website }}" target="_blank" rel="noopener noreferrer"
-                                class="mt-2 inline-block font-semibold text-cyan-400 hover:text-cyan-300">
+                                class="mt-2 inline-block font-semibold text-cyan-800 dark:text-cyan-400 hover:text-cyan-950 dark:hover:text-cyan-300">
                                 {{ $carrier->website }}
                                 ↗
                             </a>
@@ -162,7 +162,7 @@
                             API Provider
                         </p>
 
-                        <p class="mt-2 font-bold text-white">
+                        <p class="mt-2 font-bold text-slate-900 dark:text-white">
                             {{ $carrier->api_provider ?? 'Manual Management' }}
                         </p>
 
@@ -174,11 +174,11 @@
 
 
             {{-- Status --}}
-            <div class="rounded-2xl border border-slate-800 bg-slate-950">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
 
-                <div class="border-b border-slate-800 px-6 py-5">
+                <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
-                    <h2 class="font-black text-white">
+                    <h2 class="font-black text-slate-900 dark:text-white">
                         {{ __('admin_ui.label_032') }}
                     </h2>
 
@@ -194,7 +194,7 @@
                         </p>
 
                         <span
-                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $carrier->is_active ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-500' }}">
+                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $carrier->is_active ? 'bg-emerald-400/10 text-emerald-800 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500' }}">
                             {{ $carrier->is_active ? 'Active' : 'Inactive' }}
                         </span>
 
@@ -207,7 +207,7 @@
                             {{ __('admin_ui.label_148') }}
                         </p>
 
-                        <p class="mt-2 text-3xl font-black text-cyan-400">
+                        <p class="mt-2 text-3xl font-black text-cyan-800 dark:text-cyan-400">
                             {{ $carrier->vessels_count ?? $carrier->vessels->count() }}
                         </p>
 
@@ -220,7 +220,7 @@
                             Quotation Offers
                         </p>
 
-                        <p class="mt-2 text-3xl font-black text-white">
+                        <p class="mt-2 text-3xl font-black text-slate-900 dark:text-white">
                             {{ $carrier->quotation_offers_count ?? $carrier->quotationOffers->count() }}
                         </p>
 
@@ -233,7 +233,7 @@
                             {{ __('admin_ui.label_014') }}
                         </p>
 
-                        <p class="mt-2 text-3xl font-black text-white">
+                        <p class="mt-2 text-3xl font-black text-slate-900 dark:text-white">
                             {{ $carrier->shipments_count ?? $carrier->shipments->count() }}
                         </p>
 
@@ -247,14 +247,14 @@
 
 
         {{-- Vessels --}}
-        <div class="mt-6 overflow-hidden rounded-2xl border border-slate-800 bg-slate-950">
+        <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
 
             <div
-                class="flex flex-col gap-3 border-b border-slate-800 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                class="flex flex-col gap-3 border-b border-slate-200 dark:border-slate-800 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
 
                 <div>
 
-                    <h2 class="font-black text-white">
+                    <h2 class="font-black text-slate-900 dark:text-white">
                         Carrier Vessels
                     </h2>
 
@@ -275,7 +275,7 @@
 
             @if ($carrier->vessels->count())
 
-                <div class="divide-y divide-slate-800">
+                <div class="divide-y divide-slate-200 dark:divide-slate-800">
 
                     @foreach ($carrier->vessels as $vessel)
                         <div class="flex flex-col gap-4 px-6 py-5 md:flex-row md:items-center md:justify-between">
@@ -288,7 +288,7 @@
 
                                 <div>
 
-                                    <p class="font-bold text-white">
+                                    <p class="font-bold text-slate-900 dark:text-white">
                                         {{ $vessel->name }}
                                     </p>
 
@@ -314,14 +314,14 @@
                             <div class="flex items-center gap-3">
 
                                 @if ($vessel->is_in_gulf)
-                                    <span class="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-400">
+                                    <span class="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-800 dark:text-cyan-400">
                                         {{ __('admin_ui.label_069') }}
                                     </span>
                                 @endif
 
 
                                 <a href="{{ route('admin.vessels.show', $vessel) }}"
-                                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs font-bold text-slate-300 transition hover:border-cyan-400 hover:text-cyan-400">
+                                    class="rounded-lg border border-slate-300 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition hover:border-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-400">
                                     {{ __('admin_ui.label_004') }}
                                 </a>
 
@@ -338,7 +338,7 @@
                         🚢
                     </div>
 
-                    <p class="mt-3 font-bold text-white">
+                    <p class="mt-3 font-bold text-slate-900 dark:text-white">
                         No vessels assigned
                     </p>
 

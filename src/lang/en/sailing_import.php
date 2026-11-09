@@ -1,6 +1,16 @@
 <?php
 
 return [
+    'intro' => 'Upload a carrier schedule, review the proposed changes, and publish when ready.',
+    'publish_step' => 'Confirm and publish',
+    'drop_file' => 'Drop a CSV file here or choose a file',
+    'file_limits' => 'One UTF-8 CSV file · up to 128 KB',
+    'remove_file' => 'Remove file',
+    'guide' => 'File preparation',
+    'no_changes' => 'The schedule already matches the published records.',
+    'invalid_file' => 'Choose one CSV file.',
+    'file_too_large' => 'The CSV file must be 128 KB or smaller.',
+    'use_picker' => 'Choose the file using the file picker.',
     'carriers' => 'Carriers',
     'vessels' => 'Vessels',
     'ports' => 'Ports',

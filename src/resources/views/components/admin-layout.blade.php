@@ -308,22 +308,22 @@
 
         {{-- Brand --}}
 
-        <div class="flex h-20 shrink-0 items-center border-b border-slate-800 px-5">
+        <div class="hag-sidebar-brand flex shrink-0 items-center border-b px-5">
 
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
 
                 <div
-                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-400 text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/20">
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl hag-sidebar-mark text-sm font-black">
                     HAG
                 </div>
 
                 <div class="min-w-0">
 
-                    <div class="truncate text-base font-extrabold text-white">
+                    <div class="hag-sidebar-name truncate text-base font-extrabold">
                         HAG Brokers
                     </div>
 
-                    <div class="truncate text-xs font-medium text-slate-500">
+                    <div class="hag-sidebar-muted truncate text-xs font-medium">
                         {{ $t['admin_control'] }}
                     </div>
 
@@ -335,7 +335,7 @@
             {{-- Mobile close --}}
 
             <button type="button" onclick="closeAdminSidebar()"
-                class="ms-auto rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white lg:hidden"
+                class="hag-sidebar-control ms-auto rounded-lg p-2 transition lg:hidden"
                 aria-label="{{ $t['close_menu'] }}">
 
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -355,11 +355,11 @@
 
         <div class="px-4 pt-5">
 
-            <div class="rounded-2xl border border-cyan-400/10 bg-cyan-400/5 px-4 py-3">
+            <div class="hag-sidebar-panel rounded-xl border px-3 py-2.5">
 
                 <div class="flex items-center gap-3">
 
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-400">
+                    <div class="flex h-9 w-9 items-center justify-center hag-sidebar-accent rounded-xl">
 
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
@@ -373,11 +373,11 @@
 
                     <div class="min-w-0">
 
-                        <p class="truncate text-xs font-bold uppercase tracking-wider text-cyan-400">
+                        <p class="truncate text-xs font-bold hag-sidebar-accent">
                             {{ $userRole }}
                         </p>
 
-                        <p class="mt-0.5 truncate text-xs text-slate-500">
+                        <p class="hag-sidebar-muted mt-0.5 truncate text-xs">
 
                             @if ($isAdmin)
                                 {{ $t['full_access'] }}
@@ -400,7 +400,7 @@
             Navigation
         ====================================================== --}}
 
-        <nav class="flex-1 overflow-y-auto px-4 py-6">
+        <nav class="flex-1 overflow-y-auto px-3 py-5">
 
 
             {{-- =================================================
@@ -992,7 +992,7 @@
 
 
                     @if(auth()->user()?->hasRole(['admin', 'super-admin']))
-                        <a href="{{ route('admin.freight-sailings.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">{{ __('sailings.admin_title') }}</a>
+                        <a href="{{ route('admin.freight-sailings.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold {{ request()->routeIs('admin.freight-sailings.*') ? 'bg-cyan-400' : '' }}">{{ __('sailings.admin_title') }}</a>
                         <a href="{{ route('admin.public-experience.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">{{ __('public_experience.admin_title') }}</a>
                         <a href="{{ route('admin.account-center.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">
                             {{ $isAr ? 'الحسابات والسياسات' : 'Accounts & policies' }}
@@ -1091,9 +1091,9 @@
             User / Logout
         ========================================================== --}}
 
-        <div class="shrink-0 border-t border-slate-800 p-4">
+        <div class="hag-sidebar-footer shrink-0 border-t p-3">
 
-            <div class="rounded-2xl bg-slate-900 p-3">
+            <div class="hag-sidebar-panel rounded-xl border p-2.5">
 
 
                 <div class="flex items-center gap-3">
@@ -1102,21 +1102,21 @@
                     <div
                         class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-400 font-extrabold text-slate-950">
 
-                        {{ strtoupper(substr($authUser?->name ?? 'A', 0, 1)) }}
+                        {{ mb_strtoupper(mb_substr($authUser?->name ?? 'A', 0, 1)) }}
 
                     </div>
 
 
                     <div class="min-w-0 flex-1">
 
-                        <p class="truncate text-sm font-bold text-white">
+                        <p class="hag-sidebar-name truncate text-sm font-bold">
 
                             {{ $authUser?->name ?? $t['administrator'] }}
 
                         </p>
 
 
-                        <p class="truncate text-xs text-slate-500">
+                        <p class="hag-sidebar-muted truncate text-xs">
 
                             {{ $authUser?->email ?? '' }}
 
@@ -1132,7 +1132,7 @@
                     @csrf
 
                     <button type="submit"
-                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-400 transition hover:bg-red-500/10 hover:text-red-400">
+                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 hag-sidebar-control text-sm font-bold transition">
 
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 
@@ -1253,7 +1253,7 @@
                     <div
                         class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-900">
 
-                        <span class="text-slate-400">
+                        <span class="hidden text-slate-600 dark:text-slate-300 sm:inline">
                             {{ $t['language'] }}
                         </span>
 
@@ -1261,7 +1261,7 @@
                         <a href="{{ route('language.switch', 'en') }}"
                             class="{{ app()->getLocale() === 'en'
                                 ? 'text-cyan-600 dark:text-cyan-400'
-                                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }}">
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' }}">
                             EN
                         </a>
 
@@ -1274,7 +1274,7 @@
                         <a href="{{ route('language.switch', 'ar') }}"
                             class="{{ app()->getLocale() === 'ar'
                                 ? 'text-cyan-600 dark:text-cyan-400'
-                                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white' }}">
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white' }}">
                             AR
                         </a>
 
@@ -1310,7 +1310,7 @@
                                 {{ $authUser?->name ?? $t['administrator'] }}
                             </p>
 
-                            <p class="text-xs text-slate-400">
+                            <p class="text-xs text-slate-600 dark:text-slate-300">
                                 {{ $userRole }}
                             </p>
 
@@ -1320,7 +1320,7 @@
                         <div
                             class="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-400 text-sm font-extrabold text-slate-950">
 
-                            {{ strtoupper(substr($authUser?->name ?? 'A', 0, 1)) }}
+                            {{ mb_strtoupper(mb_substr($authUser?->name ?? 'A', 0, 1)) }}
 
                         </div>
 
@@ -1370,6 +1370,7 @@
     const root = document.documentElement;
     const sidebar = document.getElementById('admin-sidebar');
     const overlay = document.getElementById('admin-mobile-overlay');
+    const shell = document.querySelector('.hag-shell');
     const toggle = document.getElementById('hag-sidebar-toggle');
     const handle = document.getElementById('hag-sidebar-resize');
     const desktop = window.matchMedia('(min-width: 1024px)');
@@ -1384,7 +1385,9 @@
         const open = isOpen();
         root.dataset.hagMobileSidebar = mobileOpen ? 'open' : 'closed';
         overlay.classList.toggle('hidden', desktop.matches || !mobileOpen);
-        document.body.classList.toggle('overflow-hidden', !desktop.matches && mobileOpen);
+        const modalOpen = !desktop.matches && mobileOpen;
+        document.body.classList.toggle('overflow-hidden', modalOpen);
+        if (shell) shell.inert = modalOpen;
         sidebar.inert = !open;
         sidebar.setAttribute('aria-hidden', String(!open));
         toggle.setAttribute('aria-expanded', String(open));
