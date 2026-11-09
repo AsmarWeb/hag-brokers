@@ -95,16 +95,7 @@ class AdminVesselController extends Controller
 
     public function show(Vessel $vessel)
     {
-        $vessel->load([
-            'carrier',
-            'positions' => function ($query) {
-                $query->latest('recorded_at');
-            },
-            'portCalls.port',
-            'quotationOffers.quotation',
-            'quotationOffers.carrier',
-            'shipments',
-        ]);
+        $vessel->load('carrier');
 
         return view('admin.vessels.show', compact('vessel'));
     }

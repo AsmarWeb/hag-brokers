@@ -20,9 +20,24 @@
                     </select>
                 </label>
             @endforeach
-            @foreach(['vessel_name' => 120, 'voyage_number' => 60] as $field => $max)
-                <label class="grid gap-2">{{ __('sailings.'.$field) }}<input required name="{{ $field }}" maxlength="{{ $max }}" value="{{ old($field, $sailing->$field) }}" class="rounded-xl text-slate-900"></label>
-            @endforeach
+            <label class="grid gap-2">{{ __('sailings.vessel_name') }}
+                <select name="vessel_id" class="rounded-xl text-slate-900" @required(!$sailing->exists || $sailing->vessel_id)>
+                    <option value="">{{ __('sailings.choose') }}</option>
+                    @foreach($vessels as $vessel)
+                        <option value="{{ $vessel->id }}" @selected((string) old('vessel_id', $sailing->vessel_id) === (string) $vessel->id)>
+                            {{ $vessel->name }} · {{ $carriers->find($vessel->carrier_id)?->name }} @if($vessel->imo) · IMO {{ $vessel->imo }} @endif
+                        </option>
+                    @endforeach
+                </select>
+            </label>
+            @if($sailing->exists && !$sailing->vessel_id)
+                <label class="grid gap-2">{{ __('sailing_import.legacy_vessel') }}
+                    <input name="vessel_name" maxlength="120" value="{{ old('vessel_name', $sailing->vessel_name) }}" class="rounded-xl text-slate-900">
+                </label>
+            @endif
+            <label class="grid gap-2">{{ __('sailings.voyage_number') }}
+                <input required name="voyage_number" maxlength="60" value="{{ old('voyage_number', $sailing->voyage_number) }}" class="rounded-xl text-slate-900">
+            </label>
             @foreach(['departure_at','arrival_at','cargo_cutoff_at'] as $field)
                 <label class="grid gap-2">{{ __('sailings.'.$field) }}<input required name="{{ $field }}" type="datetime-local" value="{{ old($field, $sailing->$field?->setTimezone('Asia/Dubai')->format('Y-m-d\TH:i')) }}" class="rounded-xl text-slate-900"></label>
             @endforeach
