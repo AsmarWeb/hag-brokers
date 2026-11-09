@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Port;
 use App\Models\Quotation;
 use App\Services\FreightQuotationService;
+use App\Services\Freight\SailingCatalog;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,7 +44,20 @@ class QuotationController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('quotations.create', ['ports' => $ports]);
+        $sailing = null;
+        $selection = [];
+        if ($request->filled('sailing')) {
+            $selection = $request->validate([
+                'sailing' => ['required', 'integer', 'min:1'],
+                'container_type' => ['required', 'string'],
+                'quantity' => ['required', 'integer', 'between:1,10000'],
+                'ready_on' => ['nullable', 'date_format:Y-m-d'],
+            ]);
+            $sailing = app(SailingCatalog::class)->available()->findOrFail($selection['sailing']);
+            abort_unless(in_array($selection['container_type'], $sailing->container_types, true), 422);
+        }
+
+        return view('quotations.create', compact('ports', 'sailing', 'selection'));
     }
 
     /**
@@ -53,6 +67,15 @@ class QuotationController extends Controller
     {
         $data = $request->validate(FreightQuotationService::rules());
 
+        if (isset($data['freight_sailing_id'])) {
+            $validated = $request->validate(['request_key' => ['required', 'uuid']]);
+            [$quotation] = app(FreightQuotationService::class)->submit($request->user(), $data, $validated['request_key']);
+
+            return redirect()->route('quotations.show', $quotation)
+                ->with('success', __('sailings.request_sent'));
+        }
+
+        unset($data['sailing_revision']);
         $customerId = $request->user()->customer_id;
 
         if (! $customerId || ! Customer::whereKey($customerId)->exists()) {

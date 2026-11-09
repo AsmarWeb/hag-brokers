@@ -489,6 +489,11 @@
                             </a>
 
                             {{-- Bring a Deal --}}
+                            <a href="{{ route('freight.sailings') }}"
+                                class="rounded-xl border border-white/10 bg-white/5 px-5 py-3 font-bold text-white hover:bg-white/10">
+                                {{ __('sailings.search') }}
+                            </a>
+
                             <a href="{{ (Route::has('leads.create') ? route('leads.create') : '#contact') }}"
                                 class="inline-flex items-center justify-center gap-2 rounded-2xl border border-cyan-400/30 bg-white/5 px-7 py-4 font-semibold text-white transition hover:border-cyan-400/60 hover:bg-cyan-400/10">
 
@@ -1911,6 +1916,7 @@
 
                     <div class="mt-5 space-y-3 text-sm text-slate-500">
 
+                        <a href="{{ route('freight.sailings') }}" class="block hover:text-cyan-300">{{ __('sailings.title') }}</a>
                         <a href="{{ route('quotations.create') }}" class="block hover:text-cyan-300">
                             {{ $isAr ? 'طلب عرض شحن' : 'Request a Quote' }}
                         </a>

@@ -53,6 +53,11 @@ Route::get('/language/{locale}', function (string $locale) {
 */
 
 Route::middleware('maintenance.check')->group(function () {
+    Route::get('/freight/sailings', [\App\Http\Controllers\FreightSailingController::class, 'index'])
+        ->middleware('throttle:60,1')->name('freight.sailings');
+    Route::get('/freight/sailings/{sailing}/select', [\App\Http\Controllers\FreightSailingController::class, 'select'])
+        ->whereNumber('sailing')->middleware(['auth', 'verified'])->name('freight.sailings.select');
+
 
     // Public website routes
 
@@ -78,6 +83,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         DashboardController::class,
         'index',
     ])->name('dashboard');
+
+    Route::get('/dashboard/freight/sailings', [\App\Http\Controllers\FreightSailingController::class, 'index'])
+        ->middleware('throttle:60,1')->name('dashboard.freight.sailings');
 
 
     /*
@@ -144,6 +152,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         QuotationController::class,
         'show',
     ])->name('quotations.show');
+
+    Route::post('/quotations/{quotation}/freight-booking/accept', [\App\Http\Controllers\FreightBookingController::class, 'accept'])
+        ->middleware('throttle:15,1')->name('quotations.freight-booking.accept');
 
 
 
@@ -263,6 +274,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::resource('freight-sailings', \App\Http\Controllers\Admin\AdminFreightSailingController::class)
+            ->parameters(['freight-sailings' => 'sailing'])
+            ->only(['index', 'create', 'store', 'edit', 'update']);
+        Route::patch('freight-sailings/{sailing}/cancel', [\App\Http\Controllers\Admin\AdminFreightSailingController::class, 'cancel'])
+            ->name('freight-sailings.cancel');
 
         Route::get(
             '/company',
@@ -360,6 +376,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             AdminQuotationController::class,
             'show',
         ])->name('quotations.show');
+
+        Route::post('/quotations/{quotation}/freight-booking/offer', [\App\Http\Controllers\FreightBookingController::class, 'publish'])
+            ->middleware('throttle:15,1')->name('quotations.freight-booking.publish');
+        Route::post('/quotations/{quotation}/freight-booking/confirm', [\App\Http\Controllers\FreightBookingController::class, 'confirm'])
+            ->middleware('throttle:15,1')->name('quotations.freight-booking.confirm');
 
         Route::patch('/quotations/{quotation}/status', [
             AdminQuotationController::class,

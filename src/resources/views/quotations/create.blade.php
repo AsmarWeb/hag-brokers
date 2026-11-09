@@ -149,6 +149,12 @@
                 dir="{{ $dir }}">
 
                 @csrf
+                @if($sailing)
+                    <input type="hidden" name="freight_sailing_id" value="{{ $sailing->id }}">
+                    <input type="hidden" name="sailing_revision" value="{{ app(\App\Services\Freight\SailingCatalog::class)->revision($sailing) }}">
+                    <input type="hidden" name="request_key" value="{{ old('request_key', (string) \Illuminate\Support\Str::uuid()) }}">
+                    @include('freight.selection-summary', ['snapshot' => app(\App\Services\Freight\SailingCatalog::class)->snapshot($sailing)])
+                @endif
 
 
                 {{-- Route --}}
@@ -172,8 +178,8 @@
                     {{-- HAG SMART PORT PICKER --}}
                     <div
                         x-data="{
-                            origin: @js((string) old('origin_port_id', '')),
-                            destination: @js((string) old('destination_port_id', '')),
+                            origin: @js((string) old('origin_port_id', $sailing?->origin_port_id ?? '')),
+                            destination: @js((string) old('destination_port_id', $sailing?->destination_port_id ?? '')),
                             originSearch: '',
                             destinationSearch: '',
                             showOrigin: true,
@@ -417,23 +423,23 @@
                                     {{ $t['select_container'] }}
                                 </option>
 
-                                <option value="20ft" @selected(old('container_type') === '20ft')>
+                                <option value="20ft" @selected(old('container_type', $selection['container_type'] ?? null) === '20ft')>
                                     20ft
                                 </option>
 
-                                <option value="40ft" @selected(old('container_type') === '40ft')>
+                                <option value="40ft" @selected(old('container_type', $selection['container_type'] ?? null) === '40ft')>
                                     40ft
                                 </option>
 
-                                <option value="40ft_hc" @selected(old('container_type') === '40ft_hc')>
+                                <option value="40ft_hc" @selected(old('container_type', $selection['container_type'] ?? null) === '40ft_hc')>
                                     {{ $t['high_cube'] }}
                                 </option>
 
-                                <option value="45ft" @selected(old('container_type') === '45ft')>
+                                <option value="45ft" @selected(old('container_type', $selection['container_type'] ?? null) === '45ft')>
                                     45ft
                                 </option>
 
-                                <option value="LCL" @selected(old('container_type') === 'LCL')>
+                                <option value="LCL" @selected(old('container_type', $selection['container_type'] ?? null) === 'LCL')>
                                     LCL
                                 </option>
 
@@ -455,7 +461,7 @@
                             </label>
 
                             <input id="quantity" name="quantity" type="number" min="1"
-                                value="{{ old('quantity', 1) }}" required
+                                value="{{ old('quantity', $selection['quantity'] ?? 1) }}" required
                                 class="mt-2 block w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-cyan-400 focus:ring-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
 
                             @error('quantity')
@@ -498,7 +504,7 @@
                             </label>
 
                             <input id="preferred_date" name="preferred_date" type="date"
-                                value="{{ old('preferred_date') }}"
+                                value="{{ old('preferred_date', $selection['ready_on'] ?? null) }}"
                                 class="mt-2 block w-full rounded-xl border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-cyan-400 focus:ring-cyan-400 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
 
                             @error('preferred_date')

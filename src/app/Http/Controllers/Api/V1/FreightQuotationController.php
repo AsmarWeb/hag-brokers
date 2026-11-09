@@ -31,7 +31,8 @@ final class FreightQuotationController extends Controller
             'origin' => ['id' => $q->origin_port_id, 'name' => $q->originPort?->name],
             'destination' => ['id' => $q->destination_port_id, 'name' => $q->destinationPort?->name],
             'cargo_type' => $q->cargo_type, 'container_type' => $q->container_type, 'quantity' => (int) $q->quantity,
-            'weight' => $q->weight, 'preferred_date' => $q->preferred_date, 'created_at' => $q->created_at?->toIso8601String()];
+            'weight' => $q->weight, 'preferred_date' => $q->preferred_date, 'created_at' => $q->created_at?->toIso8601String()]
+            + ($q->sailing_snapshot ? ['sailing' => $q->sailing_snapshot] : []);
     }
 
     public function index(Request $r, FreightQuotationService $s)

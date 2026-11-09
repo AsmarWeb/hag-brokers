@@ -7,6 +7,7 @@ use App\Models\CompanyWorkspace;
 use App\Models\Customer;
 use App\Models\Quotation;
 use App\Models\User;
+use App\Services\Freight\SailingCatalog;
 use App\Services\Platform\CompanyMarketplaceService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -39,6 +40,8 @@ final class FreightQuotationService
             'quantity' => ['required', 'integer', 'min:1', 'max:10000'],
             'weight' => ['nullable', 'numeric', 'min:0', 'max:9999999999.99'],
             'preferred_date' => ['nullable', 'date_format:Y-m-d'],
+            'freight_sailing_id' => ['nullable', 'integer', 'min:1'],
+            'sailing_revision' => ['required_with:freight_sailing_id', 'nullable', 'string', 'size:64'],
         ];
     }
 
@@ -56,6 +59,10 @@ final class FreightQuotationService
                 'quantity' => (int) $data['quantity'], 'weight' => isset($data['weight']) ? number_format((float) $data['weight'], 2, '.', '') : null,
                 'preferred_date' => $data['preferred_date'] ?? null,
             ];
+            if (isset($data['freight_sailing_id'])) {
+                $payload['freight_sailing_id'] = (int) $data['freight_sailing_id'];
+                $payload['sailing_revision'] = $data['sailing_revision'];
+            }
             $hash = hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
             $old = DB::table('freight_request_keys')->where('customer_id', $customer->id)->where('request_key', $key)->first();
             if ($old) {
@@ -64,6 +71,10 @@ final class FreightQuotationService
                 }
 
                 return [Quotation::where('customer_id', $customer->id)->findOrFail($old->quotation_id), false];
+            }
+            if (isset($payload['freight_sailing_id'])) {
+                $payload['sailing_snapshot'] = app(SailingCatalog::class)->forQuotation($payload);
+                unset($payload['sailing_revision']);
             }
             $q = Quotation::create($payload + ['customer_id' => $customer->id,
                 'reference_no' => 'QT-'.now()->format('Y').'-'.strtoupper(str_replace('-', '', (string) Str::uuid()))]);
