@@ -16,6 +16,20 @@ class HomeMarketplaceTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_home_keeps_sailing_link_in_footer_and_routes_freight_requests_to_the_form(): void
+    {
+        foreach (['ar', 'en'] as $locale) {
+            $html = $this->get('/?lang='.$locale)->assertOk()->getContent();
+            $document = new \DOMDocument;
+            $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new \DOMXPath($document);
+            $sailingLink = 'a[@href="'.route('freight.sailings').'"]';
+            $this->assertSame(0, $xpath->query('//*[@id="hero"]//'.$sailingLink)->length);
+            $this->assertSame(1, $xpath->query('//footer//'.$sailingLink)->length);
+            $this->assertSame(1, $xpath->query('//*[@id="quote-request"]//a[@href="'.route('quotations.create').'"]')->length);
+        }
+    }
+
     private function company(): array
     {
         $this->artisan('platform:install-plans');
