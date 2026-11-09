@@ -34,12 +34,69 @@
 /* HAG brokerage workspace v2 */
 .hag-admin { background: #f1f5f9; }
 .dark .hag-admin { background: #08121f; }
-.hag-admin #admin-sidebar { width: var(--hag-sidebar-width, 288px); background: #0b1829; border-color: #23344a; }
-.hag-admin #admin-sidebar nav { scrollbar-width: thin; scrollbar-color: #37516c transparent; }
-.hag-admin #admin-sidebar nav a { min-height: 42px; padding-block: .65rem; border-radius: .75rem; font-size: .8125rem; }
-.hag-admin #admin-sidebar nav a:hover { background-color: #173047; }
-.hag-admin #admin-sidebar nav a.bg-cyan-400 { background: #22d3ee; color: #082330; }
-.hag-admin #admin-sidebar nav a.bg-cyan-400:hover { background: #67e8f9; }
+.hag-admin #admin-sidebar {
+  --nav-surface: #ffffff;
+  --nav-border: #d3dfe9;
+  --nav-ink: #14293c;
+  --nav-muted: #4a6074;
+  --nav-icon: #526b80;
+  --nav-hover: #eaf3f8;
+  --nav-active: #dcf5f7;
+  --nav-accent: #0e6274;
+  width: var(--hag-sidebar-width, 288px);
+  background: var(--nav-surface);
+  border-color: var(--nav-border);
+  color: var(--nav-ink);
+}
+.dark .hag-admin #admin-sidebar {
+  --nav-surface: #0b1829;
+  --nav-border: #30435a;
+  --nav-ink: #f1f5f9;
+  --nav-muted: #b6c5d6;
+  --nav-icon: #a4b7ca;
+  --nav-hover: #172c41;
+  --nav-active: #163849;
+  --nav-accent: #78dbe8;
+}
+.hag-admin .hag-sidebar-brand { min-height: 4.5rem; }
+.hag-admin .hag-sidebar-mark { background: #10283c; color: #89e7ee; border: 1px solid #246278; }
+.hag-admin .hag-sidebar-name { color: var(--nav-ink); }
+.hag-admin .hag-sidebar-muted { color: var(--nav-muted); }
+.hag-admin .hag-sidebar-accent { color: var(--nav-accent); }
+.hag-admin .hag-sidebar-brand,
+.hag-admin .hag-sidebar-footer,
+.hag-admin .hag-sidebar-panel { border-color: var(--nav-border); }
+.hag-admin .hag-sidebar-panel { background: var(--nav-hover); }
+.hag-admin .hag-sidebar-control { color: var(--nav-muted); }
+.hag-admin .hag-sidebar-control:hover { background: var(--nav-hover); color: var(--nav-ink); }
+.hag-admin #admin-sidebar :focus-visible { outline-color: var(--nav-accent); }
+.hag-admin #admin-sidebar nav { min-height: 0; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--nav-icon) transparent; }
+.hag-admin #admin-sidebar nav > p {
+  color: var(--nav-muted);
+  font-size: .75rem;
+  letter-spacing: .09em;
+  line-height: 1.5;
+}
+html[dir="rtl"] .hag-admin #admin-sidebar nav > p { letter-spacing: 0; }
+.hag-admin #admin-sidebar nav a {
+  min-height: 44px;
+  padding-block: .65rem;
+  border: 1px solid transparent;
+  border-radius: .75rem;
+  color: var(--nav-ink);
+  font-size: .875rem;
+  line-height: 1.45;
+}
+.hag-admin #admin-sidebar nav a svg { color: var(--nav-icon); }
+.hag-admin #admin-sidebar nav a:hover { background: var(--nav-hover); }
+.hag-admin #admin-sidebar nav a.bg-cyan-400 {
+  background: var(--nav-active);
+  border-color: var(--nav-accent);
+  border-inline-start-width: 3px;
+  box-shadow: none;
+}
+.hag-admin #admin-sidebar nav a.bg-cyan-400 svg { color: var(--nav-accent); }
+.hag-admin #admin-sidebar nav a.bg-cyan-400:hover { background: var(--nav-active); }
 .hag-admin .hag-shell > header > div { height: 4.5rem; }
 .hag-admin #hag-sidebar-resize { position: absolute; inset-block: 0; inset-inline-end: -5px; width: 12px; cursor: ew-resize; touch-action: none; z-index: 55; outline-offset: -3px; }
 .hag-admin #hag-sidebar-resize::after { content: ''; position: absolute; inset-block: 40%; inset-inline-start: 4px; width: 3px; border-radius: 9px; background: #54718d; }

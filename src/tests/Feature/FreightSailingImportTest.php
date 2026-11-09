@@ -69,6 +69,13 @@ final class FreightSailingImportTest extends TestCase
         $this->assertSame('SADMM', $sailing->destinationPort->unlocode);
         $this->getJson('/api/v1/freight/sailings')->assertOk()->assertJsonPath('data.0.vessel_name', $vessel->name);
 
+        $this->get(route('admin.freight-sailings.index', ['q' => 'AEJEA', 'status' => 'published']))
+            ->assertOk()->assertSee('VOY-1');
+        $this->get(route('admin.freight-sailings.index', ['q' => 'AEJEA', 'status' => 'cancelled']))
+            ->assertOk()->assertDontSee('VOY-1');
+        $this->get(route('admin.freight-sailings.index', ['q' => 'NO-MATCH']))
+            ->assertOk()->assertDontSee('VOY-1');
+
         $update = $this->post($preview, ['schedule' => $this->schedule(4)])->assertOk()->assertViewHas('plan.0.action', 'update');
         $this->assertSame($sailing->departure_at->timestamp, $sailing->fresh()->departure_at->timestamp);
         $this->post($publish, ['token' => $update->viewData('token')])->assertRedirect(route('admin.freight-sailings.index'));

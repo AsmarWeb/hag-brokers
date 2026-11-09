@@ -9,13 +9,13 @@
 
                 <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
-                    <a href="{{ route('admin.vessels.index') }}" class="hover:text-cyan-400">
+                    <a href="{{ route('admin.vessels.index') }}" class="hover:text-cyan-800 dark:hover:text-cyan-400">
                         {{ __('admin_ui.label_148') }}
                     </a>
 
                     <span>/</span>
 
-                    <span class="text-slate-400">
+                    <span class="text-slate-600 dark:text-slate-400">
                         {{ $vessel->name }}
                     </span>
 
@@ -29,7 +29,7 @@
 
                     <div>
 
-                        <h1 class="text-3xl font-black text-white">
+                        <h1 class="text-3xl font-black text-slate-900 dark:text-white">
                             {{ $vessel->name }}
                         </h1>
 
@@ -52,7 +52,7 @@
                 </a>
 
                 <a href="{{ route('admin.vessels.index') }}"
-                    class="rounded-xl border border-slate-700 px-5 py-3 text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
+                    class="rounded-xl border border-slate-300 dark:border-slate-700 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white">
                     {{ __('admin_ui.label_030') }}
                 </a>
 
@@ -65,11 +65,11 @@
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
             {{-- Vessel Information --}}
-            <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-950">
+            <div class="lg:col-span-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
 
-                <div class="border-b border-slate-800 px-6 py-5">
+                <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
-                    <h2 class="font-black text-white">
+                    <h2 class="font-black text-slate-900 dark:text-white">
                         {{ __('admin_ui.label_071') }}
                     </h2>
 
@@ -82,7 +82,7 @@
                             {{ __('admin_ui.label_002') }}
                         </p>
 
-                        <p class="mt-2 font-bold text-white">
+                        <p class="mt-2 font-bold text-slate-900 dark:text-white">
                             {{ $vessel->carrier?->name ?? 'Not assigned' }}
                         </p>
                     </div>
@@ -93,7 +93,7 @@
                             Vessel Type
                         </p>
 
-                        <p class="mt-2 font-bold text-white">
+                        <p class="mt-2 font-bold text-slate-900 dark:text-white">
                             {{ $vessel->vessel_type ? ucwords(str_replace(['_', '-'], ' ', $vessel->vessel_type)) : '—' }}
                         </p>
                     </div>
@@ -104,7 +104,7 @@
                             IMO
                         </p>
 
-                        <p class="mt-2 font-mono text-white">
+                        <p class="mt-2 font-mono text-slate-900 dark:text-white">
                             {{ $vessel->imo ?? '—' }}
                         </p>
                     </div>
@@ -115,7 +115,7 @@
                             MMSI
                         </p>
 
-                        <p class="mt-2 font-mono text-white">
+                        <p class="mt-2 font-mono text-slate-900 dark:text-white">
                             {{ $vessel->mmsi ?? '—' }}
                         </p>
                     </div>
@@ -126,7 +126,7 @@
                             Call Sign
                         </p>
 
-                        <p class="mt-2 font-mono text-white">
+                        <p class="mt-2 font-mono text-slate-900 dark:text-white">
                             {{ $vessel->call_sign ?? '—' }}
                         </p>
                     </div>
@@ -137,7 +137,7 @@
                             Flag
                         </p>
 
-                        <p class="mt-2 font-bold text-white">
+                        <p class="mt-2 font-bold text-slate-900 dark:text-white">
                             {{ $vessel->flag ?? '—' }}
                         </p>
                     </div>
@@ -148,7 +148,7 @@
                             {{ __('admin_ui.label_013') }}
                         </p>
 
-                        <p class="mt-2 font-bold text-white">
+                        <p class="mt-2 font-bold text-slate-900 dark:text-white">
                             {{ $vessel->destination ?? '—' }}
                         </p>
                     </div>
@@ -160,7 +160,7 @@
                         </p>
 
                         <span
-                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $vessel->status === 'active' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-slate-800 text-slate-400' }}">
+                            class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold {{ $vessel->status === 'active' ? 'bg-emerald-400/10 text-emerald-800 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' }}">
                             {{ ucfirst($vessel->status) }}
                         </span>
                     </div>
@@ -171,11 +171,11 @@
 
 
             {{-- Status Card --}}
-            <div class="rounded-2xl border border-slate-800 bg-slate-950">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
 
-                <div class="border-b border-slate-800 px-6 py-5">
+                <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
-                    <h2 class="font-black text-white">
+                    <h2 class="font-black text-slate-900 dark:text-white">
                         Operational Status
                     </h2>
 
@@ -190,7 +190,7 @@
                         </p>
 
                         <p
-                            class="mt-2 text-lg font-black {{ $vessel->is_in_gulf ? 'text-cyan-400' : 'text-slate-500' }}">
+                            class="mt-2 text-lg font-black {{ $vessel->is_in_gulf ? 'text-cyan-800 dark:text-cyan-400' : 'text-slate-500' }}">
                             {{ $vessel->is_in_gulf ? 'Inside Gulf' : 'Outside Gulf' }}
                         </p>
 
@@ -203,7 +203,7 @@
                             Speed
                         </p>
 
-                        <p class="mt-2 text-lg font-black text-white">
+                        <p class="mt-2 text-lg font-black text-slate-900 dark:text-white">
                             {{ $vessel->speed !== null ? number_format($vessel->speed, 2) . ' knots' : '—' }}
                         </p>
 
@@ -216,7 +216,7 @@
                             Course
                         </p>
 
-                        <p class="mt-2 text-lg font-black text-white">
+                        <p class="mt-2 text-lg font-black text-slate-900 dark:text-white">
                             {{ $vessel->course !== null ? number_format($vessel->course, 2) . '°' : '—' }}
                         </p>
 
@@ -230,11 +230,11 @@
 
 
         {{-- Position --}}
-        <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-950">
+        <div class="mt-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
 
-            <div class="border-b border-slate-800 px-6 py-5">
+            <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
-                <h2 class="font-black text-white">
+                <h2 class="font-black text-slate-900 dark:text-white">
                     Current Position
                 </h2>
 
@@ -247,7 +247,7 @@
                         Latitude
                     </p>
 
-                    <p class="mt-2 font-mono text-cyan-400">
+                    <p class="mt-2 font-mono text-cyan-800 dark:text-cyan-400">
                         {{ $vessel->latitude !== null ? number_format($vessel->latitude, 7) : '—' }}
                     </p>
                 </div>
@@ -257,7 +257,7 @@
                         Longitude
                     </p>
 
-                    <p class="mt-2 font-mono text-cyan-400">
+                    <p class="mt-2 font-mono text-cyan-800 dark:text-cyan-400">
                         {{ $vessel->longitude !== null ? number_format($vessel->longitude, 7) : '—' }}
                     </p>
                 </div>
@@ -267,7 +267,7 @@
                         Last Position
                     </p>
 
-                    <p class="mt-2 text-slate-300">
+                    <p class="mt-2 text-slate-700 dark:text-slate-300">
                         {{ $vessel->last_position_at ? $vessel->last_position_at->format('d M Y H:i') : 'No data' }}
                     </p>
                 </div>
@@ -280,13 +280,13 @@
         {{-- ETA --}}
         <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6">
 
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Estimated Time of Arrival
                 </p>
 
-                <p class="mt-3 text-2xl font-black text-white">
+                <p class="mt-3 text-2xl font-black text-slate-900 dark:text-white">
 
                     {{ $vessel->eta ? $vessel->eta->format('d M Y') : '—' }}
 
@@ -301,13 +301,13 @@
             </div>
 
 
-            <div class="rounded-2xl border border-slate-800 bg-slate-950 p-6">
+            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6">
 
                 <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     {{ __('admin_ui.label_002') }}
                 </p>
 
-                <p class="mt-3 text-2xl font-black text-white">
+                <p class="mt-3 text-2xl font-black text-slate-900 dark:text-white">
                     {{ $vessel->carrier?->name ?? 'Not assigned' }}
                 </p>
 

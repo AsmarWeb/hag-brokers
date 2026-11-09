@@ -9,23 +9,23 @@
 
                 <div class="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
 
-                    <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-400">
+                    <a href="{{ route('admin.carriers.index') }}" class="transition hover:text-cyan-800 dark:hover:text-cyan-400">
                         {{ __('admin_ui.label_016') }}
                     </a>
 
                     <span>/</span>
 
-                    <span class="text-slate-400">
+                    <span class="text-slate-600 dark:text-slate-400">
                         {{ __('admin_ui.label_064') }}
                     </span>
 
                 </div>
 
-                <h1 class="text-3xl font-black tracking-tight text-white">
+                <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
                     {{ __('admin_ui.label_025') }}
                 </h1>
 
-                <p class="mt-2 text-sm text-slate-400">
+                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     Add a shipping line or logistics carrier to HAG Brokers.
                 </p>
 
@@ -33,7 +33,7 @@
 
 
             <a href="{{ route('admin.carriers.index') }}"
-                class="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-bold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-400">
+                class="inline-flex items-center justify-center rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 transition hover:border-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-400">
                 ← Back to Carriers
             </a>
 
@@ -42,13 +42,13 @@
 
         {{-- Form --}}
         <form action="{{ route('admin.carriers.store') }}" method="POST"
-            class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 shadow-2xl">
+            class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-2xl">
 
             @csrf
 
-            <div class="border-b border-slate-800 px-6 py-5">
+            <div class="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
-                <h2 class="text-lg font-black text-white">
+                <h2 class="text-lg font-black text-slate-900 dark:text-white">
                     {{ __('admin_ui.label_065') }}
                 </h2>
 
@@ -67,10 +67,10 @@
 
 
             <div
-                class="flex flex-col-reverse gap-3 border-t border-slate-800 bg-slate-900/40 px-6 py-5 sm:flex-row sm:justify-end">
+                class="flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 px-6 py-5 sm:flex-row sm:justify-end">
 
                 <a href="{{ route('admin.carriers.index') }}"
-                    class="rounded-xl border border-slate-700 px-6 py-3 text-center text-sm font-bold text-slate-300 transition hover:bg-slate-800 hover:text-white">
+                    class="rounded-xl border border-slate-300 dark:border-slate-700 px-6 py-3 text-center text-sm font-bold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-950 dark:hover:text-white">
                     {{ __('admin_ui.label_007') }}
                 </a>
 

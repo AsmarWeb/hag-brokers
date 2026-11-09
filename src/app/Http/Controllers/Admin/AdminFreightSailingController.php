@@ -16,11 +16,30 @@ use Illuminate\Validation\ValidationException;
 
 final class AdminFreightSailingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->string('q')->trim()->substr(0, 100)->toString();
+        $status = $request->string('status')->toString();
+        $status = in_array($status, FreightSailing::STATUSES, true) ? $status : '';
+
+        $query = FreightSailing::with(['originPort', 'destinationPort', 'carrier', 'vessel'])
+            ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->when($search !== '', function ($query) use ($search) {
+                $pattern = '%'.$search.'%';
+                $query->where(function ($query) use ($pattern) {
+                    $query->whereLike('voyage_number', $pattern)
+                        ->orWhereLike('vessel_name', $pattern)
+                        ->orWhereHas('carrier', fn ($query) => $query->whereLike('name', $pattern)->orWhereLike('code', $pattern))
+                        ->orWhereHas('originPort', fn ($query) => $query->whereLike('name', $pattern)->orWhereLike('unlocode', $pattern))
+                        ->orWhereHas('destinationPort', fn ($query) => $query->whereLike('name', $pattern)->orWhereLike('unlocode', $pattern));
+                });
+            });
+
         return view('admin.freight-sailings.index', [
-            'sailings' => FreightSailing::with(['originPort', 'destinationPort', 'carrier', 'vessel'])
-                ->latest('departure_at')->latest('id')->paginate(20),
+            'sailings' => $query->latest('departure_at')->latest('id')->paginate(20)->appends(['q' => $search, 'status' => $status]),
+            'statusCounts' => FreightSailing::selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
+            'search' => $search,
+            'status' => $status,
         ]);
     }
 
