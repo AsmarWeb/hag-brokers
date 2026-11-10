@@ -40,6 +40,19 @@ class MobileAccountSecurityTest extends TestCase
         $this->withHeaders(['Authorization' => 'Bearer '.$token])->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.email', $u->email);
     }
 
+    public function test_unverified_accounts_cannot_login_or_use_existing_mobile_tokens(): void
+    {
+        $u = User::factory()->unverified()->create([
+            'password' => Hash::make('Old-password-123!'),
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $this->withHeaders($this->bearer($u))->getJson('/api/v1/me')->assertForbidden();
+    }
+
     public function test_admin_credentials_explain_web_only_access_without_issuing_token(): void
     {
         $u = $this->account();
