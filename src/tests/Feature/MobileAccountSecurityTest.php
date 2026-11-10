@@ -42,6 +42,21 @@ class MobileAccountSecurityTest extends TestCase
         $this->withHeaders(['Authorization' => 'Bearer '.$token])->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.email', $u->email);
     }
 
+    public function test_new_accounts_require_phone_verification_before_login(): void
+    {
+        $u = $this->account();
+        $u->forceFill(['phone_verified_at' => null, 'phone_verification_required' => true])->save();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $u->forceFill(['phone_verified_at' => now()])->save();
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
+        ])->assertOk();
+    }
+
     public function test_unverified_accounts_cannot_login_or_use_existing_mobile_tokens(): void
     {
         $u = User::factory()->unverified()->create([
