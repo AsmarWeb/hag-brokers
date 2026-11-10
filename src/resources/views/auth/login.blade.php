@@ -43,8 +43,8 @@
                 @endif
             </div>
 
-            <x-text-input id="password" class="mt-1 block w-full" type="password" name="password" required
-                autocomplete="current-password" :placeholder="__('auth.password_placeholder')" />
+            <x-password-toggle id="password" name="password" required :minlength="null" :maxlength="null"
+                autocomplete="current-password" :placeholder="__('auth.password_placeholder')" class="mt-1 block w-full" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -84,6 +84,13 @@
                 {{ __('auth.resend_verification_email') }}
             </button>
         </form>
+    </div>
+
+    <div class="mt-5 text-center">
+        <a href="{{ route('phone.verification.notice') }}"
+            class="text-sm font-semibold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
+            {{ __('auth.phone_verification_title') }}
+        </a>
     </div>
 
     @if (Route::has('register'))
