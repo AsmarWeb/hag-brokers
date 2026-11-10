@@ -28,7 +28,7 @@ class AdminUserManagementTest extends TestCase
         $role = Role::firstOrCreate(['name' => 'sales'], ['display_name' => 'Sales']);
         $this->actingAs($admin)->get(route('admin.users.create'))->assertOk();
         $this->post(route('admin.users.store'), [
-            'name' => 'New Team Member', 'email' => 'new-team@example.test',
+            'name' => 'New Team Member', 'email' => 'new-team@example.test', 'phone' => '+971501111111',
             'password' => 'Strong-password-123!', 'password_confirmation' => 'Strong-password-123!',
             'roles' => [$role->id],
         ])->assertRedirect()->assertSessionHasNoErrors();
@@ -71,6 +71,7 @@ class AdminUserManagementTest extends TestCase
         $this->actingAs($admin)->put(route('admin.users.update', $target), [
             'name' => $target->name,
             'email' => 'New.Address@Example.Test',
+            'phone' => $target->phone,
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $target->refresh();
@@ -86,6 +87,7 @@ class AdminUserManagementTest extends TestCase
         $this->actingAs($admin)->post(route('admin.users.store'), [
             'name' => 'Disposable User',
             'email' => 'new@mailinator.com',
+            'phone' => '+971501111111',
             'password' => 'Strong-password-123!',
             'password_confirmation' => 'Strong-password-123!',
         ])->assertSessionHasErrors('email');
