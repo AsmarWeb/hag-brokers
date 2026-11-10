@@ -119,7 +119,7 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->postJson($accept)->assertForbidden();
         $verification = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify',
             now()->addMinutes(10), ['id' => $user->id, 'hash' => sha1($email)]);
-        $this->get($verification)->assertRedirect(route('phone.verification.notice'));
+        $this->get($verification)->assertRedirect(route('phone.verification.notice', ['email' => $email]));
         $user->forceFill(['phone_verified_at' => now()])->save();
         auth()->forgetGuards();
         $this->post($accept)->assertRedirect(route('carrier.fleet'));
