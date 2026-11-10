@@ -111,18 +111,17 @@ final class CarrierPartnerController extends Controller
             ]);
         }, 3);
 
-        Auth::login($user);
         $request->session()->regenerate();
         $request->session()->put('url.intended', route('carrier.invitation.show', ['token' => $token]));
         try {
             $user->sendEmailVerificationNotification();
-        } catch (\Throwable $exception) {
+        } catch (\\Throwable $exception) {
             report($exception);
         }
 
         app(PhoneVerificationService::class)->send($user);
 
-        return redirect()->route('verification.notice');
+        return redirect()->route('login')->with('status', __('auth.verification_email_sent'));
     }
 
     public function show(Request $request, string $token)
