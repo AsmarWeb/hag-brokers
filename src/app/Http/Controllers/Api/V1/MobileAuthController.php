@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\User;
 use App\Notifications\MobileVerifyEmail;
 use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneVerificationService;
 use App\Services\Platform\CompanyMarketplaceService;
 use App\Services\Platform\CompanyWorkspaceService;
 use Illuminate\Auth\Events\PasswordReset;
@@ -28,8 +29,9 @@ class MobileAuthController extends Controller
         $member = CompanyMember::where('user_id', $u->id)->first();
         $workspace = $member ? CompanyWorkspace::find($member->company_workspace_id) : null;
 
-        return ['id' => $u->id, 'name' => $u->name, 'email' => $u->email,
-            'email_verified' => $u->hasVerifiedEmail(),
+        return ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone,
+            'email_verified' => $u->hasVerifiedEmail(), 'phone_verified' => $u->hasVerifiedPhone(),
+            'account_verified' => $u->hasVerifiedAccount(),
             'account_type' => $member ? 'company' : 'individual',
             'company' => $workspace ? ['workspace_id' => $workspace->id, 'role' => $member->role, 'status' => $workspace->status] : null];
     }
@@ -56,6 +58,7 @@ class MobileAuthController extends Controller
         $d = $r->validate([
             'account_type' => ['required', 'in:individual,company'], 'name' => ['required', 'string', 'max:160'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
             'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
             'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
             'phone' => [Rule::requiredIf($company), 'nullable', 'string', 'max:50'],
@@ -68,7 +71,7 @@ class MobileAuthController extends Controller
                 'email' => $d['email'], 'phone' => $d['phone'], 'country_code' => strtoupper($d['country_code']),
                 'city' => $d['city'] ?? null, 'is_active' => true]) : null;
             $u = User::create(['name' => $d['name'], 'email' => $d['email'], 'password' => Hash::make($d['password']),
-                'customer_id' => $c?->id, 'phone' => $d['phone'] ?? null, 'role' => 'customer']);
+                'customer_id' => $c?->id, 'phone' => $d['phone'], 'role' => 'customer']);
             if ($c) {
                 app(CompanyWorkspaceService::class)->activateNewRegistration($c, $u);
             }
@@ -84,7 +87,13 @@ class MobileAuthController extends Controller
 
         return response()->json([
             'message' => 'If the account exists, a verification email has been sent. Verify the address before signing in.',
-            'data' => ['email' => $u->email, 'verification_required' => true],
+            'data' => [
+                'email' => $u->email,
+                'phone' => $u->phone,
+                'verification_required' => true,
+                'email_verification_required' => true,
+                'phone_verification_required' => true,
+            ],
         ], 202);
     }
 
@@ -93,7 +102,7 @@ class MobileAuthController extends Controller
         $d = $r->validate(['email' => ['required', 'email', 'max:255'], 'password' => ['required', 'string', 'max:128'],
             'device_name' => ['required', 'string', 'max:80']]);
         $u = User::where('email', strtolower(trim($d['email'])))->first();
-        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedEmail() || NonDisposableEmail::isDisposable($d['email'])) {
+        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedAccount() || NonDisposableEmail::isDisposable($d['email'])) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
         if ($u->hasRole(['admin', 'super-admin'])) {
