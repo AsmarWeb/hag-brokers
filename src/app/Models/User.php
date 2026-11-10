@@ -17,13 +17,13 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
 {
     use HasFactory, HasRolesAndPermissions, \Laravel\Sanctum\HasApiTokens, MustVerifyEmailTrait, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone', 'phone_verification_required'];
+    protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone', 'phone_verification_required', 'last_login_ip', 'last_login_at', 'blocked_at', 'blocked_reason'];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
-        return ['phone_verification_required' => 'boolean'];
+        return ['phone_verification_required' => 'boolean', 'last_login_at' => 'datetime', 'blocked_at' => 'datetime'];
     }
 
     public function isPlatformAdministrator(): bool
