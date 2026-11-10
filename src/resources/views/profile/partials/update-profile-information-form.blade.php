@@ -38,9 +38,9 @@
                         </button>
                     </p>
 
-                    @if (session('status') === 'verification-link-sent')
+                    @if (session('status') && session('status') !== 'profile-updated')
                         <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                            {{ session('status') }}
                         </p>
                     @endif
                 </div>
