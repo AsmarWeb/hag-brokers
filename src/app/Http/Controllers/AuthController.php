@@ -38,7 +38,7 @@ class AuthController extends Controller
                 'max:255',
             ],
 
-            'phone_country_code' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
 
             'country_code' => [
