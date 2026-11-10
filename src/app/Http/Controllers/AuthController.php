@@ -65,9 +65,9 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'confirmed',
-                'min:12',
-                'regex:/[A-Z]/',
-                'regex:/[a-z]/',
+                'min:6',
+                'max:12',
+                'regex:/[A-Za-z]/',
                 'regex:/[0-9]/',
             ],
         ]);
