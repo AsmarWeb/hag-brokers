@@ -26,15 +26,26 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
         return ['phone_verification_required' => 'boolean'];
     }
 
+    public function isPlatformAdministrator(): bool
+    {
+        return $this->hasRole(['admin', 'super-admin']);
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return $this->isPlatformAdministrator() || $this->email_verified_at !== null;
+    }
+
     public function hasVerifiedPhone(): bool
     {
-        return $this->phone_verified_at !== null;
+        return $this->isPlatformAdministrator() || $this->phone_verified_at !== null;
     }
 
     public function hasVerifiedAccount(): bool
     {
-        return $this->hasVerifiedEmail()
-            && (! $this->phone_verification_required || $this->hasVerifiedPhone());
+        return $this->isPlatformAdministrator()
+            || ($this->hasVerifiedEmail()
+                && (! $this->phone_verification_required || $this->hasVerifiedPhone()));
     }
 
     public function customer()
