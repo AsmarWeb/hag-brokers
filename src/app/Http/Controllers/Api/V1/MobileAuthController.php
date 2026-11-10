@@ -8,6 +8,7 @@ use App\Models\CompanyWorkspace;
 use App\Models\Customer;
 use App\Models\User;
 use App\Notifications\MobileVerifyEmail;
+use App\Rules\NonDisposableEmail;
 use App\Services\Platform\CompanyMarketplaceService;
 use App\Services\Platform\CompanyWorkspaceService;
 use Illuminate\Auth\Events\PasswordReset;
@@ -54,7 +55,7 @@ class MobileAuthController extends Controller
         $company = $r->input('account_type') === 'company';
         $d = $r->validate([
             'account_type' => ['required', 'in:individual,company'], 'name' => ['required', 'string', 'max:160'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
             'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
             'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
             'phone' => [Rule::requiredIf($company), 'nullable', 'string', 'max:50'],
@@ -92,7 +93,7 @@ class MobileAuthController extends Controller
         $d = $r->validate(['email' => ['required', 'email', 'max:255'], 'password' => ['required', 'string', 'max:128'],
             'device_name' => ['required', 'string', 'max:80']]);
         $u = User::where('email', strtolower(trim($d['email'])))->first();
-        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedEmail()) {
+        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedEmail() || NonDisposableEmail::isDisposable($d['email'])) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
         if ($u->hasRole(['admin', 'super-admin'])) {
