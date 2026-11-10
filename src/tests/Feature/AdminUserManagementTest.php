@@ -165,6 +165,31 @@ class AdminUserManagementTest extends TestCase
         $this->assertDatabaseHas('users', ['id' => $user->id, 'email' => $user->email]);
     }
 
+    public function test_successful_web_login_records_the_client_ip(): void
+    {
+        $user = User::factory()->create();
+
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.25'])
+            ->post(route('login'), ['email' => $user->email, 'password' => 'password'])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'last_login_ip' => '203.0.113.25',
+        ]);
+        $this->assertNotNull($user->fresh()->last_login_at);
+    }
+
+    public function test_blocked_user_is_logged_out_of_existing_web_sessions(): void
+    {
+        $user = User::factory()->create(['blocked_at' => now()]);
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertRedirect(route('login'));
+
+        $this->assertGuest();
+    }
+
     public function test_regular_user_cannot_create_edit_or_delete_accounts(): void
     {
         $user = User::factory()->create();
