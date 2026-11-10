@@ -116,7 +116,7 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->assertNull($user->customer_id);
         $this->assertFalse($user->hasVerifiedEmail());
         \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\VerifyEmail::class);
-        $this->postJson($accept)->assertForbidden();
+        $this->postJson($accept)->assertUnauthorized();
         $verification = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify',
             now()->addMinutes(10), ['id' => $user->id, 'hash' => sha1($email)]);
         $this->get($verification)->assertRedirect(route('phone.verification.notice', ['email' => $email]));
