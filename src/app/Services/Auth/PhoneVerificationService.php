@@ -42,6 +42,8 @@ final class PhoneVerificationService
             return false;
         }
 
+        RateLimiter::hit($limiterKey, 3600);
+
         $code = (string) random_int(100000, 999999);
         $now = now();
 
@@ -67,8 +69,6 @@ final class PhoneVerificationService
 
             return false;
         }
-
-        RateLimiter::hit($limiterKey, 3600);
 
         return true;
     }
