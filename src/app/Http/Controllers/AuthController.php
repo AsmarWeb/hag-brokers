@@ -96,6 +96,7 @@ class AuthController extends Controller
                 'customer_id' => $customer->id,
                 'role' => 'customer',
                 'phone' => $validated['phone'],
+                'phone_verification_required' => true,
             ]);
 
             app(\App\Services\Platform\CompanyWorkspaceService::class)->activateNewRegistration($customer, $user);
