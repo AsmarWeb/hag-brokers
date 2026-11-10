@@ -25,8 +25,8 @@ class RegistrationTest extends TestCase
             'country_code' => 'AE',
             'city' => 'Dubai',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -38,8 +38,9 @@ class RegistrationTest extends TestCase
         $this->assertSame('Test Trading LLC', $customer->company_name);
         $this->assertSame('Test User', $user->name);
 
-        $this->assertAuthenticatedAs($user);
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $this->assertGuest();
+        $this->assertFalse($user->hasVerifiedEmail());
+        $response->assertRedirect(route('login'));
     }
 
     public function test_new_company_receives_welcome_notification(): void
@@ -51,8 +52,8 @@ class RegistrationTest extends TestCase
             'country_code' => 'AE',
             'city' => 'Dubai',
             'email' => 'welcome@example.test',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
         ])->assertSessionHasNoErrors();
 
         $user = User::where('email', 'welcome@example.test')->firstOrFail();
@@ -86,8 +87,8 @@ class RegistrationTest extends TestCase
             'country_code' => 'AE',
             'city' => 'Dubai',
             'email' => 'notification-customer@example.test',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -121,8 +122,8 @@ class RegistrationTest extends TestCase
             'country_code' => 'AE',
             'city' => 'Dubai',
             'email' => $email,
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
         ];
     }
 
