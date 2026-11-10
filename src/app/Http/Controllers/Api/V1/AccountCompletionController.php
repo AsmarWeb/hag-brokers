@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\MobileVerifyEmail;
+use App\Rules\NonDisposableEmail;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,7 +35,7 @@ final class AccountCompletionController extends Controller
     {
         $r->merge(['email' => strtolower(trim((string) $r->input('email')))]);
         $d = $r->validate(['revision' => ['required', 'string', 'size:64'], 'name' => ['required', 'string', 'max:160'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($r->user()->id)],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($r->user()->id), new NonDisposableEmail()],
             'current_password' => ['nullable', 'string', 'max:128'], 'customer_id' => ['prohibited'], 'role' => ['prohibited'], 'email_verified_at' => ['prohibited']]);
         try {
             [$u,$changed] = DB::transaction(function () use ($r, $d) {
@@ -52,7 +53,7 @@ final class AccountCompletionController extends Controller
                 }
                 $u->save();
                 if ($changed) {
-                    $u->tokens()->where('id', '!=', $r->user()->currentAccessToken()->id)->delete();
+                    $u->tokens()->delete();
                 }
 
                 return [$u, $changed];
