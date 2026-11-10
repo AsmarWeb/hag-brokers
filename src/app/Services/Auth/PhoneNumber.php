@@ -1,15 +1,28 @@
 <?php
 
-namespace App\Services\Auth;
+namespace App\\Services\\Auth;
 
 final class PhoneNumber
 {
     /**
-     * Convert a local number and an ISO country selection into E.164.
+     * Convert a local phone number and ISO country selection into E.164.
+     * Already-normalized E.164 values remain supported for API compatibility.
      */
-    public static function normalize(mixed $localNumber, mixed $countryIso): ?string
+    public static function normalize(mixed $localNumber, mixed $countryIso = null): ?string
     {
-        if (! is_string($localNumber) || ! is_string($countryIso)) {
+        if (! is_string($localNumber)) {
+            return null;
+        }
+
+        $localNumber = trim($localNumber);
+
+        if (str_starts_with($localNumber, '+')) {
+            $international = '+'.preg_replace('/\\D+/', '', substr($localNumber, 1));
+
+            return preg_match('/^\\+[1-9][0-9]{7,14}$/D', $international) ? $international : null;
+        }
+
+        if (! is_string($countryIso) || $countryIso === '') {
             return null;
         }
 
@@ -19,13 +32,13 @@ final class PhoneNumber
             return null;
         }
 
-        $digits = preg_replace('/\D+/', '', $localNumber);
+        $digits = preg_replace('/\\D+/', '', $localNumber);
 
         if (! is_string($digits) || $digits === '') {
             return null;
         }
 
-        // National trunk prefixes (for example, 050 in the UAE) are not part of E.164.
+        // Remove national trunk prefix (for example, 0 in UAE 050 numbers).
         $digits = ltrim($digits, '0');
         $dialDigits = ltrim((string) $country['dial_code'], '+');
         $number = $dialDigits.$digits;
@@ -37,9 +50,6 @@ final class PhoneNumber
         return '+'.$number;
     }
 
-    /**
-     * Return the ISO country that best matches an existing E.164 number.
-     */
     public static function countryFor(?string $phone): string
     {
         if (! $phone) {
@@ -56,5 +66,20 @@ final class PhoneNumber
         }
 
         return 'AE';
+    }
+
+    public static function nationalNumber(?string $phone): string
+    {
+        if (! $phone) {
+            return '';
+        }
+
+        $country = config('phone.countries.'.self::countryFor($phone));
+
+        if (! is_array($country)) {
+            return preg_replace('/\\D+/', '', $phone);
+        }
+
+        return ltrim(substr($phone, strlen($country['dial_code'])), '0');
     }
 }
