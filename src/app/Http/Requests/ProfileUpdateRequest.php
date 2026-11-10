@@ -33,6 +33,10 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
                 new NonDisposableEmail(),
             ],
+            'current_password' => [
+                Rule::requiredIf(fn () => $this->input('email') !== $this->user()->email),
+                'current_password',
+            ],
         ];
     }
 }
