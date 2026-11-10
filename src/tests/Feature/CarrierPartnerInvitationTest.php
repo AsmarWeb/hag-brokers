@@ -56,6 +56,19 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->get(route('carrier.fleet'))->assertForbidden();
     }
 
+    public function test_disposable_email_addresses_cannot_receive_carrier_invitations(): void
+    {
+        $admin = User::factory()->create();
+        $admin->addRole(Role::firstOrCreate(['name' => 'admin']));
+        $carrier = Carrier::create(['name' => 'Partner', 'code' => 'PARTNER', 'is_active' => true]);
+
+        $this->actingAs($admin)->post(route('admin.carriers.invitations.store', $carrier), [
+            'email' => 'contact@mailinator.com',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertDatabaseCount('carrier_invitations', 0);
+    }
+
     public function test_revoking_access_also_closes_outstanding_links_for_that_representative(): void
     {
         $recipient = User::factory()->create();
@@ -97,21 +110,31 @@ final class CarrierPartnerInvitationTest extends TestCase
         $accept = route('carrier.invitation.show', $token);
 
         $this->get($join)->assertOk()->assertSee($email);
-        $this->post($join, ['name' => 'Partner', 'password' => $password, 'password_confirmation' => $password,
-            'email' => 'spoof@example.test'])->assertRedirect(route('verification.notice'));
+        $this->post($join, ['name' => 'Partner', 'phone' => '+971501234567', 'password' => $password, 'password_confirmation' => $password,
+            'email' => 'spoof@example.test'])->assertRedirect(route('login'));
         $user = User::where('email', $email)->sole();
         $this->assertNull($user->customer_id);
         $this->assertFalse($user->hasVerifiedEmail());
         \Illuminate\Support\Facades\Notification::assertSentTo($user, \Illuminate\Auth\Notifications\VerifyEmail::class);
-        $this->postJson($accept)->assertForbidden();
+        $this->postJson($accept)->assertUnauthorized();
         $verification = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify',
             now()->addMinutes(10), ['id' => $user->id, 'hash' => sha1($email)]);
-        $this->get($verification)->assertRedirect($accept);
+        $this->get($verification)->assertRedirect(route('phone.verification.notice', ['email' => $email]));
+        $user->forceFill(['phone_verified_at' => now()])->save();
+        auth()->forgetGuards();
+        $this->post('/login', ['email' => $email, 'password' => $password])
+            ->assertRedirect($accept);
         $this->post($accept)->assertRedirect(route('carrier.fleet'));
         $this->patch(route('carrier.profile.update'), ['name' => 'Verified Representative', 'phone' => '+971 50 000 0000'])
             ->assertRedirect();
         $this->assertSame('Verified Representative', $user->fresh()->name);
 
+        // Changing the phone invalidates verification and must block token issuance.
+        $this->postJson(route('carrier.token.issue'), ['password' => $password])->assertForbidden();
+
+        // Simulate successful verification of the newly registered phone number.
+        $user->forceFill(['phone_verified_at' => now()])->save();
+        auth()->forgetGuards();
         $this->postJson(route('carrier.token.issue'), ['password' => 'wrong'])->assertUnprocessable();
         $this->post(route('carrier.token.issue'), ['password' => $password])->assertRedirect();
         $key = session('carrier_api_token');

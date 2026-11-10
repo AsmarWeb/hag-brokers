@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Auth\PhoneNumber;
+use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -93,15 +95,18 @@ class AdminUserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
+        $normalized = ['email' => strtolower(trim((string) $request->input('email')))];
+        if ($request->exists('phone')) {
+            $normalized['phone'] = PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code'));
+        }
+        $request->merge($normalized);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user),
-            ],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user), new \App\Rules\NonDisposableEmail()],
+            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone' => ['nullable', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
+            'password' => ['nullable', 'string', 'min:8', 'max:128', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
@@ -109,7 +114,6 @@ class AdminUserController extends Controller
             'permissions.*' => ['required', 'integer', 'distinct', 'exists:permissions,id'],
         ]);
 
-        // Prevent the signed-in administrator from removing their own admin access.
         if ((string) $request->user()->getKey() === (string) $user->getKey()) {
             $retainsAdminAccess = \App\Models\Role::query()
                 ->whereIn('id', $data['roles'] ?? [])
@@ -125,20 +129,51 @@ class AdminUserController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user) {
+        $emailChanged = $user->email !== $data['email'];
+        $phoneChanged = array_key_exists('phone', $data) && $user->phone !== $data['phone'];
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user, $emailChanged, $phoneChanged) {
             $user->name = $data['name'];
             $user->email = $data['email'];
             $user->customer_id = $data['customer_id'] ?? null;
+            if (array_key_exists('phone', $data)) {
+                $user->phone = $data['phone'];
+            }
+
+            if ($emailChanged) {
+                $user->email_verified_at = null;
+            }
+            if ($phoneChanged) {
+                $user->phone_verified_at = null;
+                $user->phone_verification_required = true;
+            }
+            if ($emailChanged || $phoneChanged) {
+                $user->remember_token = \Illuminate\Support\Str::random(60);
+            }
 
             if (! empty($data['password'])) {
                 $user->password = \Illuminate\Support\Facades\Hash::make($data['password']);
             }
 
             $user->save();
-
             $user->syncRoles(array_map('intval', $data['roles'] ?? []));
             $user->syncPermissions(array_map('intval', $data['permissions'] ?? []));
+
+            if ($emailChanged || $phoneChanged) {
+                $user->tokens()->delete();
+            }
         });
+
+        if ($emailChanged) {
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+        if ($phoneChanged) {
+            app(PhoneVerificationService::class)->send($user);
+        }
 
         return redirect()
             ->route('admin.users.show', $user)
@@ -146,7 +181,6 @@ class AdminUserController extends Controller
                 ? 'تم تحديث المستخدم بنجاح.'
                 : 'User updated successfully.');
     }
-
 
     /**
      * Display the user creation form.
@@ -165,10 +199,17 @@ class AdminUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+            'phone' => PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code')),
+        ]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email', new \App\Rules\NonDisposableEmail()],
+            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
+            'password' => ['required', 'string', 'min:8', 'max:128', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
@@ -181,6 +222,8 @@ class AdminUserController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+                'phone' => $data['phone'],
+                'phone_verification_required' => true,
                 'customer_id' => $data['customer_id'] ?? null,
             ]);
 
@@ -190,11 +233,18 @@ class AdminUserController extends Controller
             return $user;
         });
 
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+        app(PhoneVerificationService::class)->send($user);
+
         return redirect()
             ->route('admin.users.show', $user)
             ->with('success', app()->getLocale() === 'ar'
-                ? 'تم إنشاء المستخدم بنجاح.'
-                : 'User created successfully.');
+                ? 'تم إنشاء المستخدم. يجب تأكيد البريد والهاتف قبل تسجيل الدخول.'
+                : 'User created. Email and phone verification are required before sign-in.');
     }
 
 

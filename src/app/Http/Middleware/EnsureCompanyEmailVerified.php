@@ -9,7 +9,7 @@ class EnsureCompanyEmailVerified
 {
     public function handle(Request $request, Closure $next)
     {
-        if (! $request->user()?->hasVerifiedEmail()) {
+        if (! $request->user()?->hasVerifiedAccount()) {
             if ($request->expectsJson()) {
                 abort(403, __('market.email_required'));
             }

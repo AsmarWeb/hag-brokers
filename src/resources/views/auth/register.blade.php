@@ -49,8 +49,18 @@
         <div>
             <x-input-label for="phone" :value="__('auth.phone')" />
 
-            <x-text-input id="phone" class="mt-1 block w-full" type="tel" name="phone" :value="old('phone')"
-                required autocomplete="tel" :placeholder="__('auth.phone_placeholder')" />
+            <div class="mt-1 grid grid-cols-[minmax(8rem,0.9fr)_minmax(0,1.5fr)] gap-3">
+                <select id="phone_country_code" name="phone_country_code" required autocomplete="tel-country-code"
+                    class="block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    @foreach (config('phone.countries', []) as $iso => $country)
+                        <option value="{{ $iso }}" @selected(old('phone_country_code', 'AE') === $iso)>
+                            {{ $country['dial_code'] }} · {{ $isAr ? $country['name_ar'] : $country['name'] }}
+                        </option>
+                    @endforeach
+                </select>
+                <x-text-input id="phone" class="block w-full" type="tel" name="phone" :value="old('phone')"
+                    required autocomplete="tel-national" inputmode="tel" placeholder="50 123 4567" />
+            </div>
 
             <x-input-error :messages="$errors->get('phone')" class="mt-2" />
         </div>
@@ -113,8 +123,9 @@
         <div>
             <x-input-label for="password" :value="__('auth.password')" />
 
-            <x-text-input id="password" class="mt-1 block w-full" type="password" name="password" required
-                autocomplete="new-password" :placeholder="__('auth.password_placeholder')" />
+            <x-password-toggle id="password" name="password" required minlength="8" maxlength="128"
+                autocomplete="new-password" :placeholder="__('auth.password_placeholder')" class="mt-1 block w-full" />
+            <p class="mt-1 text-xs text-slate-500">{{ __('auth.password_length_help') }}</p>
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -123,8 +134,8 @@
         <div>
             <x-input-label for="password_confirmation" :value="__('auth.confirm_password')" />
 
-            <x-text-input id="password_confirmation" class="mt-1 block w-full" type="password"
-                name="password_confirmation" required autocomplete="new-password" :placeholder="__('auth.confirm_password_placeholder')" />
+            <x-password-toggle id="password_confirmation" name="password_confirmation" required minlength="8" maxlength="128"
+                autocomplete="new-password" :placeholder="__('auth.confirm_password_placeholder')" class="mt-1 block w-full" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>

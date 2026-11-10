@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneNumber;
+use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,6 +20,11 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+            'phone' => PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code')),
+        ]);
+
         $validated = $request->validate([
             'company_name' => [
                 'required',
@@ -31,11 +38,8 @@ class AuthController extends Controller
                 'max:255',
             ],
 
-            'phone' => [
-                'required',
-                'string',
-                'max:50',
-            ],
+            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
 
             'country_code' => [
                 'required',
@@ -55,12 +59,15 @@ class AuthController extends Controller
                 'email',
                 'max:255',
                 'unique:users,email',
+                new NonDisposableEmail(),
             ],
 
             'password' => [
                 'required',
+                'string',
                 'confirmed',
                 'min:8',
+                'max:128',
             ],
         ]);
 
@@ -89,6 +96,7 @@ class AuthController extends Controller
                 'customer_id' => $customer->id,
                 'role' => 'customer',
                 'phone' => $validated['phone'],
+                'phone_verification_required' => true,
             ]);
 
             app(\App\Services\Platform\CompanyWorkspaceService::class)->activateNewRegistration($customer, $user);
@@ -144,16 +152,10 @@ class AuthController extends Controller
         } catch (\Throwable $exception) {
             report($exception);
         }
-
-        Auth::login($user);
-
-        $request->session()->regenerate();
+        app(PhoneVerificationService::class)->send($user);
 
         return redirect()
-            ->route('dashboard')
-            ->with(
-                'success',
-                'Your HAG Brokers account has been created successfully.'
-            );
+            ->route('login')
+            ->with('status', __('auth.verification_email_sent'));
     }
 }

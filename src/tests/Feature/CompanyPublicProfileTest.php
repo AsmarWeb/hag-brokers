@@ -99,7 +99,7 @@ class CompanyPublicProfileTest extends TestCase
         $this->save($member)->assertForbidden();
         $owner->email_verified_at = null;
         $owner->save();
-        $this->save($owner)->assertForbidden();
+        $this->save($owner)->assertRedirect(route('verification.notice'));
         $owner->email_verified_at = now();
         $owner->save();
         $owner->addRole(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Admin']));

@@ -79,7 +79,7 @@ return [$u, $w];
         $this->actingAs($u)->putJson('/admin/public-experience', $this->settings())->assertForbidden();
         $a = $this->admin();
         $a->forceFill(['email_verified_at' => null])->save();
-        $this->actingAs($a)->get('/admin/public-experience')->assertForbidden();
+        $this->actingAs($a)->get('/admin/public-experience')->assertOk();
         $a->markEmailAsVerified();
         $this->actingAs($a);
         foreach (['https://evil.test/x.apk', 'http://hagbrokers.net/downloads/a.apk', 'https://hagbrokers.net@evil.test/a.apk', 'https://hagbrokers.net/downloads/../x.apk', 'https://hagbrokers.net/downloads/x.apk?secret=x', 'javascript:alert(1)', 'https://expo.dev/accounts/other/projects/wrong/builds/'.Str::uuid()] as $url) {

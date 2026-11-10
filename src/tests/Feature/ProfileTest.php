@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
@@ -23,28 +25,66 @@ class ProfileTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
+        Notification::fake();
         $user = User::factory()->create();
+        $user->createToken('mobile:phone', ['mobile:v1']);
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
+                'current_password' => 'password',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('login'));
 
         $user->refresh();
 
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+        $this->assertGuest();
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+        Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
+    public function test_email_cannot_be_changed_without_the_current_password(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+        $originalEmail = $user->email;
+
+        $this->actingAs($user)->from('/profile')->patch('/profile', [
+            'name' => 'Changed Name',
+            'email' => 'attacker@example.test',
+            'current_password' => 'wrong-password',
+        ])->assertSessionHasErrors('current_password')->assertRedirect('/profile');
+
+        $this->assertSame($originalEmail, $user->fresh()->email);
+        $this->assertNotNull($user->fresh()->email_verified_at);
+        Notification::assertNothingSent();
+    }
+
+    public function test_profile_email_cannot_be_changed_to_a_disposable_domain(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->from('/profile')->patch('/profile', [
+            'name' => $user->name,
+            'email' => 'takeover@mailinator.com',
+            'current_password' => 'password',
+        ])->assertSessionHasErrors('email')->assertRedirect('/profile');
+
+        $this->assertSame($user->email, $user->fresh()->email);
+        $this->assertNotNull($user->fresh()->email_verified_at);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
+        Notification::fake();
         $user = User::factory()->create();
 
         $response = $this
@@ -59,6 +99,7 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+        Notification::assertNothingSent();
     }
 
     public function test_user_can_delete_their_account(): void

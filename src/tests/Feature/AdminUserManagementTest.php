@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -27,13 +28,15 @@ class AdminUserManagementTest extends TestCase
         $role = Role::firstOrCreate(['name' => 'sales'], ['display_name' => 'Sales']);
         $this->actingAs($admin)->get(route('admin.users.create'))->assertOk();
         $this->post(route('admin.users.store'), [
-            'name' => 'New Team Member', 'email' => 'new-team@example.test',
-            'password' => 'new-password-123', 'password_confirmation' => 'new-password-123',
+            'name' => 'New Team Member', 'email' => 'new-team@example.test', 'phone' => '+971501111111',
+            'password' => 'Strong-password-123!', 'password_confirmation' => 'Strong-password-123!',
             'roles' => [$role->id],
         ])->assertRedirect()->assertSessionHasNoErrors();
         $target = User::where('email', 'new-team@example.test')->firstOrFail();
-        $this->assertTrue(Hash::check('new-password-123', $target->password));
+        $this->assertTrue(Hash::check('Strong-password-123!', $target->password));
         $this->assertTrue($target->roles()->whereKey($role->id)->exists());
+        $this->assertFalse($target->hasVerifiedEmail());
+        Notification::assertSentTo($target, VerifyEmail::class);
         $this->get(route('admin.users.show', $target))->assertOk();
         $this->get(route('admin.users.edit', $target))->assertOk();
     }
@@ -43,7 +46,7 @@ class AdminUserManagementTest extends TestCase
         $admin = $this->admin();
         $this->actingAs($admin)->post(route('admin.users.store'), [
             'name' => 'Invalid account', 'email' => $admin->email,
-            'password' => 'new-password-123', 'password_confirmation' => 'different-password',
+            'password' => 'Strong-password-123!', 'password_confirmation' => 'Different-password-456!',
         ])->assertSessionHasErrors(['email', 'password']);
         $this->assertDatabaseCount('users', 1);
     }
@@ -58,6 +61,38 @@ class AdminUserManagementTest extends TestCase
         ])->assertRedirect()->assertSessionHasNoErrors();
         $this->assertSame('Updated Team Member', $target->fresh()->name);
         $this->assertSame($oldHash, $target->fresh()->password);
+    }
+
+    public function test_admin_email_change_resets_verification_and_sends_a_new_link(): void
+    {
+        $admin = $this->admin();
+        $target = User::factory()->create(['email' => 'existing@example.test']);
+
+        $this->actingAs($admin)->put(route('admin.users.update', $target), [
+            'name' => $target->name,
+            'email' => 'New.Address@Example.Test',
+            'phone' => $target->phone,
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $target->refresh();
+        $this->assertSame('new.address@example.test', $target->email);
+        $this->assertNull($target->email_verified_at);
+        Notification::assertSentTo($target, VerifyEmail::class);
+    }
+
+    public function test_admin_cannot_create_users_with_disposable_email_domains(): void
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->post(route('admin.users.store'), [
+            'name' => 'Disposable User',
+            'email' => 'new@mailinator.com',
+            'phone' => '+971501111111',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertDatabaseCount('users', 1);
     }
 
     public function test_administrator_cannot_remove_own_admin_access_or_delete_self(): void

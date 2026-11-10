@@ -6,6 +6,9 @@ use App\Models\Carrier;
 use App\Models\CarrierInvitation;
 use App\Models\CarrierVesselRequest;
 use App\Models\User;
+use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneNumber;
+use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +24,8 @@ final class CarrierPartnerController extends Controller
     {
         abort_unless($request->user()->hasVerifiedEmail(), 403);
 
-        $data = $request->validate(['email' => ['required', 'email', 'max:255']]);
+        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+        $data = $request->validate(['email' => ['required', 'email', 'max:255', new NonDisposableEmail()]]);
         $token = Str::random(64);
 
         DB::transaction(function () use ($carrier, $data, $token) {
@@ -83,9 +87,11 @@ final class CarrierPartnerController extends Controller
 
     public function register(Request $request, string $token)
     {
+        $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'confirmed', Password::defaults()->min(12)],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
+            'password' => ['required', 'confirmed', Password::defaults()->min(8)->max(128)],
         ]);
 
         $user = DB::transaction(function () use ($token, $data) {
@@ -99,11 +105,12 @@ final class CarrierPartnerController extends Controller
             return User::create([
                 'name' => $data['name'],
                 'email' => $invitation->email,
+                'phone' => $data['phone'],
+                'phone_verification_required' => true,
                 'password' => Hash::make($data['password']),
             ]);
         }, 3);
 
-        Auth::login($user);
         $request->session()->regenerate();
         $request->session()->put('url.intended', route('carrier.invitation.show', ['token' => $token]));
         try {
@@ -112,7 +119,9 @@ final class CarrierPartnerController extends Controller
             report($exception);
         }
 
-        return redirect()->route('verification.notice');
+        app(PhoneVerificationService::class)->send($user);
+
+        return redirect()->route('login')->with('status', __('auth.verification_email_sent'));
     }
 
     public function show(Request $request, string $token)
@@ -159,11 +168,24 @@ final class CarrierPartnerController extends Controller
     public function updateProfile(Request $request)
     {
         $this->partnership($request->user());
+        $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:30', 'regex:/^[+0-9() .-]+$/'],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
         ]);
-        $request->user()->update($data);
+        $user = $request->user();
+        $phoneChanged = $user->phone !== $data['phone'];
+        $user->name = $data['name'];
+        $user->phone = $data['phone'];
+        if ($phoneChanged) {
+            $user->phone_verified_at = null;
+            $user->phone_verification_required = true;
+            $user->tokens()->delete();
+        }
+        $user->save();
+        if ($phoneChanged) {
+            app(PhoneVerificationService::class)->send($user);
+        }
 
         return back()->with('carrier_status', __('carrier_partner.profile_saved'));
     }

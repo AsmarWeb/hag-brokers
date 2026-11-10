@@ -43,8 +43,8 @@
                 @endif
             </div>
 
-            <x-text-input id="password" class="mt-1 block w-full" type="password" name="password" required
-                autocomplete="current-password" :placeholder="__('auth.password_placeholder')" />
+            <x-password-toggle id="password" name="password" required :minlength="null" :maxlength="null"
+                autocomplete="current-password" :placeholder="__('auth.password_placeholder')" class="mt-1 block w-full" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -66,6 +66,32 @@
             {{ __('auth.login') }}
         </x-primary-button>
     </form>
+
+    <div class="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
+        <p class="mb-3 text-sm text-slate-500 dark:text-slate-400">
+            {{ __('auth.verification_help') }}
+        </p>
+        <form method="POST" action="{{ route('verification.send') }}" class="space-y-3">
+            @csrf
+            <div>
+                <x-input-label for="verification_email" :value="__('auth.email')" />
+                <x-text-input id="verification_email" class="mt-1 block w-full" type="email" name="email"
+                    :value="old('email')" required autocomplete="email" :placeholder="__('auth.email_placeholder')" />
+                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            </div>
+            <button type="submit"
+                class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+                {{ __('auth.resend_verification_email') }}
+            </button>
+        </form>
+    </div>
+
+    <div class="mt-5 text-center">
+        <a href="{{ route('phone.verification.notice') }}"
+            class="text-sm font-semibold text-cyan-600 hover:text-cyan-500 dark:text-cyan-400">
+            {{ __('auth.phone_verification_title') }}
+        </a>
+    </div>
 
     @if (Route::has('register'))
         <div class="mt-7 border-t border-slate-200 pt-6 text-center dark:border-slate-800">

@@ -56,11 +56,28 @@ class AccountCompletionTest extends TestCase
         $this->putJson('/api/v1/auth/account', $payload + ['current_password' => 'Current-pass-123'])->assertOk()->assertJsonPath('data.user.email', 'new@example.test')->assertJsonPath('data.user.email_verified', false);
         $this->assertNull($u->fresh()->email_verified_at);
         $this->assertDatabaseMissing('personal_access_tokens', ['id' => $other->accessToken->id]);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
         auth()->forgetGuards();
-        $this->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.email_verified', false);
+        $this->getJson('/api/v1/me')->assertUnauthorized();
         Notification::assertSentTo($u, MobileVerifyEmail::class);
         $this->assertDatabaseHas('customers', ['id' => $c->id, 'company_name' => 'Immutable business']);
         $this->assertSame($c->id, $u->fresh()->customer_id);
+    }
+
+    public function test_account_email_cannot_be_changed_to_a_disposable_domain(): void
+    {
+        $u = User::factory()->create();
+        $record = $this->account($u);
+
+        $this->putJson('/api/v1/auth/account', [
+            'name' => $u->name,
+            'email' => 'fake@mailinator.com',
+            'revision' => $record['revision'],
+            'current_password' => 'password',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $this->assertSame($u->email, $u->fresh()->email);
+        $this->assertTrue($u->fresh()->hasVerifiedEmail());
     }
 
     public function test_stale_email_duplicate_and_privilege_fields_are_rejected(): void

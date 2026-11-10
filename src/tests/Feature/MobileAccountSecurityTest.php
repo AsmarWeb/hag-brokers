@@ -34,10 +34,64 @@ class MobileAccountSecurityTest extends TestCase
     public function test_valid_individual_login_returns_a_usable_scoped_token(): void
     {
         $u = $this->account();
+        // Legacy accounts predate the phone-verification gate and remain email-verified only.
+        $u->forceFill(['phone_verified_at' => null, 'phone_verification_required' => false])->save();
         $r = $this->postJson('/api/v1/auth/login', ['email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone'])->assertOk()->assertJsonPath('data.user.id', $u->id);
         $token = $r->json('data.access_token');
         auth()->forgetGuards();
         $this->withHeaders(['Authorization' => 'Bearer '.$token])->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.email', $u->email);
+    }
+
+    public function test_new_accounts_require_phone_verification_before_login(): void
+    {
+        $u = $this->account();
+        $u->forceFill(['phone_verified_at' => null, 'phone_verification_required' => true])->save();
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $u->forceFill(['phone_verified_at' => now()])->save();
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
+        ])->assertOk();
+    }
+
+    public function test_unverified_accounts_cannot_login_or_use_existing_mobile_tokens(): void
+    {
+        $u = User::factory()->unverified()->create([
+            'password' => Hash::make('Old-password-123!'),
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $this->withHeaders($this->bearer($u))->getJson('/api/v1/me')->assertForbidden();
+    }
+
+    public function test_disposable_email_domains_are_rejected_for_registration_and_login(): void
+    {
+        $this->postJson('/api/v1/auth/register', [
+            'account_type' => 'individual',
+            'name' => 'Disposable User',
+            'email' => 'signup@mailinator.com',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+            'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $this->assertDatabaseCount('users', 0);
+        $u = User::factory()->create([
+            'email' => 'legacy@mailinator.com',
+            'password' => Hash::make('Old-password-123!'),
+        ]);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email,
+            'password' => 'Old-password-123!',
+            'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
     }
 
     public function test_admin_credentials_explain_web_only_access_without_issuing_token(): void
