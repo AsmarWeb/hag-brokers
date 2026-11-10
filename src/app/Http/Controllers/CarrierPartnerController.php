@@ -85,9 +85,11 @@ final class CarrierPartnerController extends Controller
 
     public function register(Request $request, string $token)
     {
+        $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'password' => ['required', 'confirmed', Password::defaults()->min(12)],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
+            'password' => ['required', 'confirmed', Password::defaults()->min(12)->max(128)],
         ]);
 
         $user = DB::transaction(function () use ($token, $data) {
@@ -101,6 +103,7 @@ final class CarrierPartnerController extends Controller
             return User::create([
                 'name' => $data['name'],
                 'email' => $invitation->email,
+                'phone' => $data['phone'],
                 'password' => Hash::make($data['password']),
             ]);
         }, 3);
@@ -113,6 +116,8 @@ final class CarrierPartnerController extends Controller
         } catch (\Throwable $exception) {
             report($exception);
         }
+
+        app(PhoneVerificationService::class)->send($user);
 
         return redirect()->route('verification.notice');
     }
