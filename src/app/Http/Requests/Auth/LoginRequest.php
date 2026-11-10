@@ -57,11 +57,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if (! Auth::user()?->hasVerifiedAccount()) {
+        if (! Auth::user()?->hasVerifiedAccount() || Auth::user()?->blocked_at) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages(['email' => trans('auth.failed')]);
         }
+
+        Auth::user()->forceFill([
+            'last_login_ip' => $this->ip(),
+            'last_login_at' => now(),
+        ])->save();
 
         RateLimiter::clear($this->throttleKey());
     }
