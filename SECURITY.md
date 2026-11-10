@@ -8,6 +8,9 @@ HAG Brokers is under active development. Only the current `main` branch receives
 
 Maintainers will review reports when available. Do not assume an agreed disclosure timeline until confirmed directly.
 
+## Account verification and disposable email screening
+See [User Authentication Security](docs/api/USER_AUTH_SECURITY_AR.md) for the current email-verification gate, disposable-domain controls, affected web/mobile flows, deployment notes, and remaining hardening work.
+
 ## Security rules
 - No customer records, credentials, payment keys, tokens or `.env` files in issues/PRs.
 - The repository does not currently process live payments.
