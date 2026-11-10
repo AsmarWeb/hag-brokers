@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Carrier;
+use App\Models\CarrierInvitation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -138,7 +139,10 @@ class AdminCarrierController extends Controller
             'shipments',
         ]);
 
-        return view('admin.carriers.show', compact('carrier'));
+        $invitations = CarrierInvitation::where('carrier_id', $carrier->id)
+            ->latest('id')->paginate(10, pageName: 'invitations');
+
+        return view('admin.carriers.show', compact('carrier', 'invitations'));
     }
 
 

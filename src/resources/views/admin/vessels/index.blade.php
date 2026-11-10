@@ -19,6 +19,10 @@
                 </p>
             </div>
 
+            <a href="{{ route('admin.vessels.partner-requests.index') }}" class="hag-broker-action">
+                {{ __('carrier_vessels.review_queue') }}
+            </a>
+
             <a href="{{ route('admin.vessels.create') }}"
                 class="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-cyan-400/10 transition hover:bg-cyan-300">
                 <span class="text-lg">+</span>
