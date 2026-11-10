@@ -111,7 +111,7 @@ final class CarrierPartnerInvitationTest extends TestCase
 
         $this->get($join)->assertOk()->assertSee($email);
         $this->post($join, ['name' => 'Partner', 'phone' => '+971501234567', 'password' => $password, 'password_confirmation' => $password,
-            'email' => 'spoof@example.test'])->assertRedirect(route('verification.notice'));
+            'email' => 'spoof@example.test'])->assertRedirect(route('login'));
         $user = User::where('email', $email)->sole();
         $this->assertNull($user->customer_id);
         $this->assertFalse($user->hasVerifiedEmail());
