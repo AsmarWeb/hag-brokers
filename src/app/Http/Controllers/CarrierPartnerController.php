@@ -91,7 +91,7 @@ final class CarrierPartnerController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['required', 'confirmed', Password::defaults()->min(12)->max(128)],
+            'password' => ['required', 'confirmed', Password::defaults()->min(8)->max(128)],
         ]);
 
         $user = DB::transaction(function () use ($token, $data) {

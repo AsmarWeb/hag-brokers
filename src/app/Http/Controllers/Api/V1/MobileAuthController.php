@@ -64,7 +64,7 @@ class MobileAuthController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
             'phone_country_code' => ['nullable', 'string', Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
+            'password' => ['required', 'string', 'min:8', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
             'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
             'country_code' => [Rule::requiredIf($company), 'nullable', 'regex:/^[A-Za-z]{2}$/D'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -120,7 +120,7 @@ class MobileAuthController extends Controller
     public function changePassword(Request $r)
     {
         $d = $r->validate(['current_password' => ['required', 'string', 'max:128'],
-            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed', 'different:current_password']]);
+            'password' => ['required', 'string', 'min:8', 'max:128', 'confirmed', 'different:current_password']]);
         DB::transaction(function () use ($r, $d) {
             $user = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
             if (! Hash::check($d['current_password'], $user->password)) {
@@ -212,7 +212,7 @@ class MobileAuthController extends Controller
     {
         $r->merge(['email' => strtolower(trim((string) $r->input('email')))]);
         $d = $r->validate(['email' => ['required', 'email'], 'token' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed']]);
+            'password' => ['required', 'string', 'min:8', 'max:128', 'confirmed']]);
         $status = Password::reset($d, function (User $u, string $password) {
             DB::transaction(function () use ($u, $password) {
                 $u->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();

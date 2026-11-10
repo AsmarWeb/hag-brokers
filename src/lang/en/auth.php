@@ -157,7 +157,7 @@ return [
 
     'show_password' => 'Show password',
     'hide_password' => 'Hide password',
-    'password_length_help' => 'Use at least 12 characters. Longer passphrases up to 128 characters are supported.',
+    'password_length_help' => 'Use at least 8 characters. Longer passphrases up to 128 characters are supported.',
     'phone_code_sent' => 'If the account exists and the phone is eligible, a verification code has been sent by SMS.',
     'phone_code_invalid' => 'The verification code is invalid or expired. Request a new code.',
     'phone_verified_login' => 'Your phone number is verified. You can now sign in.',

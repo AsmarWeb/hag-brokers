@@ -20,12 +20,12 @@
             </div>
             <div>
                 <x-input-label for="partner-password" :value="__('carrier_partner.new_password')" />
-                <x-text-input id="partner-password" name="password" type="password" minlength="12" required autocomplete="new-password" class="mt-1 block w-full" />
+                <x-text-input id="partner-password" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" class="mt-1 block w-full" />
                 <x-input-error :messages="$errors->get('password')" class="mt-1" />
             </div>
             <div>
                 <x-input-label for="partner-confirmation" :value="__('carrier_partner.confirm_password')" />
-                <x-text-input id="partner-confirmation" name="password_confirmation" type="password" minlength="12" required autocomplete="new-password" class="mt-1 block w-full" />
+                <x-text-input id="partner-confirmation" name="password_confirmation" type="password" minlength="8" maxlength="128" required autocomplete="new-password" class="mt-1 block w-full" />
             </div>
             <button class="hag-broker-action">{{ __('carrier_partner.create_account') }}</button>
         </form>

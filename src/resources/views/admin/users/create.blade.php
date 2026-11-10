@@ -175,9 +175,9 @@
                             {{ $isAr ? 'كلمة المرور' : 'Password' }}
                         </label>
 
-                        <x-password-toggle id="new-user-password" name="password" required minlength="12" maxlength="128"
+                        <x-password-toggle id="new-user-password" name="password" required minlength="8" maxlength="128"
                             autocomplete="new-password" class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-cyan-500/20" />
-<p id="help-password" class="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">{{ $isAr ? 'من 6 إلى 12 خانة على الأقل. شارك بيانات الدخول مع صاحب الحساب عبر قناة خاصة.' : 'At least 6 to 12 characters. Share credentials privately with the account owner.' }}</p>
+<p id="help-password" class="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">{{ $isAr ? 'من 8 إلى 128 حرفاً. شارك بيانات الدخول مع صاحب الحساب عبر قناة خاصة.' : '8 to 128 characters. Share credentials privately with the account owner.' }}</p>
 
                     </div>
 
@@ -190,7 +190,7 @@
                         </label>
 
                         <input type="password" name="password_confirmation" required
-                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-cyan-500/20" id="new-user-password_confirmation" aria-describedby="help-password_confirmation" minlength="8" autocomplete="new-password">
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-cyan-500/20" id="new-user-password_confirmation" aria-describedby="help-password_confirmation" minlength="8" maxlength="128" autocomplete="new-password">
 <p id="help-password_confirmation" class="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">{{ $isAr ? 'أعد كتابة كلمة المرور نفسها.' : 'Enter the same password again.' }}</p>
 
                     </div>

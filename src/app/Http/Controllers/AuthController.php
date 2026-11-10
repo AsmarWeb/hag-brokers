@@ -66,7 +66,7 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'confirmed',
-                'min:12',
+                'min:8',
                 'max:128',
             ],
         ]);

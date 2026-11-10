@@ -15,7 +15,7 @@
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
-            <x-password-toggle id="password" name="password" required minlength="12" maxlength="128" autocomplete="new-password" class="mt-1 block w-full" />
+            <x-password-toggle id="password" name="password" required minlength="8" maxlength="128" autocomplete="new-password" class="mt-1 block w-full" />
             <p class="mt-1 text-xs text-slate-500">{{ __('auth.password_length_help') }}</p>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -24,7 +24,7 @@
         <div class="mt-4">
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
-            <x-password-toggle id="password_confirmation" name="password_confirmation" required minlength="6" maxlength="12" autocomplete="new-password" class="mt-1 block w-full" />
+            <x-password-toggle id="password_confirmation" name="password_confirmation" required minlength="8" maxlength="128" autocomplete="new-password" class="mt-1 block w-full" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
