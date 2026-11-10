@@ -17,7 +17,7 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
 {
     use HasFactory, HasRolesAndPermissions, \Laravel\Sanctum\HasApiTokens, MustVerifyEmailTrait, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone', 'phone_verification_required', 'last_login_ip', 'last_login_at', 'blocked_at', 'blocked_reason'];
+    protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone', 'phone_verification_required'];
 
     protected $hidden = ['password', 'remember_token'];
 
