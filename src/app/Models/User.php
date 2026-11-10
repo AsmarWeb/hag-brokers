@@ -17,9 +17,14 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
 {
     use HasFactory, HasRolesAndPermissions, \Laravel\Sanctum\HasApiTokens, MustVerifyEmailTrait, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone'];
+    protected $fillable = ['name', 'email', 'password', 'customer_id', 'role', 'phone', 'phone_verification_required'];
 
     protected $hidden = ['password', 'remember_token'];
+
+    protected function casts(): array
+    {
+        return ['phone_verification_required' => 'boolean'];
+    }
 
     public function hasVerifiedPhone(): bool
     {
@@ -28,7 +33,8 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
 
     public function hasVerifiedAccount(): bool
     {
-        return $this->hasVerifiedEmail() && $this->hasVerifiedPhone();
+        return $this->hasVerifiedEmail()
+            && (! $this->phone_verification_required || $this->hasVerifiedPhone());
     }
 
     public function customer()
