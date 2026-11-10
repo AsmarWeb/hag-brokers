@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\User;
 use App\Notifications\MobileVerifyEmail;
 use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneNumber;
 use App\Services\Auth\PhoneVerificationService;
 use App\Services\Platform\CompanyMarketplaceService;
 use App\Services\Platform\CompanyWorkspaceService;
@@ -63,7 +64,7 @@ class MobileAuthController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
             'phone_country_code' => ['required', 'string', Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
+            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
             'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
             'country_code' => [Rule::requiredIf($company), 'nullable', 'regex:/^[A-Za-z]{2}$/D'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -87,6 +88,7 @@ class MobileAuthController extends Controller
         } catch (\Throwable $e) {
             report($e);
         }
+        app(PhoneVerificationService::class)->send($u);
 
         return response()->json([
             'message' => 'If the account exists, a verification email has been sent. Verify the address before signing in.',
@@ -118,7 +120,7 @@ class MobileAuthController extends Controller
     public function changePassword(Request $r)
     {
         $d = $r->validate(['current_password' => ['required', 'string', 'max:128'],
-            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed', 'different:current_password']]);
+            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed', 'different:current_password']]);
         DB::transaction(function () use ($r, $d) {
             $user = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
             if (! Hash::check($d['current_password'], $user->password)) {
@@ -210,7 +212,7 @@ class MobileAuthController extends Controller
     {
         $r->merge(['email' => strtolower(trim((string) $r->input('email')))]);
         $d = $r->validate(['email' => ['required', 'email'], 'token' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed']]);
+            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed']]);
         $status = Password::reset($d, function (User $u, string $password) {
             DB::transaction(function () use ($u, $password) {
                 $u->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
