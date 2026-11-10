@@ -50,6 +50,12 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (! Auth::user()?->hasVerifiedEmail()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages(['email' => trans('auth.failed')]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
