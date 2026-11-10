@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\RateLimiter;
 
 final class PhoneVerificationService
 {
-    private const CODE_TTL_MINUTES = 10;
-    private const RESEND_COOLDOWN_SECONDS = 60;
-    private const MAX_ATTEMPTS = 5;
-
     public function __construct(private readonly TwilioSmsGateway $sms)
     {
     }
@@ -38,7 +34,7 @@ final class PhoneVerificationService
 
         $existing = DB::table('phone_verifications')->where('user_id', $user->getKey())->first();
 
-        if ($existing && Carbon::parse($existing->sent_at)->gt(now()->subSeconds(self::RESEND_COOLDOWN_SECONDS))) {
+        if ($existing && Carbon::parse($existing->sent_at)->gt(now()->subSeconds((int) config('auth_security.phone_otp_resend_cooldown_seconds', 60)))) {
             return false;
         }
 
@@ -53,7 +49,7 @@ final class PhoneVerificationService
                 'phone' => $phone,
                 'code_hash' => Hash::make($code),
                 'attempts' => 0,
-                'expires_at' => $now->copy()->addMinutes(self::CODE_TTL_MINUTES),
+                'expires_at' => $now->copy()->addMinutes((int) config('auth_security.phone_otp_ttl_minutes', 10)),
                 'sent_at' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -86,7 +82,7 @@ final class PhoneVerificationService
                 || $user->phone === null
                 || ! hash_equals((string) $user->phone, (string) $challenge->phone)
                 || Carbon::parse($challenge->expires_at)->isPast()
-                || (int) $challenge->attempts >= self::MAX_ATTEMPTS
+                || (int) $challenge->attempts >= (int) config('auth_security.phone_otp_max_attempts', 5)
             ) {
                 return false;
             }
