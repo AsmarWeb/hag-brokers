@@ -155,4 +155,18 @@ return [
     'disposable_email' => 'Please use a permanent email address. Disposable email services are not accepted.',
     'current_password_for_email_change' => 'Required only when you change your email address.'
 
+    'show_password' => 'Show password',
+    'hide_password' => 'Hide password',
+    'password_length_help' => 'Use 6 to 12 characters, including at least one letter and one number.',
+    'phone_code_sent' => 'If the account exists and the phone is eligible, a verification code has been sent by SMS.',
+    'phone_code_invalid' => 'The verification code is invalid or expired. Request a new code.',
+    'phone_verified_login' => 'Your phone number is verified. You can now sign in.',
+    'phone_verified_still_email' => 'Your phone number is verified. Please verify your email address to finish account verification.',
+    'email_verified_still_phone' => 'Your email is verified. Enter the SMS code sent to your phone to finish account verification.',
+    'phone_verification_title' => 'Verify your phone number',
+    'phone_verification_description' => 'Enter the 6-digit code sent to your mobile number.',
+    'send_phone_code' => 'Send SMS code',
+    'verify_phone_code' => 'Verify phone number',
+    'phone_number' => 'Phone number',
+    'verification_code' => 'SMS verification code',
 ];
