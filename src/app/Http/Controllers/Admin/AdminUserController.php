@@ -13,6 +13,57 @@ use Illuminate\View\View;
 class AdminUserController extends Controller
 {
     /**
+     * Suspend a user account and revoke existing API tokens and database sessions.
+     */
+    public function block(Request $request, User $user): RedirectResponse
+    {
+        $isAr = app()->getLocale() === 'ar';
+
+        if ((string) $request->user()->getKey() === (string) $user->getKey()) {
+            return back()->with('error', $isAr ? 'لا يمكنك حظر حسابك الحالي.' : 'You cannot block your own account.');
+        }
+
+        if ($user->hasRole(['admin', 'super-admin'])) {
+            return back()->with('error', $isAr ? 'لا يمكن حظر حسابات المسؤولين من هذه الصفحة.' : 'Administrator accounts cannot be blocked here.');
+        }
+
+        $data = $request->validate([
+            'blocked_reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($user, $data) {
+            $target = User::query()->whereKey($user->getKey())->lockForUpdate()->firstOrFail();
+            $target->forceFill([
+                'blocked_at' => now(),
+                'blocked_reason' => $data['blocked_reason'] ?? null,
+            ])->save();
+
+            $target->tokens()->delete();
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('sessions')) {
+                \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $target->getKey())->delete();
+            }
+        });
+
+        return back()->with('success', $isAr ? 'تم حظر المستخدم وإلغاء جلساته ورموزه.' : 'User blocked; active sessions and API tokens were revoked.');
+    }
+
+    /**
+     * Restore access to a previously suspended account.
+     */
+    public function unblock(Request $request, User $user): RedirectResponse
+    {
+        $isAr = app()->getLocale() === 'ar';
+
+        $user->forceFill([
+            'blocked_at' => null,
+            'blocked_reason' => null,
+        ])->save();
+
+        return back()->with('success', $isAr ? 'تم فك حظر المستخدم.' : 'User access restored.');
+    }
+
+    /**
      * Display a user's profile and assigned access.
      */
     public function show(User $user): View
@@ -29,7 +80,13 @@ class AdminUserController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = User::query();
+        $query = User::query()->with(['roles', 'permissions', 'customer']);
+
+        if ($request->input('status') === 'blocked') {
+            $query->whereNotNull('blocked_at');
+        } elseif ($request->input('status') === 'active') {
+            $query->whereNull('blocked_at');
+        }
 
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();
@@ -47,6 +104,9 @@ class AdminUserController extends Controller
 
         return view('admin.users.index', [
             'users' => $users,
+            'totalUsers' => User::count(),
+            'activeUsers' => User::whereNull('blocked_at')->count(),
+            'blockedUsers' => User::whereNotNull('blocked_at')->count(),
         ]);
     }
 

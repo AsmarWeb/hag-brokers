@@ -23,7 +23,7 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
 
     protected function casts(): array
     {
-        return ['phone_verification_required' => 'boolean'];
+        return ['phone_verification_required' => 'boolean', 'last_login_at' => 'datetime', 'blocked_at' => 'datetime'];
     }
 
     public function isPlatformAdministrator(): bool

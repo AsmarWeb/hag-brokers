@@ -56,7 +56,7 @@ Route::middleware('maintenance.check')->group(function () {
     Route::get('/freight/sailings', [\App\Http\Controllers\FreightSailingController::class, 'index'])
         ->middleware('throttle:60,1')->name('freight.sailings');
     Route::get('/freight/sailings/{sailing}/select', [\App\Http\Controllers\FreightSailingController::class, 'select'])
-        ->whereNumber('sailing')->middleware(['auth', 'verified'])->name('freight.sailings.select');
+        ->whereNumber('sailing')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->name('freight.sailings.select');
 
 
     // Public website routes
@@ -76,7 +76,7 @@ Route::get('/carrier/join/{token}', [\App\Http\Controllers\CarrierPartnerControl
 Route::post('/carrier/join/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'register'])
     ->where('token', '[A-Za-z0-9]{64}')->middleware(['guest', 'throttle:5,1,carrier-register:'])->name('carrier.onboarding.register');
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1,carrier-web:'])
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1,carrier-web:'])
     ->prefix('carrier')->name('carrier.')->group(function () {
         Route::get('/invitations/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'show'])
             ->where('token', '[A-Za-z0-9]{64}')->name('invitation.show');
@@ -96,7 +96,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
         Route::delete('/api-token', [\App\Http\Controllers\CarrierPartnerController::class, 'revokeToken'])->middleware('throttle:5,1,carrier-token:')->name('token.revoke');
     });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -258,15 +258,15 @@ Route::get('/opportunities', [
 Route::get('/opportunities/create', [
     OpportunityController::class,
     'create',
-])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.create');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.create');
 
 Route::post('/opportunities', [
     OpportunityController::class,
     'store',
-])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.store');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.store');
 
 Route::post('/company/opportunity-assistant', \App\Http\Controllers\OpportunityAssistantController::class)
-    ->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:4,1'])->name('company.opportunity-assistant');
+    ->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:4,1'])->name('company.opportunity-assistant');
 
 Route::get('/opportunities/{opportunity:slug}', [
     OpportunityController::class,
@@ -276,12 +276,12 @@ Route::get('/opportunities/{opportunity:slug}', [
 Route::get('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'interest',
-])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest');
 
 Route::post('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'storeInterest',
-])->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest.store');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest.store');
 
 
 Route::get('/bring-a-deal', [LeadController::class, 'create'])
@@ -295,7 +295,7 @@ Route::post('/bring-a-deal', [LeadController::class, 'store'])
 // ADMIN + SUPER ADMIN
 // ======================================================
 
-Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'role:super-admin|admin',])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -499,6 +499,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             [AdminUserController::class, 'updateCustomer']
         )->name('users.customer');
 
+        Route::patch('/users/{user}/block', [AdminUserController::class, 'block'])
+            ->middleware('throttle:10,1')->name('users.block');
+        Route::patch('/users/{user}/unblock', [AdminUserController::class, 'unblock'])
+            ->middleware('throttle:10,1')->name('users.unblock');
+
         /*
 |--------------------------------------------------------------------------
 | Document Center
@@ -616,9 +621,9 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
 require __DIR__ . '/auth.php';
 
-Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified'])->name('company.workspace');
+Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->name('company.workspace');
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
     Route::get('/trade-offers/{offer}/room',[\App\Http\Controllers\TradeOfferRoomController::class,'show'])->name('trade-offers.room');
     Route::post('/trade-offers/{offer}/room',[\App\Http\Controllers\TradeOfferRoomController::class,'store'])->middleware('throttle:30,1')->name('trade-offers.room.store');
     Route::post('/trade-offers/{offer}/room/read',[\App\Http\Controllers\TradeOfferRoomController::class,'read'])->middleware('throttle:60,1')->name('trade-offers.room.read');
@@ -636,7 +641,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
     Route::post('/applications/{interest}/decision', [\App\Http\Controllers\CompanyMarketplaceController::class, 'decide'])->name('applications.decide');
 });
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company/billing')->name('company.billing')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company/billing')->name('company.billing')->group(function () {
     Route::get('/', [\App\Http\Controllers\CompanyBillingController::class, 'show']);
     Route::post('/checkout', [\App\Http\Controllers\CompanyBillingController::class, 'checkout'])->middleware('throttle:10,1')->name('.checkout');
     Route::post('/refresh', [\App\Http\Controllers\CompanyBillingController::class, 'refresh'])->middleware('throttle:10,1')->name('.refresh');
@@ -645,14 +650,14 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
 });
 
 // Company-controlled public profile; no internal customer identifiers are accepted.
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () {
     Route::get('/company/profile', [\App\Http\Controllers\CompanyProfileController::class, 'edit'])->name('company.profile.edit');
     Route::put('/company/profile', [\App\Http\Controllers\CompanyProfileController::class, 'update'])->middleware('throttle:20,1')->name('company.profile.update');
     Route::get('/company/profile/preview', [\App\Http\Controllers\CompanyProfileController::class, 'preview'])->name('company.profile.preview');
 });
 Route::get('/companies/{slug}', [\App\Http\Controllers\CompanyProfileController::class, 'show'])->where('slug', 'company-[a-f0-9-]{36}')->name('companies.show');
 
-Route::middleware(['auth','verified'])->group(function(){
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, 'verified'])->group(function(){
     Route::get('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'edit'])->name('company.mail.edit');
     Route::put('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'update'])->middleware('throttle:20,1')->name('company.mail.update');
 });
@@ -661,7 +666,7 @@ Route::middleware(['auth','verified'])->group(function(){
 Route::get('/download', [\App\Http\Controllers\PublicExperienceController::class, 'download'])
     ->middleware('maintenance.check')->name('app.download');
 Route::prefix('admin/public-experience')->name('admin.public-experience.')
-    ->middleware(['auth', 'verified', 'role:super-admin|admin'])->group(function () {
+    ->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'role:super-admin|admin'])->group(function () {
         $c = \App\Http\Controllers\PublicExperienceController::class;
         Route::get('/', [$c, 'index'])->name('index');
         Route::put('/', [$c, 'update'])->name('update');
@@ -669,7 +674,7 @@ Route::prefix('admin/public-experience')->name('admin.public-experience.')
         Route::put('/opportunities/{opportunity}/location', [$c, 'saveLocation'])->name('location.update');
     });
 Route::prefix('company/map-locations')->name('company.map-location.')
-    ->middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->group(function () {
+    ->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->group(function () {
         $c = \App\Http\Controllers\PublicExperienceController::class;
         Route::get('/{opportunity}', [$c, 'location'])->name('edit');
         Route::put('/{opportunity}', [$c, 'saveLocation'])->name('update');

@@ -27,6 +27,7 @@ class AuthController extends Controller
             ! $user
             || ! Hash::check($data['password'], $user->password)
             || ! $user->hasVerifiedAccount()
+            || $user->blocked_at
             || NonDisposableEmail::isDisposable($data['email'])
         ) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
@@ -38,6 +39,8 @@ class AuthController extends Controller
                 'message' => 'Platform administrator accounts use the web dashboard.',
             ], 403);
         }
+
+        $user->forceFill(['last_login_ip' => $request->ip(), 'last_login_at' => now()])->save();
 
         $expiresAt = now()->addDays(30);
         $token = $user->createToken('mobile:legacy', ['mobile:v1'], $expiresAt);

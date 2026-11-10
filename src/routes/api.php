@@ -65,7 +65,7 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
         ->middleware('throttle:3,1,phone-verification-send:');
     Route::post('/auth/verify-phone', [PhoneVerificationController::class, 'verify'])
         ->middleware('throttle:10,1,phone-verification-verify:');
-    Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
+    Route::middleware(['auth:sanctum', MobileToken::class, \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () use ($auth) {
         $push=\App\Http\Controllers\Api\V1\MobilePushController::class;
         Route::get('/push/settings',[$push,'settings']);
         Route::put('/push/device',[$push,'register'])->middleware('throttle:20,1,mobile-push-register:');
