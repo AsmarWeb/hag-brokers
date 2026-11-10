@@ -3,8 +3,8 @@
     'name',
     'required' => false,
     'autocomplete' => 'new-password',
-    'minlength' => 6,
-    'maxlength' => 12,
+    'minlength' => 12,
+    'maxlength' => 128,
     'placeholder' => null,
 ])
 
