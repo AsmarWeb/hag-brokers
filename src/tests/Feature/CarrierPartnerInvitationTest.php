@@ -120,6 +120,7 @@ final class CarrierPartnerInvitationTest extends TestCase
         $verification = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify',
             now()->addMinutes(10), ['id' => $user->id, 'hash' => sha1($email)]);
         $this->get($verification)->assertRedirect(route('login'));
+        auth()->forgetGuards();
         $this->post($accept)->assertRedirect(route('carrier.fleet'));
         $this->patch(route('carrier.profile.update'), ['name' => 'Verified Representative', 'phone' => '+971 50 000 0000'])
             ->assertRedirect();
