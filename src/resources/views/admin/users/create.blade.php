@@ -145,6 +145,18 @@
 
                     </div>
 
+                    <div>
+                        <label for="new-user-phone" class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            {{ $isAr ? 'رقم الهاتف الدولي' : 'Phone number (international format)' }}
+                        </label>
+                        <input type="tel" name="phone" id="new-user-phone" value="{{ old('phone') }}" required
+                            pattern="^\\+[1-9][0-9]{7,14}$" placeholder="+971501234567" autocomplete="tel" dir="ltr"
+                            class="mt-2 block w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-2.5 text-sm outline-none focus:border-cyan-500">
+                        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
+                            {{ $isAr ? 'سيتم إرسال رمز SMS إلى هذا الرقم لتأكيد ملكيته.' : 'An SMS code will be sent to this number to verify ownership.' }}
+                        </p>
+                    </div>
+
 
                     {{-- Password --}}
                     <div>
