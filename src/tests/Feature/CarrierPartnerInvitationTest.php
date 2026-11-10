@@ -110,7 +110,7 @@ final class CarrierPartnerInvitationTest extends TestCase
         $accept = route('carrier.invitation.show', $token);
 
         $this->get($join)->assertOk()->assertSee($email);
-        $this->post($join, ['name' => 'Partner', 'password' => $password, 'password_confirmation' => $password,
+        $this->post($join, ['name' => 'Partner', 'phone' => '+971501234567', 'password' => $password, 'password_confirmation' => $password,
             'email' => 'spoof@example.test'])->assertRedirect(route('verification.notice'));
         $user = User::where('email', $email)->sole();
         $this->assertNull($user->customer_id);
@@ -119,7 +119,8 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->postJson($accept)->assertForbidden();
         $verification = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify',
             now()->addMinutes(10), ['id' => $user->id, 'hash' => sha1($email)]);
-        $this->get($verification)->assertRedirect(route('login'));
+        $this->get($verification)->assertRedirect(route('phone.verification.notice'));
+        $user->forceFill(['phone_verified_at' => now()])->save();
         auth()->forgetGuards();
         $this->post($accept)->assertRedirect(route('carrier.fleet'));
         $this->patch(route('carrier.profile.update'), ['name' => 'Verified Representative', 'phone' => '+971 50 000 0000'])
