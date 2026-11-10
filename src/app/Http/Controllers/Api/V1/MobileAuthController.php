@@ -212,7 +212,7 @@ class MobileAuthController extends Controller
     {
         $r->merge(['email' => strtolower(trim((string) $r->input('email')))]);
         $d = $r->validate(['email' => ['required', 'email'], 'token' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed']]);
+            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed']]);
         $status = Password::reset($d, function (User $u, string $password) {
             DB::transaction(function () use ($u, $password) {
                 $u->forceFill(['password' => Hash::make($password), 'remember_token' => Str::random(60)])->save();
