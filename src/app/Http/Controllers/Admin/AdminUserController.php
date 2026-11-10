@@ -104,6 +104,9 @@ class AdminUserController extends Controller
 
         return view('admin.users.index', [
             'users' => $users,
+            'totalUsers' => User::count(),
+            'activeUsers' => User::whereNull('blocked_at')->count(),
+            'blockedUsers' => User::whereNotNull('blocked_at')->count(),
         ]);
     }
 
