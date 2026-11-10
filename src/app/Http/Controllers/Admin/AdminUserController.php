@@ -93,6 +93,8 @@ class AdminUserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
+        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -100,8 +102,9 @@ class AdminUserController extends Controller
                 'email',
                 'max:255',
                 \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user),
+                new \App\Rules\NonDisposableEmail(),
             ],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => ['nullable', 'string', 'min:12', 'regex:/[A-Z]/', 'regex:/[a-z]/', 'regex:/[0-9]/', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
@@ -125,10 +128,16 @@ class AdminUserController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user) {
+        $emailChanged = $user->email !== $data['email'];
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user, $emailChanged) {
             $user->name = $data['name'];
             $user->email = $data['email'];
             $user->customer_id = $data['customer_id'] ?? null;
+
+            if ($emailChanged) {
+                $user->email_verified_at = null;
+            }
 
             if (! empty($data['password'])) {
                 $user->password = \Illuminate\Support\Facades\Hash::make($data['password']);
@@ -139,6 +148,14 @@ class AdminUserController extends Controller
             $user->syncRoles(array_map('intval', $data['roles'] ?? []));
             $user->syncPermissions(array_map('intval', $data['permissions'] ?? []));
         });
+
+        if ($emailChanged) {
+            try {
+                $user->sendEmailVerificationNotification();
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
 
         return redirect()
             ->route('admin.users.show', $user)
@@ -165,10 +182,12 @@ class AdminUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email', new \App\Rules\NonDisposableEmail()],
+            'password' => ['required', 'string', 'min:12', 'regex:/[A-Z]/', 'regex:/[a-z]/', 'regex:/[0-9]/', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
@@ -189,6 +208,12 @@ class AdminUserController extends Controller
 
             return $user;
         });
+
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return redirect()
             ->route('admin.users.show', $user)
