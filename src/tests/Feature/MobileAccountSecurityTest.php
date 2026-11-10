@@ -53,6 +53,27 @@ class MobileAccountSecurityTest extends TestCase
         $this->withHeaders($this->bearer($u))->getJson('/api/v1/me')->assertForbidden();
     }
 
+    public function test_disposable_email_domains_are_rejected_for_registration_and_login(): void
+    {
+        $this->postJson('/api/v1/auth/register', [
+            'account_type' => 'individual',
+            'name' => 'Disposable User',
+            'email' => 'signup@mailinator.com',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+            'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $this->assertDatabaseCount('users', 0);
+        $u = User::factory()->create(['email' => 'legacy@mailinator.com']);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email,
+            'password' => 'Old-password-123!',
+            'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+    }
+
     public function test_admin_credentials_explain_web_only_access_without_issuing_token(): void
     {
         $u = $this->account();
