@@ -113,6 +113,22 @@ class RegistrationTest extends TestCase
         );
     }
 
+    public function test_disposable_email_domains_are_rejected_before_account_creation(): void
+    {
+        $this->post('/register', [
+            'company_name' => 'Disposable Mail LLC',
+            'contact_person' => 'Disposable User',
+            'phone' => '+971501234567',
+            'country_code' => 'AE',
+            'email' => 'signup@mailinator.com',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('customers', 0);
+    }
+
     private function welcomeRegistrationPayload(string $email): array
     {
         return [
