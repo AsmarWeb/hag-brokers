@@ -54,6 +54,20 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_disposable_email_domains_cannot_authenticate_even_with_verified_accounts(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'legacy@mailinator.com',
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();
