@@ -75,7 +75,7 @@ class MobileAuthController extends Controller
                 'email' => $d['email'], 'phone' => $d['phone'], 'country_code' => strtoupper($d['country_code']),
                 'city' => $d['city'] ?? null, 'is_active' => true]) : null;
             $u = User::create(['name' => $d['name'], 'email' => $d['email'], 'password' => Hash::make($d['password']),
-                'customer_id' => $c?->id, 'phone' => $d['phone'], 'role' => 'customer']);
+                'customer_id' => $c?->id, 'phone' => $d['phone'], 'phone_verification_required' => true, 'role' => 'customer']);
             if ($c) {
                 app(CompanyWorkspaceService::class)->activateNewRegistration($c, $u);
             }
