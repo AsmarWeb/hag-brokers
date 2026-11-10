@@ -95,17 +95,18 @@ class AdminUserController extends Controller
      */
     public function update(Request $request, User $user): RedirectResponse
     {
-        $request->merge([
-            'email' => strtolower(trim((string) $request->input('email'))),
-            'phone' => PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code')),
-        ]);
+        $normalized = ['email' => strtolower(trim((string) $request->input('email')))];
+        if ($request->exists('phone')) {
+            $normalized['phone'] = PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code'));
+        }
+        $request->merge($normalized);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user), new \App\Rules\NonDisposableEmail()],
             'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['nullable', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed'],
+            'password' => ['nullable', 'string', 'min:12', 'max:128', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
@@ -129,13 +130,15 @@ class AdminUserController extends Controller
         }
 
         $emailChanged = $user->email !== $data['email'];
-        $phoneChanged = $user->phone !== $data['phone'];
+        $phoneChanged = array_key_exists('phone', $data) && $user->phone !== $data['phone'];
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user, $emailChanged, $phoneChanged) {
             $user->name = $data['name'];
             $user->email = $data['email'];
             $user->customer_id = $data['customer_id'] ?? null;
-            $user->phone = $data['phone'];
+            if (array_key_exists('phone', $data)) {
+                $user->phone = $data['phone'];
+            }
 
             if ($emailChanged) {
                 $user->email_verified_at = null;
@@ -205,7 +208,7 @@ class AdminUserController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new \App\Rules\NonDisposableEmail()],
             'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed'],
+            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
