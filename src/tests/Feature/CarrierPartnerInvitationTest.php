@@ -122,6 +122,8 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->get($verification)->assertRedirect(route('phone.verification.notice', ['email' => $email]));
         $user->forceFill(['phone_verified_at' => now()])->save();
         auth()->forgetGuards();
+        $this->post('/login', ['email' => $email, 'password' => $password])
+            ->assertRedirect($accept);
         $this->post($accept)->assertRedirect(route('carrier.fleet'));
         $this->patch(route('carrier.profile.update'), ['name' => 'Verified Representative', 'phone' => '+971 50 000 0000'])
             ->assertRedirect();
