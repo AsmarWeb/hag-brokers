@@ -62,9 +62,9 @@ class MobileAuthController extends Controller
         $d = $r->validate([
             'account_type' => ['required', 'in:individual,company'], 'name' => ['required', 'string', 'max:160'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
-            'phone_country_code' => ['required', 'string', Rule::in(array_keys(config('phone.countries', [])))],
+            'phone_country_code' => ['nullable', 'string', Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
+            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
             'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
             'country_code' => [Rule::requiredIf($company), 'nullable', 'regex:/^[A-Za-z]{2}$/D'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -120,7 +120,7 @@ class MobileAuthController extends Controller
     public function changePassword(Request $r)
     {
         $d = $r->validate(['current_password' => ['required', 'string', 'max:128'],
-            'password' => ['required', 'string', 'min:6', 'max:12', 'regex:/[A-Za-z]/', 'regex:/[0-9]/', 'confirmed', 'different:current_password']]);
+            'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed', 'different:current_password']]);
         DB::transaction(function () use ($r, $d) {
             $user = User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();
             if (! Hash::check($d['current_password'], $user->password)) {
