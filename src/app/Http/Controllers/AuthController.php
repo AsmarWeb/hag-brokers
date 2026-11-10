@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\User;
 use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -36,7 +37,7 @@ class AuthController extends Controller
             'phone' => [
                 'required',
                 'string',
-                'max:50',
+                'regex:/^\\+[1-9][0-9]{7,14}$/D',
             ],
 
             'country_code' => [
