@@ -24,7 +24,7 @@ class VerifyEmailController extends Controller
             $request->user()->refresh();
         }
 
-        if (! $user->hasVerifiedPhone()) {
+        if ($user->phone_verification_required && ! $user->hasVerifiedPhone()) {
             return redirect()
                 ->route('phone.verification.notice', ['email' => $user->email])
                 ->with('status', __('auth.email_verified_still_phone'));
