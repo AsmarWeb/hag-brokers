@@ -10,13 +10,15 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->timestamp('phone_verified_at')->nullable()->after('email_verified_at');
+            // Existing rows remain grandfathered; all new registration flows explicitly enable this gate.
+            $table->boolean('phone_verification_required')->default(false)->after('phone_verified_at');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('phone_verified_at');
+            $table->dropColumn(['phone_verified_at', 'phone_verification_required']);
         });
     }
 };
