@@ -30,6 +30,8 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'stats' => $stats,
+            'hasCarrierFleet' => $request->user()->hasVerifiedEmail()
+                && $request->user()->carrierPartnership()->whereHas('carrier', fn ($query) => $query->where('is_active', true))->exists(),
         ]);
     }
 }

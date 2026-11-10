@@ -39,6 +39,9 @@ Route::post('/platform-billing/stripe/webhook', StripeTestWebhookController::cla
 
 Route::post('/platform-billing/stripe/live/webhook', StripeLiveWebhookController::class)->name('platform-billing.live-webhook');
 
+Route::get('/v1/carrier/fleet', [\App\Http\Controllers\CarrierPartnerController::class, 'apiFleet'])
+    ->middleware([MobileApi::class, 'auth:sanctum', 'throttle:60,1,carrier-api:'])->name('api.carrier.fleet');
+
 // Versioned native client API. Stripe endpoints above are unchanged.
 Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:'])->group(function () {
     $auth = MobileAuthController::class;

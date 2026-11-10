@@ -66,6 +66,59 @@
         </div>
 
 
+        <section class="hag-broker-card mb-6 space-y-3">
+            <h2>{{ __('carrier_partner.invitation') }}</h2>
+            <p class="hag-broker-muted">{{ __('carrier_partner.instructions') }}</p>
+            @if($carrier->is_active)
+                <form method="POST" action="{{ route('admin.carriers.invitations.store', $carrier) }}" class="flex flex-wrap items-end gap-3">
+                    @csrf
+                    <label class="grid min-w-0 flex-1 gap-2 text-sm font-semibold">
+                        {{ __('carrier_partner.email') }}
+                        <input name="email" type="email" value="{{ old('email') }}" maxlength="255" required
+                            class="w-full border-slate-300 bg-white text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100">
+                    </label>
+                    <button class="hag-broker-action">{{ __('carrier_partner.invite') }}</button>
+                </form>
+                @error('email')<p role="alert" class="text-sm text-rose-800 dark:text-rose-300">{{ $message }}</p>@enderror
+                @if(session('carrier_invitation_url'))
+                    <label class="grid gap-2 text-sm font-semibold">
+                        {{ __('carrier_partner.link') }}
+                        <input type="url" readonly dir="ltr" value="{{ session('carrier_invitation_url') }}"
+                            class="w-full border-slate-300 bg-white text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100">
+                    </label>
+                @endif
+            @else
+                <p class="hag-broker-muted">{{ __('carrier_partner.inactive') }}</p>
+            @endif
+            <div class="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+                <h3 class="font-bold">{{ __('carrier_partner.history') }}</h3>
+                @if(session('carrier_invitation_status'))
+                    <p role="status" class="hag-broker-muted">{{ session('carrier_invitation_status') }}</p>
+                @endif
+                @forelse($invitations as $invitation)
+                    @php($status = $invitation->status())
+                    <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-950">
+                        <div class="min-w-0">
+                            <p class="break-all text-sm font-semibold"><bdi>{{ $invitation->email }}</bdi></p>
+                            <p class="hag-broker-muted">{{ __('carrier_partner.statuses.'.$status) }} · {{ __('carrier_partner.expires') }} <bdi>{{ $invitation->expires_at->setTimezone('Asia/Dubai')->format('Y-m-d H:i') }}</bdi> · {{ __('carrier_partner.dubai_time') }}</p>
+                        </div>
+                        @if(in_array($status, ['pending', 'accepted'], true))
+                            <details>
+                                <summary class="cursor-pointer text-sm font-semibold text-rose-800 dark:text-rose-300">{{ __('carrier_partner.revoke') }}</summary>
+                                <form method="POST" action="{{ route('admin.carriers.invitations.revoke', [$carrier, $invitation]) }}" class="mt-2">
+                                    @csrf @method('PATCH')
+                                    <button class="rounded-lg bg-rose-100 px-3 py-2 text-sm font-bold text-rose-950 dark:bg-rose-950 dark:text-rose-200">{{ __('carrier_partner.confirm_revoke') }}</button>
+                                </form>
+                            </details>
+                        @endif
+                    </div>
+                @empty
+                    <p class="hag-broker-muted">{{ __('carrier_partner.no_invitations') }}</p>
+                @endforelse
+                {{ $invitations->links() }}
+            </div>
+        </section>
+
         {{-- Overview --}}
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 

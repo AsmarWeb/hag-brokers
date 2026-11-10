@@ -71,6 +71,25 @@ Route::middleware('maintenance.check')->group(function () {
 |--------------------------------------------------------------------------
 */
 
+Route::get('/carrier/join/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'onboarding'])
+    ->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:20,1,carrier-join-view:')->name('carrier.onboarding.show');
+Route::post('/carrier/join/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'register'])
+    ->where('token', '[A-Za-z0-9]{64}')->middleware(['guest', 'throttle:5,1,carrier-register:'])->name('carrier.onboarding.register');
+
+Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1,carrier-web:'])
+    ->prefix('carrier')->name('carrier.')->group(function () {
+        Route::get('/invitations/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'show'])
+            ->where('token', '[A-Za-z0-9]{64}')->name('invitation.show');
+        Route::post('/invitations/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'accept'])
+            ->where('token', '[A-Za-z0-9]{64}')->name('invitation.accept');
+        Route::get('/fleet', [\App\Http\Controllers\CarrierPartnerController::class, 'fleet'])->name('fleet');
+        Route::post('/fleet/requests', [\App\Http\Controllers\CarrierVesselRequestController::class, 'store'])
+            ->middleware('throttle:10,1,carrier-vessels:')->name('fleet.requests.store');
+        Route::patch('/profile', [\App\Http\Controllers\CarrierPartnerController::class, 'updateProfile'])->name('profile.update');
+        Route::post('/api-token', [\App\Http\Controllers\CarrierPartnerController::class, 'issueToken'])->middleware('throttle:5,1,carrier-token:')->name('token.issue');
+        Route::delete('/api-token', [\App\Http\Controllers\CarrierPartnerController::class, 'revokeToken'])->middleware('throttle:5,1,carrier-token:')->name('token.revoke');
+    });
+
 Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
@@ -444,8 +463,17 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
 
         Route::resource('ports', AdminPortController::class);
 
+        Route::post('carriers/{carrier}/invitations', [\App\Http\Controllers\CarrierPartnerController::class, 'invite'])
+            ->middleware('throttle:10,1')->name('carriers.invitations.store');
+        Route::patch('carriers/{carrier}/invitations/{invitation}/revoke', [\App\Http\Controllers\CarrierPartnerController::class, 'revoke'])
+            ->middleware('throttle:10,1')->name('carriers.invitations.revoke');
+
         Route::resource('carriers', AdminCarrierController::class);
 
+        Route::get('vessels/partner-requests', [\App\Http\Controllers\CarrierVesselRequestController::class, 'index'])
+            ->name('vessels.partner-requests.index');
+        Route::patch('vessels/partner-requests/{proposal}', [\App\Http\Controllers\CarrierVesselRequestController::class, 'review'])
+            ->middleware('throttle:30,1,carrier-vessel-review:')->name('vessels.partner-requests.review');
         Route::resource('vessels', AdminVesselController::class);
 
 
