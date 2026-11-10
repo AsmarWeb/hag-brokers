@@ -21,7 +21,7 @@
 
         <div>
             <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-password-toggle id="update_password_password" name="password" minlength="6" maxlength="12" autocomplete="new-password" class="mt-1 block w-full" />
+            <x-password-toggle id="update_password_password" name="password" minlength="12" maxlength="128" autocomplete="new-password" class="mt-1 block w-full" />
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
         </div>
 
