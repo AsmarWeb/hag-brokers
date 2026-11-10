@@ -148,4 +148,9 @@ return [
     'secure_platform' =>
     'Secure Sea Freight Platform',
 
+    'verification_email_sent' => 'If the account exists and still needs verification, a new verification link will be sent.',
+    'email_verified_login' => 'Your email address has been verified. You can now sign in.',
+    'verification_help' => 'Have not received a verification link? Enter your email to request a new one.',
+    'resend_verification_email' => 'Resend verification email',
+
 ];
