@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Auth\PhoneNumber;
+use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -100,8 +102,8 @@ class AdminUserController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', \\Illuminate\\Validation\\Rule::unique('users', 'email')->ignore($user), new \\App\\Rules\\NonDisposableEmail()],
-            'phone_country_code' => ['nullable', 'string', \\Illuminate\\Validation\\Rule::in(array_keys(config('phone.countries', [])))],
+            'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user), new \App\Rules\NonDisposableEmail()],
+            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
             'password' => ['nullable', 'string', 'min:12', 'regex:/[A-Z]/', 'regex:/[a-z]/', 'regex:/[0-9]/', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
@@ -112,13 +114,13 @@ class AdminUserController extends Controller
         ]);
 
         if ((string) $request->user()->getKey() === (string) $user->getKey()) {
-            $retainsAdminAccess = \\App\\Models\\Role::query()
+            $retainsAdminAccess = \App\Models\Role::query()
                 ->whereIn('id', $data['roles'] ?? [])
                 ->whereIn('name', ['admin', 'super-admin'])
                 ->exists();
 
             if (! $retainsAdminAccess) {
-                throw \\Illuminate\\Validation\\ValidationException::withMessages([
+                throw \Illuminate\Validation\ValidationException::withMessages([
                     'roles' => app()->getLocale() === 'ar'
                         ? 'يجب الاحتفاظ بدور إداري واحد على الأقل لحسابك.'
                         : 'Keep at least one administrator role on your own account.',
@@ -129,7 +131,7 @@ class AdminUserController extends Controller
         $emailChanged = $user->email !== $data['email'];
         $phoneChanged = $user->phone !== $data['phone'];
 
-        \\Illuminate\\Support\\Facades\\DB::transaction(function () use ($data, $user, $emailChanged, $phoneChanged) {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user, $emailChanged, $phoneChanged) {
             $user->name = $data['name'];
             $user->email = $data['email'];
             $user->customer_id = $data['customer_id'] ?? null;
@@ -142,11 +144,11 @@ class AdminUserController extends Controller
                 $user->phone_verified_at = null;
             }
             if ($emailChanged || $phoneChanged) {
-                $user->remember_token = \\Illuminate\\Support\\Str::random(60);
+                $user->remember_token = \Illuminate\Support\Str::random(60);
             }
 
             if (! empty($data['password'])) {
-                $user->password = \\Illuminate\\Support\\Facades\\Hash::make($data['password']);
+                $user->password = \Illuminate\Support\Facades\Hash::make($data['password']);
             }
 
             $user->save();
@@ -161,7 +163,7 @@ class AdminUserController extends Controller
         if ($emailChanged) {
             try {
                 $user->sendEmailVerificationNotification();
-            } catch (\\Throwable $exception) {
+            } catch (\Throwable $exception) {
                 report($exception);
             }
         }
@@ -200,8 +202,8 @@ class AdminUserController extends Controller
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email', new \\App\\Rules\\NonDisposableEmail()],
-            'phone_country_code' => ['nullable', 'string', \\Illuminate\\Validation\\Rule::in(array_keys(config('phone.countries', [])))],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email', new \App\Rules\NonDisposableEmail()],
+            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
             'password' => ['required', 'string', 'min:12', 'regex:/[A-Z]/', 'regex:/[a-z]/', 'regex:/[0-9]/', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
@@ -211,11 +213,11 @@ class AdminUserController extends Controller
             'permissions.*' => ['required', 'integer', 'distinct', 'exists:permissions,id'],
         ]);
 
-        $user = \\Illuminate\\Support\\Facades\\DB::transaction(function () use ($data) {
+        $user = \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => \\Illuminate\\Support\\Facades\\Hash::make($data['password']),
+                'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
                 'phone' => $data['phone'],
                 'customer_id' => $data['customer_id'] ?? null,
             ]);
@@ -228,7 +230,7 @@ class AdminUserController extends Controller
 
         try {
             $user->sendEmailVerificationNotification();
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             report($exception);
         }
         app(PhoneVerificationService::class)->send($user);
