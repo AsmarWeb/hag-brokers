@@ -21,6 +21,16 @@ class User extends Authenticatable implements LaratrustUser, MustVerifyEmailCont
 
     protected $hidden = ['password', 'remember_token'];
 
+    public function hasVerifiedPhone(): bool
+    {
+        return $this->phone_verified_at !== null;
+    }
+
+    public function hasVerifiedAccount(): bool
+    {
+        return $this->hasVerifiedEmail() && $this->hasVerifiedPhone();
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);
