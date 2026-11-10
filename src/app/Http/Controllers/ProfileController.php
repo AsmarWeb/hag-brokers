@@ -26,27 +26,36 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        $emailChanged = $request->user()->isDirty('email');
+        $emailChanged = $user->isDirty('email');
 
         if ($emailChanged) {
-            $request->user()->email_verified_at = null;
+            $user->email_verified_at = null;
+            $user->remember_token = \Illuminate\Support\Str::random(60);
         }
 
-        $request->user()->save();
+        $user->save();
 
         if ($emailChanged) {
+            // Force every device to authenticate again after changing the account identity.
+            $user->tokens()->delete();
+
             try {
-                $request->user()->sendEmailVerificationNotification();
+                $user->sendEmailVerificationNotification();
             } catch (\Throwable $exception) {
                 report($exception);
             }
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return Redirect::route('login')->with('status', __('auth.verification_email_sent'));
         }
 
-        return Redirect::route('profile.edit')->with('status', $emailChanged
-            ? __('auth.verification_email_sent')
-            : 'profile-updated');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
