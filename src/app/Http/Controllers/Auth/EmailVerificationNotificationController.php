@@ -11,8 +11,14 @@ class EmailVerificationNotificationController extends Controller
 {
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate(['email' => ['required', 'string', 'email', 'max:255']]);
-        $user = User::query()->where('email', strtolower(trim($data['email'])))->first();
+        $data = $request->validate([
+            'email' => ['nullable', 'string', 'email', 'max:255'],
+        ]);
+
+        $email = strtolower(trim((string) ($data['email'] ?? '')));
+        $user = $email !== ''
+            ? User::query()->where('email', $email)->first()
+            : $request->user();
 
         if ($user && ! $user->hasVerifiedEmail()) {
             try {
