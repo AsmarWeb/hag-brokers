@@ -145,6 +145,7 @@ class AdminUserController extends Controller
             }
             if ($phoneChanged) {
                 $user->phone_verified_at = null;
+                $user->phone_verification_required = true;
             }
             if ($emailChanged || $phoneChanged) {
                 $user->remember_token = \Illuminate\Support\Str::random(60);
@@ -222,6 +223,7 @@ class AdminUserController extends Controller
                 'email' => $data['email'],
                 'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
                 'phone' => $data['phone'],
+                'phone_verification_required' => true,
                 'customer_id' => $data['customer_id'] ?? null,
             ]);
 
