@@ -44,6 +44,24 @@ class EmailVerificationTest extends TestCase
         $response->assertSessionHas('status', __('auth.email_verified_login'));
     }
 
+    public function test_legacy_email_verification_does_not_require_phone_verification(): void
+    {
+        $user = User::factory()->unverified()->create([
+            'phone_verified_at' => null,
+            'phone_verification_required' => false,
+        ]);
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $this->get($verificationUrl)->assertRedirect(route('login'));
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+        $this->assertFalse($user->fresh()->hasVerifiedPhone());
+    }
+
     public function test_guest_can_request_a_resend_without_revealing_account_existence(): void
     {
         Notification::fake();
