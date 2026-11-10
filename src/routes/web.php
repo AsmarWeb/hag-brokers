@@ -76,7 +76,7 @@ Route::get('/carrier/join/{token}', [\App\Http\Controllers\CarrierPartnerControl
 Route::post('/carrier/join/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'register'])
     ->where('token', '[A-Za-z0-9]{64}')->middleware(['guest', 'throttle:5,1,carrier-register:'])->name('carrier.onboarding.register');
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1,carrier-web:'])
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1,carrier-web:'])
     ->prefix('carrier')->name('carrier.')->group(function () {
         Route::get('/invitations/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'show'])
             ->where('token', '[A-Za-z0-9]{64}')->name('invitation.show');
@@ -96,7 +96,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
         Route::delete('/api-token', [\App\Http\Controllers\CarrierPartnerController::class, 'revokeToken'])->middleware('throttle:5,1,carrier-token:')->name('token.revoke');
     });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
@@ -295,7 +295,7 @@ Route::post('/bring-a-deal', [LeadController::class, 'store'])
 // ADMIN + SUPER ADMIN
 // ======================================================
 
-Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'role:super-admin|admin',])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -499,6 +499,11 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             [AdminUserController::class, 'updateCustomer']
         )->name('users.customer');
 
+        Route::patch('/users/{user}/block', [AdminUserController::class, 'block'])
+            ->middleware('throttle:10,1')->name('users.block');
+        Route::patch('/users/{user}/unblock', [AdminUserController::class, 'unblock'])
+            ->middleware('throttle:10,1')->name('users.unblock');
+
         /*
 |--------------------------------------------------------------------------
 | Document Center
@@ -618,7 +623,7 @@ require __DIR__ . '/auth.php';
 
 Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified'])->name('company.workspace');
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
     Route::get('/trade-offers/{offer}/room',[\App\Http\Controllers\TradeOfferRoomController::class,'show'])->name('trade-offers.room');
     Route::post('/trade-offers/{offer}/room',[\App\Http\Controllers\TradeOfferRoomController::class,'store'])->middleware('throttle:30,1')->name('trade-offers.room.store');
     Route::post('/trade-offers/{offer}/room/read',[\App\Http\Controllers\TradeOfferRoomController::class,'read'])->middleware('throttle:60,1')->name('trade-offers.room.read');
@@ -636,7 +641,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
     Route::post('/applications/{interest}/decision', [\App\Http\Controllers\CompanyMarketplaceController::class, 'decide'])->name('applications.decide');
 });
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company/billing')->name('company.billing')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company/billing')->name('company.billing')->group(function () {
     Route::get('/', [\App\Http\Controllers\CompanyBillingController::class, 'show']);
     Route::post('/checkout', [\App\Http\Controllers\CompanyBillingController::class, 'checkout'])->middleware('throttle:10,1')->name('.checkout');
     Route::post('/refresh', [\App\Http\Controllers\CompanyBillingController::class, 'refresh'])->middleware('throttle:10,1')->name('.refresh');
@@ -645,7 +650,7 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
 });
 
 // Company-controlled public profile; no internal customer identifiers are accepted.
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () {
     Route::get('/company/profile', [\App\Http\Controllers\CompanyProfileController::class, 'edit'])->name('company.profile.edit');
     Route::put('/company/profile', [\App\Http\Controllers\CompanyProfileController::class, 'update'])->middleware('throttle:20,1')->name('company.profile.update');
     Route::get('/company/profile/preview', [\App\Http\Controllers\CompanyProfileController::class, 'preview'])->name('company.profile.preview');
