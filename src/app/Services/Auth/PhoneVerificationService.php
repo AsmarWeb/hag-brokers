@@ -18,7 +18,7 @@ final class PhoneVerificationService
     {
         $phone = trim((string) $user->phone);
 
-        if (! preg_match('/^\+[1-9][0-9]{7,14}$/D', $phone)) {
+        if (! preg_match('/^\\+[1-9][0-9]{7,14}$/D', $phone)) {
             return false;
         }
 
@@ -72,15 +72,25 @@ final class PhoneVerificationService
     public function verify(User $user, string $code): bool
     {
         return DB::transaction(function () use ($user, $code): bool {
+            // Lock and re-read the authoritative user row before trusting the submitted model.
+            // This serializes verification against concurrent phone-number changes.
+            $lockedUser = User::query()
+                ->whereKey($user->getKey())
+                ->lockForUpdate()
+                ->first();
+
+            if (! $lockedUser || $lockedUser->phone === null) {
+                return false;
+            }
+
             $challenge = DB::table('phone_verifications')
-                ->where('user_id', $user->getKey())
+                ->where('user_id', $lockedUser->getKey())
                 ->lockForUpdate()
                 ->first();
 
             if (
                 ! $challenge
-                || $user->phone === null
-                || ! hash_equals((string) $user->phone, (string) $challenge->phone)
+                || ! hash_equals((string) $lockedUser->phone, (string) $challenge->phone)
                 || Carbon::parse($challenge->expires_at)->isPast()
                 || (int) $challenge->attempts >= (int) config('auth_security.phone_otp_max_attempts', 5)
             ) {
@@ -89,17 +99,17 @@ final class PhoneVerificationService
 
             if (! Hash::check($code, $challenge->code_hash)) {
                 DB::table('phone_verifications')
-                    ->where('user_id', $user->getKey())
+                    ->where('user_id', $lockedUser->getKey())
                     ->increment('attempts');
 
                 return false;
             }
 
-            $user->forceFill(['phone_verified_at' => now()])->save();
+            $lockedUser->forceFill(['phone_verified_at' => now()])->save();
 
-            DB::table('phone_verifications')->where('user_id', $user->getKey())->delete();
+            DB::table('phone_verifications')->where('user_id', $lockedUser->getKey())->delete();
 
-            RateLimiter::clear('phone-verification-send:'.$user->getKey());
+            RateLimiter::clear('phone-verification-send:'.$lockedUser->getKey());
 
             return true;
         }, 3);
