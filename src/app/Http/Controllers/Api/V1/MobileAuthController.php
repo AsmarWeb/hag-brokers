@@ -53,15 +53,18 @@ class MobileAuthController extends Controller
 
     public function register(Request $r)
     {
-        $r->merge(['email' => strtolower(trim((string) $r->input('email')))]);
+        $r->merge([
+            'email' => strtolower(trim((string) $r->input('email'))),
+            'phone' => PhoneNumber::normalize($r->input('phone'), $r->input('phone_country_code')),
+        ]);
         $company = $r->input('account_type') === 'company';
         $d = $r->validate([
             'account_type' => ['required', 'in:individual,company'], 'name' => ['required', 'string', 'max:160'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
+            'phone_country_code' => ['required', 'string', Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
             'password' => ['required', 'string', 'min:12', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
             'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
-            'phone' => [Rule::requiredIf($company), 'nullable', 'string', 'max:50'],
             'country_code' => [Rule::requiredIf($company), 'nullable', 'regex:/^[A-Za-z]{2}$/D'],
             'city' => ['nullable', 'string', 'max:255'],
             'role' => ['prohibited'], 'customer_id' => ['prohibited'], 'email_verified_at' => ['prohibited'],
