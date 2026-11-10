@@ -153,7 +153,7 @@ return [
     'verification_help' => 'Have not received a verification link? Enter your email to request a new one.',
     'resend_verification_email' => 'Resend verification email',
     'disposable_email' => 'Please use a permanent email address. Disposable email services are not accepted.',
-    'current_password_for_email_change' => 'Required only when you change your email address.'
+    'current_password_for_email_change' => 'Required only when you change your email address.',
 
     'show_password' => 'Show password',
     'hide_password' => 'Hide password',
