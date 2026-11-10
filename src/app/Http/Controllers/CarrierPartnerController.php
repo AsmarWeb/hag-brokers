@@ -106,6 +106,7 @@ final class CarrierPartnerController extends Controller
                 'name' => $data['name'],
                 'email' => $invitation->email,
                 'phone' => $data['phone'],
+                'phone_verification_required' => true,
                 'password' => Hash::make($data['password']),
             ]);
         }, 3);
@@ -168,11 +169,24 @@ final class CarrierPartnerController extends Controller
     public function updateProfile(Request $request)
     {
         $this->partnership($request->user());
+        $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:30', 'regex:/^[+0-9() .-]+$/'],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
         ]);
-        $request->user()->update($data);
+        $user = $request->user();
+        $phoneChanged = $user->phone !== $data['phone'];
+        $user->name = $data['name'];
+        $user->phone = $data['phone'];
+        if ($phoneChanged) {
+            $user->phone_verified_at = null;
+            $user->phone_verification_required = true;
+            $user->tokens()->delete();
+        }
+        $user->save();
+        if ($phoneChanged) {
+            app(PhoneVerificationService::class)->send($user);
+        }
 
         return back()->with('carrier_status', __('carrier_partner.profile_saved'));
     }
