@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Rules\NonDisposableEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -56,6 +57,7 @@ class AuthController extends Controller
                 'email',
                 'max:255',
                 'unique:users,email',
+                new NonDisposableEmail(),
             ],
 
             'password' => [
