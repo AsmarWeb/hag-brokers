@@ -110,8 +110,8 @@
                             {{ $isAr ? 'رقم الهاتف الدولي' : 'Phone number (international format)' }}
                         </label>
                         @php
-                            $selectedPhoneCountry = old('phone_country_code', \\App\\Services\\Auth\\PhoneNumber::countryFor($user->phone));
-                            $localPhone = old('phone', \\App\\Services\\Auth\\PhoneNumber::nationalNumber($user->phone));
+                            $selectedPhoneCountry = old('phone_country_code', \App\Services\Auth\PhoneNumber::countryFor($user->phone));
+                            $localPhone = old('phone', \App\Services\Auth\PhoneNumber::nationalNumber($user->phone));
                         @endphp
                         <div class="mt-2 grid grid-cols-[minmax(8rem,0.9fr)_minmax(0,1.4fr)] gap-2">
                             <select name="phone_country_code" required autocomplete="tel-country-code"
