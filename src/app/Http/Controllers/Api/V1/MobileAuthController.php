@@ -81,7 +81,10 @@ class MobileAuthController extends Controller
             report($e);
         }
 
-        return response()->json(['data' => $this->token($u, $d['device_name'])], 201);
+        return response()->json([
+            'message' => 'If the account exists, a verification email has been sent. Verify the address before signing in.',
+            'data' => ['email' => $u->email, 'verification_required' => true],
+        ], 202);
     }
 
     public function login(Request $r)
@@ -89,7 +92,7 @@ class MobileAuthController extends Controller
         $d = $r->validate(['email' => ['required', 'email', 'max:255'], 'password' => ['required', 'string', 'max:128'],
             'device_name' => ['required', 'string', 'max:80']]);
         $u = User::where('email', strtolower(trim($d['email'])))->first();
-        if (! $u || ! Hash::check($d['password'], $u->password)) {
+        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedEmail()) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
         if ($u->hasRole(['admin', 'super-admin'])) {
@@ -154,11 +157,20 @@ class MobileAuthController extends Controller
 
     public function resend(Request $r)
     {
-        if (! $r->user()->hasVerifiedEmail()) {
-            $r->user()->notify(new MobileVerifyEmail);
+        $d = $r->validate(['email' => ['required', 'string', 'email', 'max:255']]);
+        $u = User::where('email', strtolower(trim($d['email'])))->first();
+
+        if ($u && ! $u->hasVerifiedEmail()) {
+            try {
+                $u->notify(new MobileVerifyEmail);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
-        return response()->json(['message' => 'Verification email requested.']);
+        return response()->json([
+            'message' => 'If the account exists and is not verified, a verification email will be sent.',
+        ]);
     }
 
     public function verify(Request $r, string $id, string $hash)
