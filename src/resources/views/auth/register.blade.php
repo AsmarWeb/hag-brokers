@@ -123,7 +123,7 @@
         <div>
             <x-input-label for="password" :value="__('auth.password')" />
 
-            <x-password-toggle id="password" name="password" required minlength="6" maxlength="12"
+            <x-password-toggle id="password" name="password" required minlength="12" maxlength="128"
                 autocomplete="new-password" :placeholder="__('auth.password_placeholder')" class="mt-1 block w-full" />
             <p class="mt-1 text-xs text-slate-500">{{ __('auth.password_length_help') }}</p>
 
