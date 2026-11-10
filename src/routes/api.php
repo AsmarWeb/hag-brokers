@@ -60,6 +60,10 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('api.v1.verify');
     Route::post('/auth/verification-email', [$auth, 'resend'])->middleware('throttle:3,1,mobile-resend:');
+    Route::post('/auth/phone-verification', [\\App\\Http\\Controllers\\Auth\\PhoneVerificationController::class, 'resend'])
+        ->middleware('throttle:3,1,phone-verification-send:');
+    Route::post('/auth/verify-phone', [\\App\\Http\\Controllers\\Auth\\PhoneVerificationController::class, 'verify'])
+        ->middleware('throttle:10,1,phone-verification-verify:');
     Route::middleware(['auth:sanctum', MobileToken::class])->group(function () use ($auth) {
         $push=\App\Http\Controllers\Api\V1\MobilePushController::class;
         Route::get('/push/settings',[$push,'settings']);
