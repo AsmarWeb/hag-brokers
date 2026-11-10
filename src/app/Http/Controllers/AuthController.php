@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,6 +17,8 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+
         $validated = $request->validate([
             'company_name' => [
                 'required',
@@ -59,8 +60,12 @@ class AuthController extends Controller
 
             'password' => [
                 'required',
+                'string',
                 'confirmed',
-                'min:8',
+                'min:12',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
             ],
         ]);
 
@@ -145,15 +150,8 @@ class AuthController extends Controller
             report($exception);
         }
 
-        Auth::login($user);
-
-        $request->session()->regenerate();
-
         return redirect()
-            ->route('dashboard')
-            ->with(
-                'success',
-                'Your HAG Brokers account has been created successfully.'
-            );
+            ->route('login')
+            ->with('status', __('auth.verification_email_sent'));
     }
 }
