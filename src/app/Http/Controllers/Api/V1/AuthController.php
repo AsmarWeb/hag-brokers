@@ -26,7 +26,7 @@ class AuthController extends Controller
         if (
             ! $user
             || ! Hash::check($data['password'], $user->password)
-            || ! $user->hasVerifiedEmail()
+            || ! $user->hasVerifiedAccount()
             || NonDisposableEmail::isDisposable($data['email'])
         ) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
