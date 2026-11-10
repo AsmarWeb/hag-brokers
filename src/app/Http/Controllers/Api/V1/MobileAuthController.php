@@ -110,11 +110,11 @@ class MobileAuthController extends Controller
         if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedAccount() || $u->blocked_at || NonDisposableEmail::isDisposable($d['email'])) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
-        $u->forceFill(['last_login_ip' => $r->ip(), 'last_login_at' => now()])->save();
-
         if ($u->hasRole(['admin', 'super-admin'])) {
             return response()->json(['message' => 'Platform administrator accounts use the web dashboard.', 'error_code' => 'AUTH_ADMIN_WEB_ONLY'], 403);
         }
+
+        $u->forceFill(['last_login_ip' => $r->ip(), 'last_login_at' => now()])->save();
 
         return response()->json(['data' => $this->token($u, $d['device_name'])]);
     }
