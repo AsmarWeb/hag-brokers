@@ -27,6 +27,7 @@ class ProfileTest extends TestCase
     {
         Notification::fake();
         $user = User::factory()->create();
+        $user->createToken('mobile:phone', ['mobile:v1']);
 
         $response = $this
             ->actingAs($user)
@@ -38,7 +39,7 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(route('login'));
 
         $user->refresh();
 
@@ -46,6 +47,7 @@ class ProfileTest extends TestCase
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
         $this->assertGuest();
+        $this->assertDatabaseCount('personal_access_tokens', 0);
         Notification::assertSentTo($user, VerifyEmail::class);
     }
 
