@@ -127,6 +127,31 @@ final class SailingImport
         return $plan;
     }
 
+    public function revision(array $plan): string
+    {
+        // Canonicalize object keys because MySQL may reorder JSON keys.
+        $normalize = function (array $data) use (&$normalize): array {
+            if (! array_is_list($data)) {
+                ksort($data);
+            }
+
+            return array_map(fn ($value) => is_array($value) ? $normalize($value) : $value, $data);
+        };
+
+        return hash('sha256', json_encode($normalize($plan), JSON_THROW_ON_ERROR));
+    }
+
+    public function apply(array $plan): void
+    {
+        foreach ($plan as $row) {
+            if ($row['action'] === 'unchanged') {
+                continue;
+            }
+            $sailing = $row['id'] ? FreightSailing::findOrFail($row['id']) : new FreightSailing;
+            $sailing->fill($row['data'])->save();
+        }
+    }
+
     private function fail(string $key, ?int $row = null): never
     {
         throw ValidationException::withMessages(['schedule' => __('sailing_import.'.$key, ['row' => $row])]);

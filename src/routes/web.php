@@ -82,6 +82,12 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureCompanyEmailVerified::clas
             ->where('token', '[A-Za-z0-9]{64}')->name('invitation.show');
         Route::post('/invitations/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'accept'])
             ->where('token', '[A-Za-z0-9]{64}')->name('invitation.accept');
+        Route::get('/schedules', [\App\Http\Controllers\CarrierScheduleController::class, 'index'])->name('schedules.index');
+        Route::get('/schedules/template', [\App\Http\Controllers\CarrierScheduleController::class, 'template'])->name('schedules.template');
+        Route::post('/schedules', [\App\Http\Controllers\CarrierScheduleController::class, 'preview'])
+            ->middleware('throttle:10,1,carrier-schedule-preview:')->name('schedules.preview');
+        Route::post('/schedules/submit', [\App\Http\Controllers\CarrierScheduleController::class, 'submit'])
+            ->middleware('throttle:10,1,carrier-schedule-submit:')->name('schedules.submit');
         Route::get('/fleet', [\App\Http\Controllers\CarrierPartnerController::class, 'fleet'])->name('fleet');
         Route::post('/fleet/requests', [\App\Http\Controllers\CarrierVesselRequestController::class, 'store'])
             ->middleware('throttle:10,1,carrier-vessels:')->name('fleet.requests.store');
@@ -299,6 +305,13 @@ Route::middleware(['auth', 'verified', 'role:super-admin|admin',])
             Route::post('/', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'preview'])->name('import.preview');
             Route::post('/publish', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'publish'])->name('import.publish');
         });
+
+        Route::get('freight-sailings/carrier-submissions', [\App\Http\Controllers\CarrierScheduleController::class, 'queue'])
+            ->name('freight-sailings.carrier-queue');
+        Route::get('freight-sailings/carrier-submissions/{submission}', [\App\Http\Controllers\CarrierScheduleController::class, 'show'])
+            ->name('freight-sailings.carrier-review');
+        Route::patch('freight-sailings/carrier-submissions/{submission}', [\App\Http\Controllers\CarrierScheduleController::class, 'review'])
+            ->middleware('throttle:20,1,carrier-schedule-review:')->name('freight-sailings.carrier-review.store');
 
         Route::resource('freight-sailings', \App\Http\Controllers\Admin\AdminFreightSailingController::class)
             ->parameters(['freight-sailings' => 'sailing'])

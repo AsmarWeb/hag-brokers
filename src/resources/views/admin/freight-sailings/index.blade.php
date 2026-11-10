@@ -7,6 +7,7 @@
             <div class="mt-5 flex flex-wrap gap-3">
                 <a class="hag-broker-action" href="{{ route('admin.freight-sailings.create') }}">+ {{ __('sailings.create') }}</a>
                 <a class="inline-flex min-h-11 items-center rounded-xl border border-cyan-200 px-4 py-2 text-sm font-bold text-white hover:bg-white/10" href="{{ route('admin.freight-sailings.import') }}">{{ __('sailing_import.title') }}</a>
+                <a class="carrier-secondary" href="{{ route('admin.freight-sailings.carrier-queue') }}">{{ __('carrier_schedules.queue') }}</a>
             </div>
         </header>
 
