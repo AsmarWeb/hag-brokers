@@ -6,6 +6,7 @@ use App\Models\Carrier;
 use App\Models\CarrierInvitation;
 use App\Models\CarrierVesselRequest;
 use App\Models\User;
+use App\Rules\NonDisposableEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,8 @@ final class CarrierPartnerController extends Controller
     {
         abort_unless($request->user()->hasVerifiedEmail(), 403);
 
-        $data = $request->validate(['email' => ['required', 'email', 'max:255']]);
+        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+        $data = $request->validate(['email' => ['required', 'email', 'max:255', new NonDisposableEmail()]]);
         $token = Str::random(64);
 
         DB::transaction(function () use ($carrier, $data, $token) {
