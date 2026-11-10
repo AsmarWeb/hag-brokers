@@ -56,6 +56,19 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->get(route('carrier.fleet'))->assertForbidden();
     }
 
+    public function test_disposable_email_addresses_cannot_receive_carrier_invitations(): void
+    {
+        $admin = User::factory()->create();
+        $admin->addRole(Role::firstOrCreate(['name' => 'admin']));
+        $carrier = Carrier::create(['name' => 'Partner', 'code' => 'PARTNER', 'is_active' => true]);
+
+        $this->actingAs($admin)->post(route('admin.carriers.invitations.store', $carrier), [
+            'email' => 'contact@mailinator.com',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertDatabaseCount('carrier_invitations', 0);
+    }
+
     public function test_revoking_access_also_closes_outstanding_links_for_that_representative(): void
     {
         $recipient = User::factory()->create();
@@ -106,7 +119,7 @@ final class CarrierPartnerInvitationTest extends TestCase
         $this->postJson($accept)->assertForbidden();
         $verification = \Illuminate\Support\Facades\URL::temporarySignedRoute('verification.verify',
             now()->addMinutes(10), ['id' => $user->id, 'hash' => sha1($email)]);
-        $this->get($verification)->assertRedirect($accept);
+        $this->get($verification)->assertRedirect(route('login'));
         $this->post($accept)->assertRedirect(route('carrier.fleet'));
         $this->patch(route('carrier.profile.update'), ['name' => 'Verified Representative', 'phone' => '+971 50 000 0000'])
             ->assertRedirect();
