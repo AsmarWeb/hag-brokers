@@ -33,6 +33,7 @@ class ProfileTest extends TestCase
             ->patch('/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
+                'current_password' => 'password',
             ]);
 
         $response
@@ -44,7 +45,39 @@ class ProfileTest extends TestCase
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+        $this->assertGuest();
         Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
+    public function test_email_cannot_be_changed_without_the_current_password(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+        $originalEmail = $user->email;
+
+        $this->actingAs($user)->from('/profile')->patch('/profile', [
+            'name' => 'Changed Name',
+            'email' => 'attacker@example.test',
+            'current_password' => 'wrong-password',
+        ])->assertSessionHasErrors('current_password')->assertRedirect('/profile');
+
+        $this->assertSame($originalEmail, $user->fresh()->email);
+        $this->assertNotNull($user->fresh()->email_verified_at);
+        Notification::assertNothingSent();
+    }
+
+    public function test_profile_email_cannot_be_changed_to_a_disposable_domain(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->from('/profile')->patch('/profile', [
+            'name' => $user->name,
+            'email' => 'takeover@mailinator.com',
+            'current_password' => 'password',
+        ])->assertSessionHasErrors('email')->assertRedirect('/profile');
+
+        $this->assertSame($user->email, $user->fresh()->email);
+        $this->assertNotNull($user->fresh()->email_verified_at);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
