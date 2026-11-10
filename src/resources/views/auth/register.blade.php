@@ -123,8 +123,9 @@
         <div>
             <x-input-label for="password" :value="__('auth.password')" />
 
-            <x-text-input id="password" class="mt-1 block w-full" type="password" name="password" required
-                autocomplete="new-password" :placeholder="__('auth.password_placeholder')" />
+            <x-password-toggle id="password" name="password" required minlength="6" maxlength="12"
+                autocomplete="new-password" :placeholder="__('auth.password_placeholder')" class="mt-1 block w-full" />
+            <p class="mt-1 text-xs text-slate-500">{{ __('auth.password_length_help') }}</p>
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -133,8 +134,8 @@
         <div>
             <x-input-label for="password_confirmation" :value="__('auth.confirm_password')" />
 
-            <x-text-input id="password_confirmation" class="mt-1 block w-full" type="password"
-                name="password_confirmation" required autocomplete="new-password" :placeholder="__('auth.confirm_password_placeholder')" />
+            <x-password-toggle id="password_confirmation" name="password_confirmation" required minlength="6" maxlength="12"
+                autocomplete="new-password" :placeholder="__('auth.confirm_password_placeholder')" class="mt-1 block w-full" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
