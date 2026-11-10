@@ -33,14 +33,14 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
 
-        $user->forceFill(['last_login_ip' => $request->ip(), 'last_login_at' => now()])->save();
-
         if ($user->hasRole(['admin', 'super-admin'])) {
             return response()->json([
                 'success' => false,
                 'message' => 'Platform administrator accounts use the web dashboard.',
             ], 403);
         }
+
+        $user->forceFill(['last_login_ip' => $request->ip(), 'last_login_at' => now()])->save();
 
         $expiresAt = now()->addDays(30);
         $token = $user->createToken('mobile:legacy', ['mobile:v1'], $expiresAt);
