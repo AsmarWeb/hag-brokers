@@ -11,4 +11,7 @@ return [
         static fn (string $domain): string => strtolower(trim($domain)),
         $domains
     )))),
+    'phone_otp_ttl_minutes' => 10,
+    'phone_otp_max_attempts' => 5,
+    'phone_otp_resend_cooldown_seconds' => 60,
 ];
