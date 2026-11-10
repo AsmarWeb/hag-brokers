@@ -34,7 +34,7 @@ class MobileApiFoundationTest extends TestCase
 
     private function payload(array $x = []): array
     {
-        return array_replace(['account_type' => 'individual', 'name' => 'Person', 'email' => 'mobile@example.test', 'password' => 'correct-password-123', 'password_confirmation' => 'correct-password-123', 'device_name' => 'phone'], $x);
+        return array_replace(['account_type' => 'individual', 'name' => 'Person', 'email' => 'mobile@example.test', 'phone' => '+971501234567', 'password' => 'correct-password-123', 'password_confirmation' => 'correct-password-123', 'device_name' => 'phone'], $x);
     }
 
     private function bearer(User $u, array $abilities = ['mobile:v1']): array
@@ -72,6 +72,7 @@ class MobileApiFoundationTest extends TestCase
         $this->assertNull($u->customer_id);
         $this->assertDatabaseCount('company_workspaces', 0);
         $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertFalse($u->hasVerifiedPhone());
         $this->postJson('/api/v1/auth/login', [
             'email' => $u->email, 'password' => 'correct-password-123', 'device_name' => 'phone',
         ])->assertUnprocessable()->assertJsonValidationErrors('email');
