@@ -19,7 +19,10 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+        $request->merge([
+            'email' => strtolower(trim((string) $request->input('email'))),
+            'phone' => PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code')),
+        ]);
 
         $validated = $request->validate([
             'company_name' => [
@@ -34,11 +37,8 @@ class AuthController extends Controller
                 'max:255',
             ],
 
-            'phone' => [
-                'required',
-                'string',
-                'regex:/^\\+[1-9][0-9]{7,14}$/D',
-            ],
+            'phone_country_code' => ['required', 'string', \\Illuminate\\Validation\\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
 
             'country_code' => [
                 'required',
