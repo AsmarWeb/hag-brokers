@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\User;
 use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneNumber;
 use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,8 +38,8 @@ class AuthController extends Controller
                 'max:255',
             ],
 
-            'phone_country_code' => ['required', 'string', \\Illuminate\\Validation\\Rule::in(array_keys(config('phone.countries', [])))],
-            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
+            'phone_country_code' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
 
             'country_code' => [
                 'required',
@@ -152,6 +153,7 @@ class AuthController extends Controller
         } catch (\Throwable $exception) {
             report($exception);
         }
+        app(PhoneVerificationService::class)->send($user);
 
         return redirect()
             ->route('login')
