@@ -74,10 +74,12 @@ return [$u, $w];
     public function test_registration_creates_free_workspace_and_sends_email_verification(): void
     {
         Notification::fake();
-        $this->post('/register', ['company_name' => 'Automatic Company', 'contact_person' => 'Owner', 'phone' => '+971500000001', 'country_code' => 'AE', 'city' => 'Dubai', 'email' => 'owner@example.test', 'password' => 'password123', 'password_confirmation' => 'password123'])->assertRedirect(route('dashboard', absolute: false));
+        $this->post('/register', ['company_name' => 'Automatic Company', 'contact_person' => 'Owner', 'phone' => '+971500000001', 'country_code' => 'AE', 'city' => 'Dubai', 'email' => 'owner@example.test', 'password' => 'Strong-password-123!', 'password_confirmation' => 'Strong-password-123!'])->assertRedirect(route('login'));
+        $this->assertGuest();
         $u = User::where('email', 'owner@example.test')->firstOrFail();
         $w = CompanyWorkspace::firstOrFail();
         $this->assertSame($u->customer_id, $w->customer_id);
+        $this->assertFalse($u->hasVerifiedEmail());
         $this->assertDatabaseHas('company_members', ['user_id' => $u->id, 'role' => 'owner']);
         Notification::assertSentTo($u, VerifyEmail::class);
     }
