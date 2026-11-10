@@ -115,7 +115,7 @@ final class CarrierPartnerController extends Controller
         $request->session()->put('url.intended', route('carrier.invitation.show', ['token' => $token]));
         try {
             $user->sendEmailVerificationNotification();
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             report($exception);
         }
 
