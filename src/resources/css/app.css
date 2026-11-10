@@ -396,3 +396,18 @@ main>.cw-navigation{padding-inline:24px}
   color: #155e75;
 }
 .dark .carrier-vessel-mark { background: #164e63; color: #a5f3fc; }
+
+
+/* HAG_PHONE_SELECTOR */
+.iti {
+    width: 100%;
+}
+
+.iti input {
+    width: 100%;
+}
+
+.iti__country-list {
+    z-index: 100;
+    max-width: min(320px, 90vw);
+}

@@ -46,26 +46,33 @@
         </div>
 
         {{-- Phone --}}
-        <div>
-            <x-input-label for="phone" :value="__('auth.phone')" />
+<div>
+    <x-input-label for="phone" :value="__('auth.phone')" />
 
-            <div class="mt-1 grid grid-cols-[minmax(8rem,0.9fr)_minmax(0,1.5fr)] gap-3">
-                <select id="phone_country_code" name="phone_country_code" required autocomplete="tel-country-code"
-                    class="block w-full rounded-md border-slate-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
-                    @foreach (config('phone.countries', []) as $iso => $country)
-                        <option value="{{ $iso }}" @selected(old('phone_country_code', 'AE') === $iso)>
-                            {{ $country['dial_code'] }} · {{ $isAr ? $country['name_ar'] : $country['name'] }}
-                        </option>
-                    @endforeach
-                </select>
-                <x-text-input id="phone" class="block w-full" type="tel" name="phone" :value="old('phone')"
-                    required autocomplete="tel-national" inputmode="tel" placeholder="50 123 4567" />
-            </div>
+    <input
+        type="hidden"
+        id="phone_country_code"
+        name="phone_country_code"
+        value="{{ old('phone_country_code', 'AE') }}"
+    >
 
-            <x-input-error :messages="$errors->get('phone')" class="mt-2" />
-        </div>
+    <x-text-input
+        id="phone"
+        class="mt-1 block w-full"
+        type="tel"
+        name="phone"
+        :value="old('phone')"
+        required
+        autocomplete="tel"
+        inputmode="tel"
+        placeholder="50 123 4567"
+    />
 
-        {{-- Country --}}
+    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+    <x-input-error :messages="$errors->get('phone_country_code')" class="mt-2" />
+</div>
+
+{{-- Country --}}
         <div>
             <x-input-label for="country_code" :value="__('auth.country')" />
 
