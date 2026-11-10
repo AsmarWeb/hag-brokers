@@ -27,10 +27,13 @@ class AuthController extends Controller
             ! $user
             || ! Hash::check($data['password'], $user->password)
             || ! $user->hasVerifiedAccount()
+            || $user->blocked_at
             || NonDisposableEmail::isDisposable($data['email'])
         ) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
+
+        $user->forceFill(['last_login_ip' => $request->ip(), 'last_login_at' => now()])->save();
 
         if ($user->hasRole(['admin', 'super-admin'])) {
             return response()->json([
