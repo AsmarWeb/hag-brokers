@@ -105,7 +105,7 @@ class AdminUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user), new \App\Rules\NonDisposableEmail()],
             'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
-            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
+            'phone' => ['nullable', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
             'password' => ['nullable', 'string', 'min:12', 'max:128', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'roles' => ['sometimes', 'array'],
