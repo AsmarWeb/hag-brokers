@@ -73,6 +73,7 @@ class MobileApiFoundationTest extends TestCase
         $this->assertDatabaseCount('company_workspaces', 0);
         $this->assertDatabaseCount('personal_access_tokens', 0);
         $this->assertFalse($u->hasVerifiedPhone());
+        $this->assertTrue($u->phone_verification_required);
         $this->postJson('/api/v1/auth/login', [
             'email' => $u->email, 'password' => 'correct-password-123', 'device_name' => 'phone',
         ])->assertUnprocessable()->assertJsonValidationErrors('email');
