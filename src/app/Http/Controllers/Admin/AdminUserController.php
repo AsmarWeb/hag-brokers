@@ -137,6 +137,7 @@ class AdminUserController extends Controller
 
             if ($emailChanged) {
                 $user->email_verified_at = null;
+                $user->remember_token = \Illuminate\Support\Str::random(60);
             }
 
             if (! empty($data['password'])) {
@@ -147,6 +148,10 @@ class AdminUserController extends Controller
 
             $user->syncRoles(array_map('intval', $data['roles'] ?? []));
             $user->syncPermissions(array_map('intval', $data['permissions'] ?? []));
+
+            if ($emailChanged) {
+                $user->tokens()->delete();
+            }
         });
 
         if ($emailChanged) {
