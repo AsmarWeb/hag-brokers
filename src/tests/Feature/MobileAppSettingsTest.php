@@ -35,7 +35,7 @@ class MobileAppSettingsTest extends TestCase
         $this->assertDatabaseCount('mobile_app_setting_audits', 0);
     }
 
-    public function test_only_verified_platform_administrators_can_manage_content(): void
+    public function test_platform_administrators_can_manage_content_without_verification(): void
     {
         $this->get('/admin/mobile-app')->assertRedirect();
         $this->actingAs(User::factory()->create())->get('/admin/mobile-app')->assertForbidden();
