@@ -1,6 +1,6 @@
 <?php
 
-namespace App\\Services\\Auth;
+namespace App\Services\Auth;
 
 final class PhoneNumber
 {
@@ -17,9 +17,9 @@ final class PhoneNumber
         $localNumber = trim($localNumber);
 
         if (str_starts_with($localNumber, '+')) {
-            $international = '+'.preg_replace('/\\D+/', '', substr($localNumber, 1));
+            $international = '+'.preg_replace('/\D+/', '', substr($localNumber, 1));
 
-            return preg_match('/^\\+[1-9][0-9]{7,14}$/D', $international) ? $international : null;
+            return preg_match('/^\+[1-9][0-9]{7,14}$/D', $international) ? $international : null;
         }
 
         if (! is_string($countryIso) || $countryIso === '') {
@@ -32,7 +32,7 @@ final class PhoneNumber
             return null;
         }
 
-        $digits = preg_replace('/\\D+/', '', $localNumber);
+        $digits = preg_replace('/\D+/', '', $localNumber);
 
         if (! is_string($digits) || $digits === '') {
             return null;
@@ -77,7 +77,7 @@ final class PhoneNumber
         $country = config('phone.countries.'.self::countryFor($phone));
 
         if (! is_array($country)) {
-            return preg_replace('/\\D+/', '', $phone);
+            return preg_replace('/\D+/', '', $phone);
         }
 
         return ltrim(substr($phone, strlen($country['dial_code'])), '0');
