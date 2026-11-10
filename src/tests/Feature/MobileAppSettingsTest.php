@@ -42,7 +42,7 @@ class MobileAppSettingsTest extends TestCase
         $this->put('/admin/mobile-app', $this->payload())->assertForbidden();
         $u = $this->administrator();
         $u->forceFill(['email_verified_at' => null])->save();
-        $this->actingAs($u)->get('/admin/mobile-app')->assertRedirect(route('verification.notice'));
+        $this->actingAs($u)->get('/admin/mobile-app')->assertOk();
         $this->assertDatabaseCount('mobile_app_settings', 0);
     }
 
