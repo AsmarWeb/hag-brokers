@@ -65,7 +65,10 @@ class MobileAccountSecurityTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('email');
 
         $this->assertDatabaseCount('users', 0);
-        $u = User::factory()->create(['email' => 'legacy@mailinator.com']);
+        $u = User::factory()->create([
+            'email' => 'legacy@mailinator.com',
+            'password' => Hash::make('Old-password-123!'),
+        ]);
 
         $this->postJson('/api/v1/auth/login', [
             'email' => $u->email,
