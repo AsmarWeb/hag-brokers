@@ -167,7 +167,7 @@ return [
     'verification_help' => 'لم يصلك رابط التأكيد؟ أدخل بريدك الإلكتروني لطلب رابط جديد.',
     'resend_verification_email' => 'إعادة إرسال رابط التأكيد',
     'disposable_email' => 'يرجى استخدام بريد إلكتروني دائم؛ لا نقبل خدمات البريد المؤقت.',
-    'current_password_for_email_change' => 'مطلوبة فقط عند تغيير عنوان بريدك الإلكتروني.'
+    'current_password_for_email_change' => 'مطلوبة فقط عند تغيير عنوان بريدك الإلكتروني.',
 
     'show_password' => 'إظهار كلمة المرور',
     'hide_password' => 'إخفاء كلمة المرور',
