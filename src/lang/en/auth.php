@@ -152,6 +152,7 @@ return [
     'email_verified_login' => 'Your email address has been verified. You can now sign in.',
     'verification_help' => 'Have not received a verification link? Enter your email to request a new one.',
     'resend_verification_email' => 'Resend verification email',
-    'disposable_email' => 'Please use a permanent email address. Disposable email services are not accepted.'
+    'disposable_email' => 'Please use a permanent email address. Disposable email services are not accepted.',
+    'current_password_for_email_change' => 'Required only when you change your email address.'
 
 ];
