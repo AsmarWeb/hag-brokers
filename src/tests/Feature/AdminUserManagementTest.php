@@ -114,6 +114,57 @@ class AdminUserManagementTest extends TestCase
         $this->assertDatabaseMissing('users', ['id' => $target->id]);
     }
 
+    public function test_admin_can_block_and_unblock_a_user_and_revoke_api_tokens(): void
+    {
+        $admin = $this->admin();
+        $target = User::factory()->create();
+        $token = $target->createToken('mobile:test');
+
+        $this->actingAs($admin)->patch(route('admin.users.block', $target), [
+            'blocked_reason' => 'Policy violation',
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $this->assertNotNull($target->fresh()->blocked_at);
+        $this->assertSame('Policy violation', $target->fresh()->blocked_reason);
+        $this->assertDatabaseMissing('personal_access_tokens', ['id' => $token->accessToken->id]);
+
+        $this->patch(route('admin.users.unblock', $target))
+            ->assertRedirect()->assertSessionHas('success');
+
+        $this->assertNull($target->fresh()->blocked_at);
+        $this->assertNull($target->fresh()->blocked_reason);
+    }
+
+    public function test_admin_cannot_block_themselves_or_another_administrator(): void
+    {
+        $admin = $this->admin();
+        $otherAdmin = $this->admin();
+
+        $this->actingAs($admin)->patch(route('admin.users.block', $admin))
+            ->assertSessionHas('error');
+        $this->patch(route('admin.users.block', $otherAdmin))
+            ->assertSessionHas('error');
+
+        $this->assertNull($admin->fresh()->blocked_at);
+        $this->assertNull($otherAdmin->fresh()->blocked_at);
+    }
+
+    public function test_blocked_user_cannot_sign_in(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'blocked@example.test',
+            'password' => Hash::make('Strong-password-123!'),
+            'blocked_at' => now(),
+        ]);
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'Strong-password-123!',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'email' => $user->email]);
+    }
+
     public function test_regular_user_cannot_create_edit_or_delete_accounts(): void
     {
         $user = User::factory()->create();
