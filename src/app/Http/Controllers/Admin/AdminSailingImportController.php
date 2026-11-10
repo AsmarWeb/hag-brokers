@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\FreightSailing;
 use App\Services\Freight\SailingCatalog;
 use App\Services\Freight\SailingImport;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -40,7 +39,7 @@ final class AdminSailingImportController extends Controller
             'user' => $request->user()->id,
             'expires' => now()->addMinutes(15)->timestamp,
             'rows' => $rows,
-            'revision' => $this->revision($plan),
+            'revision' => $import->revision($plan),
         ]);
 
         return response()->view('admin.freight-sailings.import', compact('plan', 'token'))
@@ -59,16 +58,10 @@ final class AdminSailingImportController extends Controller
         try {
             DB::transaction(function () use ($import, $catalog, $preview) {
                 $plan = $import->plan($preview['rows'], $catalog, true);
-                if (! hash_equals($preview['revision'], $this->revision($plan))) {
+                if (! hash_equals($preview['revision'], $import->revision($plan))) {
                     $this->stale();
                 }
-                foreach ($plan as $row) {
-                    if ($row['action'] === 'unchanged') {
-                        continue;
-                    }
-                    $sailing = $row['id'] ? FreightSailing::findOrFail($row['id']) : new FreightSailing;
-                    $sailing->fill($row['data'])->save();
-                }
+                $import->apply($plan);
             }, 3);
         } catch (UniqueConstraintViolationException) {
             $this->stale();
@@ -77,11 +70,6 @@ final class AdminSailingImportController extends Controller
         $request->session()->forget('sailing_import');
 
         return redirect()->route('admin.freight-sailings.index')->with('success', __('sailing_import.published'));
-    }
-
-    private function revision(array $plan): string
-    {
-        return hash('sha256', json_encode($plan, JSON_THROW_ON_ERROR));
     }
 
     private function stale(): never

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
@@ -21,6 +22,11 @@ class User extends Authenticatable implements LaratrustUser
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function carrierPartnership(): HasOne
+    {
+        return $this->hasOne(CarrierInvitation::class)->whereNotNull('accepted_at')->whereNull('revoked_at');
     }
 
     protected static function booted(): void
