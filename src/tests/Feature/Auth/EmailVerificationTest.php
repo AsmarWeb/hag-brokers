@@ -15,6 +15,27 @@ class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_platform_administrators_can_sign_in_without_email_or_phone_verification(): void
+    {
+        $admin = User::factory()->unverified()->create([
+            'password' => bcrypt('Admin-password-123!'),
+            'phone_verified_at' => null,
+            'phone_verification_required' => true,
+        ]);
+        $admin->addRole(Role::firstOrCreate(['name' => 'admin'], ['display_name' => 'Administrator']));
+
+        $this->assertTrue($admin->hasVerifiedEmail());
+        $this->assertTrue($admin->hasVerifiedPhone());
+        $this->assertTrue($admin->hasVerifiedAccount());
+
+        $this->post('/login', [
+            'email' => $admin->email,
+            'password' => 'Admin-password-123!',
+        ])->assertSessionHasNoErrors();
+
+        $this->assertAuthenticatedAs($admin);
+    }
+
     public function test_email_verification_screen_can_be_rendered(): void
     {
         $user = User::factory()->unverified()->create();
