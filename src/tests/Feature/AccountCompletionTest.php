@@ -56,8 +56,9 @@ class AccountCompletionTest extends TestCase
         $this->putJson('/api/v1/auth/account', $payload + ['current_password' => 'Current-pass-123'])->assertOk()->assertJsonPath('data.user.email', 'new@example.test')->assertJsonPath('data.user.email_verified', false);
         $this->assertNull($u->fresh()->email_verified_at);
         $this->assertDatabaseMissing('personal_access_tokens', ['id' => $other->accessToken->id]);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
         auth()->forgetGuards();
-        $this->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.email_verified', false);
+        $this->getJson('/api/v1/me')->assertUnauthorized();
         Notification::assertSentTo($u, MobileVerifyEmail::class);
         $this->assertDatabaseHas('customers', ['id' => $c->id, 'company_name' => 'Immutable business']);
         $this->assertSame($c->id, $u->fresh()->customer_id);
