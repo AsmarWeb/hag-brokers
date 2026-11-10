@@ -64,13 +64,17 @@ class MobileApiFoundationTest extends TestCase
     public function test_individual_registration_has_no_workspace_and_issues_scoped_expiring_token(): void
     {
         Notification::fake();
-        $r = $this->postJson('/api/v1/auth/register', $this->payload())->assertCreated()->assertJsonPath('data.user.account_type', 'individual')->assertJsonPath('data.user.email_verified', false);
+        $this->postJson('/api/v1/auth/register', $this->payload())
+            ->assertAccepted()
+            ->assertJsonPath('data.email', 'mobile@example.test')
+            ->assertJsonPath('data.verification_required', true);
         $u = User::firstOrFail();
         $this->assertNull($u->customer_id);
         $this->assertDatabaseCount('company_workspaces', 0);
-        $this->assertSame(['mobile:v1'], $u->tokens()->first()->abilities);
-        $this->assertNotNull($u->tokens()->first()->expires_at);
-        $this->withHeaders(['Authorization' => 'Bearer '.$r->json('data.access_token')])->getJson('/api/v1/me')->assertOk();
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email, 'password' => 'correct-password-123', 'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
         Notification::assertSentTo($u, MobileVerifyEmail::class);
     }
 
@@ -85,7 +89,8 @@ class MobileApiFoundationTest extends TestCase
         $this->assertDatabaseCount('customers', 0);
         PlatformPlan::where('code', 'free')->update(['is_available' => true]);
         config(['platform_billing.free_launch' => true]);
-        $this->postJson('/api/v1/auth/register', $d)->assertCreated()->assertJsonPath('data.user.company.role', 'owner');
+        $this->postJson('/api/v1/auth/register', $d)->assertAccepted()->assertJsonPath('data.verification_required', true);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
         $this->assertSame('free', app(CompanyWorkspaceService::class)->plan(CompanyWorkspace::first())['code']);
     }
 
