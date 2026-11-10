@@ -34,6 +34,8 @@ class MobileAccountSecurityTest extends TestCase
     public function test_valid_individual_login_returns_a_usable_scoped_token(): void
     {
         $u = $this->account();
+        // Legacy accounts predate the phone-verification gate and remain email-verified only.
+        $u->forceFill(['phone_verified_at' => null, 'phone_verification_required' => false])->save();
         $r = $this->postJson('/api/v1/auth/login', ['email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone'])->assertOk()->assertJsonPath('data.user.id', $u->id);
         $token = $r->json('data.access_token');
         auth()->forgetGuards();
