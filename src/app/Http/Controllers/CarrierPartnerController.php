@@ -7,6 +7,8 @@ use App\Models\CarrierInvitation;
 use App\Models\CarrierVesselRequest;
 use App\Models\User;
 use App\Rules\NonDisposableEmail;
+use App\Services\Auth\PhoneNumber;
+use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
