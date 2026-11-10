@@ -14,6 +14,11 @@
                 <x-input-error :messages="$errors->get('name')" class="mt-1" />
             </div>
             <div>
+                <x-input-label for="partner-phone" :value="__('auth.phone')" />
+                <x-text-input id="partner-phone" name="phone" type="tel" :value="old('phone')" placeholder="+971501234567" required autocomplete="tel" class="mt-1 block w-full" dir="ltr" />
+                <x-input-error :messages="$errors->get('phone')" class="mt-1" />
+            </div>
+            <div>
                 <x-input-label for="partner-password" :value="__('carrier_partner.new_password')" />
                 <x-text-input id="partner-password" name="password" type="password" minlength="12" required autocomplete="new-password" class="mt-1 block w-full" />
                 <x-input-error :messages="$errors->get('password')" class="mt-1" />
