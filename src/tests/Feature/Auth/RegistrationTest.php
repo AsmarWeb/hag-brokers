@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\CompanyMember;
+use App\Models\CompanyWorkspace;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,200 +18,117 @@ class RegistrationTest extends TestCase
         $this->get('/register')->assertOk();
     }
 
-    public function test_new_company_can_register(): void
+    public function test_registration_creates_a_personal_account_without_creating_a_company_or_phone(): void
     {
-        $response = $this->post('/register', [
-            'company_name' => 'Test Trading LLC',
-            'contact_person' => 'Test User',
-            'phone' => '+971501234567',
-            'country_code' => 'AE',
-            'city' => 'Dubai',
-            'email' => 'test@example.com',
-            'password' => 'Strong-password-123!',
-            'password_confirmation' => 'Strong-password-123!',
-        ]);
+        $response = $this->post('/register', $this->registrationPayload('personal@example.test'));
 
-        $response->assertSessionHasNoErrors();
+        $response->assertSessionHasNoErrors()->assertRedirect(route('login'));
+        $user = User::where('email', 'personal@example.test')->firstOrFail();
 
-        $user = User::where('email', 'test@example.com')->firstOrFail();
-
-        $customer = Customer::findOrFail($user->customer_id);
-
-        $this->assertSame('Test Trading LLC', $customer->company_name);
-        $this->assertSame('Test User', $user->name);
-
-        $this->assertGuest();
+        $this->assertSame('Personal User', $user->name);
+        $this->assertNull($user->customer_id);
+        $this->assertNull($user->phone);
+        $this->assertTrue($user->phone_verification_required);
         $this->assertFalse($user->hasVerifiedEmail());
-        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+        $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('company_workspaces', 0);
+        $this->assertDatabaseCount('company_members', 0);
     }
 
-    public function test_new_company_receives_welcome_notification(): void
+    public function test_new_personal_account_receives_welcome_notification(): void
     {
-        $this->post('/register', [
-            'company_name' => 'Welcome Trading LLC',
-            'contact_person' => 'Welcome User',
-            'phone' => '+971501234567',
-            'country_code' => 'AE',
-            'city' => 'Dubai',
-            'email' => 'welcome@example.test',
-            'password' => 'Strong-password-123!',
-            'password_confirmation' => 'Strong-password-123!',
-        ])->assertSessionHasNoErrors();
+        $this->post('/register', $this->registrationPayload('welcome@example.test'))
+            ->assertSessionHasNoErrors();
 
         $user = User::where('email', 'welcome@example.test')->firstOrFail();
-
-        $welcome = $user->notifications()
-            ->where('data->type', 'account.welcome')
-            ->get();
+        $welcome = $user->notifications()->where('data->type', 'account.welcome')->get();
 
         $this->assertCount(1, $welcome);
         $this->assertSame('Welcome to HAG Brokers', $welcome->first()->data['title']);
         $this->assertNull($welcome->first()->read_at);
+        $this->assertDatabaseCount('customers', 0);
     }
 
-    public function test_registration_notifies_admin_and_welcomes_customer_once(): void
+    public function test_registration_notifies_admin_and_welcomes_user_once(): void
     {
-        $admin = User::factory()->create([
-            'role' => 'admin',
-        ]);
+        $admin = User::factory()->create(['role' => 'admin']);
+        $admin->addRole(\App\Models\Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'Administrator']
+        ));
 
-        $admin->addRole(
-            \App\Models\Role::firstOrCreate(
-                ['name' => 'admin'],
-                ['display_name' => 'Administrator']
-            )
-        );
+        $this->post('/register', $this->registrationPayload('notification@example.test'))
+            ->assertSessionHasNoErrors();
 
-        $response = $this->post('/register', [
-            'company_name' => 'Notification Test LLC',
-            'contact_person' => 'Notification Customer',
-            'phone' => '+971501234567',
-            'country_code' => 'AE',
-            'city' => 'Dubai',
-            'email' => 'notification-customer@example.test',
-            'password' => 'Strong-password-123!',
-            'password_confirmation' => 'Strong-password-123!',
-        ]);
-
-        $response->assertSessionHasNoErrors();
-
-        $customer = User::where(
-            'email',
-            'notification-customer@example.test'
-        )->firstOrFail();
-
-        $this->assertSame(
-            1,
-            $customer->notifications()
-                ->where('data->type', 'account.welcome')
-                ->count()
-        );
-
-        $this->assertSame(
-            1,
-            $admin->notifications()
-                ->where('data->type', 'user.created')
-                ->count()
-        );
+        $user = User::where('email', 'notification@example.test')->firstOrFail();
+        $this->assertSame(1, $user->notifications()->where('data->type', 'account.welcome')->count());
+        $this->assertSame(1, $admin->notifications()->where('data->type', 'user.created')->count());
     }
 
     public function test_disposable_email_domains_are_rejected_before_account_creation(): void
     {
-        $this->post('/register', [
-            'company_name' => 'Disposable Mail LLC',
-            'contact_person' => 'Disposable User',
-            'phone' => '+971501234567',
-            'country_code' => 'AE',
-            'email' => 'signup@mailinator.com',
-            'password' => 'Strong-password-123!',
-            'password_confirmation' => 'Strong-password-123!',
-        ])->assertSessionHasErrors('email');
+        $this->post('/register', $this->registrationPayload('signup@mailinator.com'))
+            ->assertSessionHasErrors('email');
 
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('customers', 0);
     }
 
-    private function welcomeRegistrationPayload(string $email): array
+    public function test_company_and_phone_fields_are_not_accepted_during_personal_registration(): void
+    {
+        $payload = $this->registrationPayload('legacy-payload@example.test');
+        $payload['company_name'] = 'Must not be created';
+        $payload['phone'] = '+971501234567';
+
+        $this->post('/register', $payload)->assertSessionHasErrors(['company_name', 'phone']);
+        $this->assertDatabaseCount('users', 0);
+        $this->assertDatabaseCount('customers', 0);
+    }
+
+    public function test_email_verified_user_can_sign_in_before_phone_setup(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'verified@example.test',
+            'password' => bcrypt('Strong-password-123!'),
+            'email_verified_at' => now(),
+            'phone' => null,
+            'phone_verification_required' => true,
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'Strong-password-123!',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_unverified_email_user_cannot_sign_in(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'unverified@example.test',
+            'password' => bcrypt('Strong-password-123!'),
+            'email_verified_at' => null,
+            'phone' => null,
+            'phone_verification_required' => true,
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'Strong-password-123!',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertGuest();
+    }
+
+    private function registrationPayload(string $email): array
     {
         return [
-            'company_name' => 'Welcome Mail Trading LLC',
-            'contact_person' => 'Welcome Mail User',
-            'phone' => '+971501234567',
-            'country_code' => 'AE',
-            'city' => 'Dubai',
+            'name' => 'Personal User',
             'email' => $email,
             'password' => 'Strong-password-123!',
             'password_confirmation' => 'Strong-password-123!',
         ];
     }
-
-    public function test_welcome_email_is_queued_when_enabled(): void
-    {
-        \Illuminate\Support\Facades\Mail::fake();
-        config()->set('welcome_mail.enabled', true);
-
-        $this->post('/register', $this->welcomeRegistrationPayload(
-            'welcome-mail@example.test'
-        ))->assertSessionHasNoErrors();
-
-        \Illuminate\Support\Facades\Mail::assertQueued(
-            \App\Mail\WelcomeAccountMail::class,
-            function ($mail) {
-                return $mail->hasTo('welcome-mail@example.test')
-                    && $mail->recipientName === 'Welcome Mail User';
-            }
-        );
-    }
-
-    public function test_welcome_email_is_not_queued_when_disabled(): void
-    {
-        \Illuminate\Support\Facades\Mail::fake();
-        config()->set('welcome_mail.enabled', false);
-
-        $this->post('/register', $this->welcomeRegistrationPayload(
-            'disabled-mail@example.test'
-        ))->assertSessionHasNoErrors();
-
-        \Illuminate\Support\Facades\Mail::assertNotQueued(\App\Mail\WelcomeAccountMail::class);
-        \Illuminate\Support\Facades\Mail::assertNotSent(\App\Mail\WelcomeAccountMail::class);
-    }
-
-    public function test_registration_succeeds_when_sms_provider_rejects_verification_message(): void
-    {
-        \Illuminate\Support\Facades\Http::fake([
-            'https://api.twilio.com/*' => \Illuminate\Support\Facades\Http::response(
-                ['message' => 'Provider unavailable'],
-                503
-            ),
-        ]);
-
-        config()->set('services.twilio.account_sid', 'AC_TEST_ACCOUNT');
-        config()->set('services.twilio.auth_token', 'test-token');
-        config()->set('services.twilio.from', '+15005550006');
-
-        $response = $this->post('/register', $this->welcomeRegistrationPayload(
-            'sms-provider-failure@example.test'
-        ));
-
-        $response->assertSessionHasNoErrors()
-            ->assertRedirect(route('login'));
-
-        $user = User::where('email', 'sms-provider-failure@example.test')
-            ->firstOrFail();
-
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'phone' => '+971501234567',
-        ]);
-
-        $this->assertDatabaseMissing('phone_verifications', [
-            'user_id' => $user->id,
-        ]);
-
-        \Illuminate\Support\Facades\Http::assertSent(
-            fn ($request) => str_contains($request->url(), 'Messages.json')
-                && $request['To'] === '+971501234567'
-        );
-    }
-
 }
