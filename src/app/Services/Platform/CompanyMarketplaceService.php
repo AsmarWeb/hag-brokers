@@ -65,7 +65,7 @@ final class CompanyMarketplaceService
         $user = User::whereKey($actor->id)->lockForUpdate()->firstOrFail();
         $member = CompanyMember::where('user_id', $user->id)->where('company_workspace_id', $w->id)->lockForUpdate()->first();
         $customer = Customer::whereKey($w->customer_id)->lockForUpdate()->firstOrFail();
-        abort_unless($member && $w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id && $user->hasVerifiedEmail() && ! $user->hasRole(['admin', 'super-admin']), 403);
+        abort_unless($member && $w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id && $user->hasVerifiedEmail() && (! $user->phone_verification_required || $user->hasVerifiedPhone()) && ! $user->hasRole(['admin', 'super-admin']), 403);
         if ($publish) {
             abort_unless(in_array($member->role, ['owner', 'manager'], true), 403);
         }
