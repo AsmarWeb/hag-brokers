@@ -31,6 +31,10 @@ class AuthController extends Controller
             'phone' => ['prohibited'],
             'customer_id' => ['prohibited'],
             'role' => ['prohibited'],
+            'account_type' => ['prohibited'],
+            'country_code' => ['prohibited'],
+            'city' => ['prohibited'],
+            'phone_country_code' => ['prohibited'],
         ]);
 
         $user = User::create([
