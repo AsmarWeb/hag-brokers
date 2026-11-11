@@ -31,7 +31,7 @@ final class PhoneVerificationController extends Controller
         ]);
         $data = $request->validate([
             'phone_country_code' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
-            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
+            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D', \Illuminate\Validation\Rule::unique('users', 'phone')->ignore($request->user()->id)],
             'current_password' => ['nullable', 'string', 'max:128'],
             'email' => ['prohibited'], 'phone_verified_at' => ['prohibited'], 'phone_verification_required' => ['prohibited'],
         ]);
