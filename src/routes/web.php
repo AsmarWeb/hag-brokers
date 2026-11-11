@@ -261,15 +261,15 @@ Route::get('/opportunities', [
 Route::get('/opportunities/create', [
     OpportunityController::class,
     'create',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.create');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.create');
 
 Route::post('/opportunities', [
     OpportunityController::class,
     'store',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.store');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.store');
 
 Route::post('/company/opportunity-assistant', \App\Http\Controllers\OpportunityAssistantController::class)
-    ->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:4,1'])->name('company.opportunity-assistant');
+    ->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:4,1'])->name('company.opportunity-assistant');
 
 Route::get('/opportunities/{opportunity:slug}', [
     OpportunityController::class,
@@ -279,12 +279,12 @@ Route::get('/opportunities/{opportunity:slug}', [
 Route::get('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'interest',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.interest');
 
 Route::post('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'storeInterest',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, 'throttle:30,1'])->name('opportunities.interest.store');
+])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.interest.store');
 
 
 Route::get('/bring-a-deal', [LeadController::class, 'create'])
@@ -666,7 +666,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
 });
 Route::get('/companies/{slug}', [\App\Http\Controllers\CompanyProfileController::class, 'show'])->where('slug', 'company-[a-f0-9-]{36}')->name('companies.show');
 
-Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, 'verified'])->group(function(){
+Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, 'verified', \App\Http\Middleware\EnsureCompanyWorkspace::class])->group(function(){
     Route::get('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'edit'])->name('company.mail.edit');
     Route::put('/company/email-settings',[\App\Http\Controllers\CompanyMailController::class,'update'])->middleware('throttle:20,1')->name('company.mail.update');
 });
