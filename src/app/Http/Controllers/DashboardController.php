@@ -27,6 +27,7 @@ class DashboardController extends Controller
             'stats' => $stats,
             'hasCompanyWorkspace' => CompanyMember::where('user_id', $user->id)->exists(),
             'phoneVerified' => $user->hasVerifiedPhone(),
+            'phoneVerificationRequired' => (bool) $user->phone_verification_required,
             'hasCarrierFleet' => $user->hasVerifiedEmail()
                 && $user->carrierPartnership()->whereHas('carrier', fn ($query) => $query->where('is_active', true))->exists(),
         ]);
