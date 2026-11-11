@@ -71,17 +71,43 @@ return [$u, $w];
         return $a;
     }
 
-    public function test_registration_creates_free_workspace_and_sends_email_verification(): void
+    public function test_registration_is_personal_and_company_workspace_is_created_after_verification(): void
     {
         Notification::fake();
-        $this->post('/register', ['company_name' => 'Automatic Company', 'contact_person' => 'Owner', 'phone' => '+971500000001', 'country_code' => 'AE', 'city' => 'Dubai', 'email' => 'owner@example.test', 'password' => 'Strong-password-123!', 'password_confirmation' => 'Strong-password-123!'])->assertRedirect(route('login'));
+        $this->artisan('platform:install-plans');
+
+        $this->post('/register', [
+            'name' => 'Owner',
+            'email' => 'owner@example.test',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertRedirect(route('login'));
+
         $this->assertGuest();
         $u = User::where('email', 'owner@example.test')->firstOrFail();
-        $w = CompanyWorkspace::firstOrFail();
-        $this->assertSame($u->customer_id, $w->customer_id);
-        $this->assertFalse($u->hasVerifiedEmail());
-        $this->assertDatabaseHas('company_members', ['user_id' => $u->id, 'role' => 'owner']);
+        $this->assertNull($u->customer_id);
+        $this->assertNull($u->phone);
+        $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('company_workspaces', 0);
         Notification::assertSentTo($u, VerifyEmail::class);
+
+        $u->forceFill([
+            'email_verified_at' => now(),
+            'phone' => '+971500000001',
+            'phone_verified_at' => now(),
+            'phone_verification_required' => true,
+        ])->save();
+
+        $this->actingAs($u)->post(route('company.onboarding.store'), [
+            'company_name' => 'Automatic Company',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+        ])->assertRedirect(route('company.workspace'));
+
+        $w = CompanyWorkspace::firstOrFail();
+        $this->assertSame($u->fresh()->customer_id, $w->customer_id);
+        $this->assertDatabaseHas('company_members', ['user_id' => $u->id, 'role' => 'owner']);
+        $this->assertSame('free', app(CompanyWorkspaceService::class)->plan($w)['code']);
     }
 
     public function test_company_publishes_automatically_with_trusted_identity_and_private_notes(): void

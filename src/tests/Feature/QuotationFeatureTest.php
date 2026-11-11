@@ -194,7 +194,7 @@ class QuotationFeatureTest extends TestCase
 
         $this->actingAs($user)
             ->post(route('quotations.store'), $payload)
-            ->assertSessionHasErrors('customer');
+            ->assertRedirect(route('company.onboarding.show'));
 
         $this->assertDatabaseCount('quotations', 0);
     }

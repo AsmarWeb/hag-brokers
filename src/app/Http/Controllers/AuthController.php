@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Models\User;
 use App\Rules\NonDisposableEmail;
-use App\Services\Auth\PhoneNumber;
-use App\Services\Auth\PhoneVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,132 +18,63 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->merge([
+            'name' => trim((string) $request->input('name')),
             'email' => strtolower(trim((string) $request->input('email'))),
-            'phone' => PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code')),
         ]);
 
         $validated = $request->validate([
-            'company_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'contact_person' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-
-            'phone_country_code' => ['nullable', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
-            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
-
-            'country_code' => [
-                'required',
-                'string',
-                'size:2',
-            ],
-
-            'city' => [
-                'nullable',
-                'string',
-                'max:255',
-            ],
-
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-                'unique:users,email',
-                new NonDisposableEmail(),
-            ],
-
-            'password' => [
-                'required',
-                'string',
-                'confirmed',
-                'min:8',
-                'max:128',
-            ],
+            'name' => ['required', 'string', 'max:160'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
+            'password' => ['required', 'string', 'confirmed', 'min:8', 'max:128'],
+            'company_name' => ['prohibited'],
+            'contact_person' => ['prohibited'],
+            'phone' => ['prohibited'],
+            'customer_id' => ['prohibited'],
+            'role' => ['prohibited'],
+            'account_type' => ['prohibited'],
+            'country_code' => ['prohibited'],
+            'city' => ['prohibited'],
+            'phone_country_code' => ['prohibited'],
+            'email_verified_at' => ['prohibited'],
+            'phone_verified_at' => ['prohibited'],
+            'phone_verification_required' => ['prohibited'],
         ]);
 
-        $user = DB::transaction(function () use ($validated) {
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone_verification_required' => true,
+        ]);
 
-            /*
-             * 1. Create Customer
-             */
-            $customer = Customer::create([
-                'company_name' => $validated['company_name'],
-                'contact_person' => $validated['contact_person'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'],
-                'country_code' => strtoupper($validated['country_code']),
-                'city' => $validated['city'] ?? null,
-                'is_active' => true,
-            ]);
-
-            /*
-             * 2. Create User
-             */
-            $user = User::create([
-                'name' => $validated['contact_person'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'customer_id' => $customer->id,
-                'role' => 'customer',
-                'phone' => $validated['phone'],
-                'phone_verification_required' => true,
-            ]);
-
-            app(\App\Services\Platform\CompanyWorkspaceService::class)->activateNewRegistration($customer, $user);
-
-            return $user;
-        });
-
-        /*
-         * 3. Welcome notification after successful registration.
-         * Notification storage failure must not undo account creation.
-         */
         try {
             $user->notify(new \App\Notifications\AdminPlatformNotification(
                 type: 'account.welcome',
                 title: 'Welcome to HAG Brokers',
-                message: 'Welcome ' . $user->name . '! Your account has been created successfully.',
+                message: 'Welcome '.$user->name.'! Your personal account has been created successfully.',
                 url: '/dashboard',
-                extra: ['action' => 'complete_profile']
+                extra: ['action' => 'complete_company_setup']
             ));
         } catch (\Throwable $exception) {
             report($exception);
         }
 
-        /*
-         * Notify administrators after successful registration.
-         */
         try {
             \App\Services\NotificationService::admins(
                 type: 'user.created',
                 title: 'New User Registered',
-                message: $user->name . ' has registered a new account.',
+                message: $user->name.' has registered a personal account.',
                 model: $user,
-                data: [
-                    'user_id' => $user->id,
-                    'url' => '/admin/users',
-                ]
+                data: ['user_id' => $user->id, 'url' => '/admin/users']
             );
         } catch (\Throwable $exception) {
             report($exception);
         }
 
-        /*
-         * 4. Login user automatically
-         */
         if (config('welcome_mail.enabled', false)) {
             try {
                 \Illuminate\Support\Facades\Mail::to($user->email)
-                    ->queue(new \App\Mail\WelcomeAccountMail(
-                        $user->name
-                    ));
+                    ->queue(new \App\Mail\WelcomeAccountMail($user->name));
             } catch (\Throwable $exception) {
                 report($exception);
             }
@@ -157,7 +85,6 @@ class AuthController extends Controller
         } catch (\Throwable $exception) {
             report($exception);
         }
-        app(PhoneVerificationService::class)->sendSafely($user);
 
         return redirect()
             ->route('login')

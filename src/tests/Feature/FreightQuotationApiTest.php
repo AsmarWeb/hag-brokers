@@ -85,7 +85,7 @@ class FreightQuotationApiTest extends TestCase
         $this->device($u);
         $this->getJson('/api/v1/freight/quotations')->assertForbidden();
         auth()->forgetGuards();
-        $this->actingAs($u)->get('/quotations')->assertForbidden();
+        $this->actingAs($u)->get('/quotations')->assertRedirect(route('company.onboarding.show'));
         [$leader,$w] = $this->company();
         $member = User::factory()->create(['customer_id' => $leader->customer_id]);
         CompanyMember::create(['user_id' => $member->id, 'company_workspace_id' => $w->id, 'role' => 'member']);

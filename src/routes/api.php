@@ -61,11 +61,13 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     Route::post('/auth/reset-password', [$auth, 'reset'])->middleware('throttle:5,1,mobile-reset:');
     Route::get('/auth/verify-email/{id}/{hash}', [$auth, 'verify'])->middleware(['signed', 'throttle:6,1'])->name('api.v1.verify');
     Route::post('/auth/verification-email', [$auth, 'resend'])->middleware('throttle:3,1,mobile-resend:');
-    Route::post('/auth/phone-verification', [PhoneVerificationController::class, 'resend'])
-        ->middleware('throttle:3,1,phone-verification-send:');
-    Route::post('/auth/verify-phone', [PhoneVerificationController::class, 'verify'])
-        ->middleware('throttle:10,1,phone-verification-verify:');
     Route::middleware(['auth:sanctum', MobileToken::class, \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () use ($auth) {
+        Route::put('/auth/phone', [PhoneVerificationController::class, 'updatePhone'])->middleware('throttle:5,1,phone-number-update:');
+        Route::post('/auth/phone-verification', [PhoneVerificationController::class, 'resend'])->middleware('throttle:3,1,phone-verification-send:');
+        Route::post('/auth/verify-phone', [PhoneVerificationController::class, 'verify'])->middleware('throttle:10,1,phone-verification-verify:');
+        $companyWorkspace = \App\Http\Controllers\CompanyWorkspaceController::class;
+        Route::get('/company/onboarding', [$companyWorkspace, 'onboarding']);
+        Route::post('/company/onboarding', [$companyWorkspace, 'store'])->middleware('throttle:5,1,company-onboarding:');
         $push=\App\Http\Controllers\Api\V1\MobilePushController::class;
         Route::get('/push/settings',[$push,'settings']);
         Route::put('/push/device',[$push,'register'])->middleware('throttle:20,1,mobile-push-register:');
@@ -76,6 +78,7 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
         Route::put('/auth/account', [$account,'update'])->middleware('throttle:5,1,mobile-account:');
         Route::get('/auth/deletion-request', [$account,'deletion']);
         Route::post('/auth/deletion-request', [$account,'requestDeletion'])->middleware('throttle:3,1,mobile-delete:');
+        Route::middleware(\App\Http\Middleware\EnsureCompanyWorkspace::class)->group(function () {
         $freight = \App\Http\Controllers\Api\V1\FreightQuotationController::class;
         Route::get('/freight/ports', [$freight, 'ports']);
         Route::get('/freight/quotations', [$freight, 'index']);
@@ -101,6 +104,7 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
         Route::get('/company/opportunities/{opportunityId}', [$opportunities, 'show'])->whereNumber('opportunityId');
         Route::patch('/company/opportunities/{opportunityId}', [$opportunities, 'update'])->whereNumber('opportunityId')->middleware('throttle:30,1,mobile-edit:');
         Route::post('/company/opportunities/{opportunityId}/close', [$opportunities, 'close'])->whereNumber('opportunityId')->middleware('throttle:30,1,mobile-close:');
+        });
         Route::put('/auth/password', [$auth, 'changePassword'])->middleware('throttle:5,1,mobile-password:');
         Route::get('/me', [$auth, 'me']);
         Route::get('/company/workspace', [$auth, 'workspace']);

@@ -42,19 +42,19 @@ class MobileAccountSecurityTest extends TestCase
         $this->withHeaders(['Authorization' => 'Bearer '.$token])->getJson('/api/v1/me')->assertOk()->assertJsonPath('data.email', $u->email);
     }
 
-    public function test_new_accounts_require_phone_verification_before_login(): void
+    public function test_new_accounts_can_sign_in_after_email_verification_before_phone_setup(): void
     {
         $u = $this->account();
         $u->forceFill(['phone_verified_at' => null, 'phone_verification_required' => true])->save();
 
-        $this->postJson('/api/v1/auth/login', [
-            'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
-        ])->assertUnprocessable()->assertJsonValidationErrors('email');
-
-        $u->forceFill(['phone_verified_at' => now()])->save();
-        $this->postJson('/api/v1/auth/login', [
+        $response = $this->postJson('/api/v1/auth/login', [
             'email' => $u->email, 'password' => 'Old-password-123!', 'device_name' => 'phone',
         ])->assertOk();
+
+        $token = $response->json('data.access_token');
+        $this->withHeaders(['Authorization' => 'Bearer '.$token])
+            ->getJson('/api/v1/freight/quotations')
+            ->assertForbidden();
     }
 
     public function test_unverified_accounts_cannot_login_or_use_existing_mobile_tokens(): void
@@ -159,10 +159,17 @@ class MobileAccountSecurityTest extends TestCase
         $this->artisan('platform:mobile-check')->expectsOutputToContain('mobile_app_settings: MISSING')->assertFailed();
     }
 
-    public function test_company_registration_reports_missing_company_fields_without_creating_records(): void
+    public function test_registration_rejects_legacy_company_selector_without_creating_records(): void
     {
-        $this->postJson('/api/v1/auth/register', ['account_type' => 'company', 'name' => 'Owner', 'email' => 'new@example.test', 'password' => 'Strong-password-123', 'password_confirmation' => 'Strong-password-123', 'device_name' => 'phone'])
-            ->assertUnprocessable()->assertJsonValidationErrors(['company_name', 'phone', 'country_code']);
+        $this->postJson('/api/v1/auth/register', [
+            'account_type' => 'company',
+            'name' => 'Owner',
+            'email' => 'new@example.test',
+            'password' => 'Strong-password-123',
+            'password_confirmation' => 'Strong-password-123',
+            'device_name' => 'phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('account_type');
+
         $this->assertDatabaseCount('users', 0);
         $this->assertDatabaseCount('customers', 0);
         $this->assertDatabaseCount('personal_access_tokens', 0);

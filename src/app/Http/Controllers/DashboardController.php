@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyMember;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -10,28 +11,25 @@ class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Shipment::where(
-            'customer_id',
-            $request->user()->customer_id
-        );
+        $user = $request->user();
+        $query = $user->customer_id
+            ? Shipment::where('customer_id', $user->customer_id)
+            : Shipment::whereRaw('1 = 0');
 
         $stats = [
             'total_shipments' => (clone $query)->count(),
-            'in_transit' => (clone $query)
-                ->where('status', 'in_transit')
-                ->count(),
-            'pending' => (clone $query)
-                ->where('status', 'pending')
-                ->count(),
-            'delivered' => (clone $query)
-                ->where('status', 'delivered')
-                ->count(),
+            'in_transit' => (clone $query)->where('status', 'in_transit')->count(),
+            'pending' => (clone $query)->where('status', 'pending')->count(),
+            'delivered' => (clone $query)->where('status', 'delivered')->count(),
         ];
 
         return view('dashboard', [
             'stats' => $stats,
-            'hasCarrierFleet' => $request->user()->hasVerifiedEmail()
-                && $request->user()->carrierPartnership()->whereHas('carrier', fn ($query) => $query->where('is_active', true))->exists(),
+            'hasCompanyWorkspace' => CompanyMember::where('user_id', $user->id)->exists(),
+            'phoneVerified' => $user->hasVerifiedPhone(),
+            'phoneVerificationRequired' => (bool) $user->phone_verification_required,
+            'hasCarrierFleet' => $user->hasVerifiedEmail()
+                && $user->carrierPartnership()->whereHas('carrier', fn ($query) => $query->where('is_active', true))->exists(),
         ]);
     }
 }

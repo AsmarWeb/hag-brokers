@@ -123,13 +123,60 @@ final class CompanyWorkspaceService
         return $workspace;
     }
 
+    public function createForOwner(User $owner, array $data): CompanyWorkspace
+    {
+        return DB::transaction(function () use ($owner, $data): CompanyWorkspace {
+            $user = User::whereKey($owner->id)->lockForUpdate()->firstOrFail();
+
+            abort_unless($user->hasVerifiedEmail() && $user->hasVerifiedPhone(), 403, 'Verify your email and phone before creating a company workspace.');
+            abort_if($user->isPlatformAdministrator() || $user->carrierPartnership()->exists(), 403);
+            abort_unless($user->customer_id === null && ! CompanyMember::where('user_id', $user->id)->exists(), 409, 'This account already belongs to a company.');
+
+            $free = PlatformPlan::where('code', 'free')->where('is_available', true)->lockForUpdate()->first();
+            if (! $free || $free->seats < 1) {
+                $this->fail('plans_missing');
+            }
+
+            $customer = Customer::create([
+                'company_name' => trim($data['company_name']),
+                'contact_person' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'country_code' => strtoupper($data['country_code']),
+                'city' => isset($data['city']) ? trim($data['city']) : null,
+                'is_active' => true,
+            ]);
+
+            $user->forceFill(['customer_id' => $customer->id])->save();
+
+            $workspace = CompanyWorkspace::create(['customer_id' => $customer->id, 'status' => 'active']);
+            CompanyMember::create(['company_workspace_id' => $workspace->id, 'user_id' => $user->id, 'role' => 'owner']);
+            CompanyAccessGrant::create([
+                'company_workspace_id' => $workspace->id,
+                'source' => 'free',
+                'plan_snapshot' => $this->snapshot($free),
+                'expires_at' => null,
+                'reason' => 'Initial self-service company onboarding',
+                'created_by' => $user->id,
+                'created_at' => now('UTC')->format('Y-m-d H:i:s'),
+            ]);
+            $this->audit($workspace, $user, 'activated', [
+                'customer_id' => $customer->id,
+                'owner_id' => $user->id,
+                'source' => 'self_service_onboarding',
+            ]);
+
+            return $workspace;
+        }, 3);
+    }
+
     public function workspaceFor(User $user): CompanyWorkspace
     {
         $member = CompanyMember::where('user_id', $user->id)->first();
         abort_unless($member, 403);
         $w = CompanyWorkspace::findOrFail($member->company_workspace_id);
         $customer = Customer::findOrFail($w->customer_id);
-        abort_unless($w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id, 403);
+        abort_unless($w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id && (! $user->phone_verification_required || $user->hasVerifiedPhone()), 403);
 
         return $w;
     }
