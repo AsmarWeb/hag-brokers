@@ -136,7 +136,6 @@ final class CompanyWorkspaceService
             if (! $free || $free->seats < 1) {
                 $this->fail('plans_missing');
             }
-            abort_if(CompanyWorkspace::whereHas('customer', fn ($q) => $q->where('email', $user->email))->exists(), 409);
 
             $customer = Customer::create([
                 'company_name' => trim($data['company_name']),
