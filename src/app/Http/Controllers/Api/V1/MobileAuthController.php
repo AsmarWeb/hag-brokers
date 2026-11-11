@@ -54,51 +54,29 @@ class MobileAuthController extends Controller
 
     public function register(Request $r)
     {
-        $r->merge([
-            'email' => strtolower(trim((string) $r->input('email'))),
-            'phone' => PhoneNumber::normalize($r->input('phone'), $r->input('phone_country_code')),
-        ]);
-        $company = $r->input('account_type') === 'company';
+        $r->merge(['name' => trim((string) $r->input('name')), 'email' => strtolower(trim((string) $r->input('email')))]);
         $d = $r->validate([
-            'account_type' => ['required', 'in:individual,company'], 'name' => ['required', 'string', 'max:160'],
+            'name' => ['required', 'string', 'max:160'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email', new NonDisposableEmail()],
-            'phone_country_code' => ['nullable', 'string', Rule::in(array_keys(config('phone.countries', [])))],
-            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
-            'password' => ['required', 'string', 'min:8', 'max:128', 'confirmed'], 'device_name' => ['required', 'string', 'max:80'],
-            'company_name' => [Rule::requiredIf($company), 'nullable', 'string', 'max:255'],
-            'country_code' => [Rule::requiredIf($company), 'nullable', 'regex:/^[A-Za-z]{2}$/D'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'role' => ['prohibited'], 'customer_id' => ['prohibited'], 'email_verified_at' => ['prohibited'],
+            'password' => ['required', 'string', 'min:8', 'max:128', 'confirmed'],
+            'device_name' => ['nullable', 'string', 'max:80'],
+            'account_type' => ['prohibited'], 'phone' => ['prohibited'], 'phone_country_code' => ['prohibited'],
+            'company_name' => ['prohibited'], 'country_code' => ['prohibited'], 'city' => ['prohibited'],
+            'customer_id' => ['prohibited'], 'role' => ['prohibited'], 'email_verified_at' => ['prohibited'],
         ]);
-        $u = DB::transaction(function () use ($d, $company) {
-            $c = $company ? Customer::create(['company_name' => $d['company_name'], 'contact_person' => $d['name'],
-                'email' => $d['email'], 'phone' => $d['phone'], 'country_code' => strtoupper($d['country_code']),
-                'city' => $d['city'] ?? null, 'is_active' => true]) : null;
-            $u = User::create(['name' => $d['name'], 'email' => $d['email'], 'password' => Hash::make($d['password']),
-                'customer_id' => $c?->id, 'phone' => $d['phone'], 'phone_verification_required' => true, 'role' => 'customer']);
-            if ($c) {
-                app(CompanyWorkspaceService::class)->activateNewRegistration($c, $u);
-            }
-
-            return $u;
-        });
-        // Account creation succeeds even if the mail provider is temporarily unavailable.
+        $u = User::create([
+            'name' => $d['name'], 'email' => $d['email'], 'password' => Hash::make($d['password']),
+            'phone_verification_required' => true,
+        ]);
         try {
             $u->notify(new MobileVerifyEmail);
         } catch (\Throwable $e) {
             report($e);
         }
-        app(PhoneVerificationService::class)->sendSafely($u);
 
         return response()->json([
-            'message' => 'If the account exists, a verification email has been sent. Verify the address before signing in.',
-            'data' => [
-                'email' => $u->email,
-                'phone' => $u->phone,
-                'verification_required' => true,
-                'email_verification_required' => true,
-                'phone_verification_required' => true,
-            ],
+            'message' => 'Verify your email address before signing in. Phone and company setup happen after sign-in.',
+            'data' => ['email' => $u->email, 'verification_required' => true, 'email_verification_required' => true],
         ], 202);
     }
 
@@ -106,14 +84,14 @@ class MobileAuthController extends Controller
     {
         $d = $r->validate(['email' => ['required', 'email', 'max:255'], 'password' => ['required', 'string', 'max:128'],
             'device_name' => ['required', 'string', 'max:80']]);
-        $u = User::where('email', strtolower(trim($d['email'])))->first();
-        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedAccount() || $u->blocked_at || NonDisposableEmail::isDisposable($d['email'])) {
+        $email = strtolower(trim($d['email']));
+        $u = User::where('email', $email)->first();
+        if (! $u || ! Hash::check($d['password'], $u->password) || ! $u->hasVerifiedEmail() || $u->blocked_at || NonDisposableEmail::isDisposable($email)) {
             throw ValidationException::withMessages(['email' => ['Invalid credentials.']]);
         }
         if ($u->hasRole(['admin', 'super-admin'])) {
             return response()->json(['message' => 'Platform administrator accounts use the web dashboard.', 'error_code' => 'AUTH_ADMIN_WEB_ONLY'], 403);
         }
-
         $u->forceFill(['last_login_ip' => $r->ip(), 'last_login_at' => now()])->save();
 
         return response()->json(['data' => $this->token($u, $d['device_name'])]);
