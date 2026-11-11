@@ -41,41 +41,41 @@ class AuthController extends Controller
         ]);
 
         try {
-            $user->notify(new \\App\\Notifications\\AdminPlatformNotification(
+            $user->notify(new \App\Notifications\AdminPlatformNotification(
                 type: 'account.welcome',
                 title: 'Welcome to HAG Brokers',
                 message: 'Welcome '.$user->name.'! Your personal account has been created successfully.',
                 url: '/dashboard',
                 extra: ['action' => 'complete_company_setup']
             ));
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             report($exception);
         }
 
         try {
-            \\App\\Services\\NotificationService::admins(
+            \App\Services\NotificationService::admins(
                 type: 'user.created',
                 title: 'New User Registered',
                 message: $user->name.' has registered a personal account.',
                 model: $user,
                 data: ['user_id' => $user->id, 'url' => '/admin/users']
             );
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             report($exception);
         }
 
         if (config('welcome_mail.enabled', false)) {
             try {
-                \\Illuminate\\Support\\Facades\\Mail::to($user->email)
-                    ->queue(new \\App\\Mail\\WelcomeAccountMail($user->name));
-            } catch (\\Throwable $exception) {
+                \Illuminate\Support\Facades\Mail::to($user->email)
+                    ->queue(new \App\Mail\WelcomeAccountMail($user->name));
+            } catch (\Throwable $exception) {
                 report($exception);
             }
         }
 
         try {
             $user->sendEmailVerificationNotification();
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             report($exception);
         }
 
