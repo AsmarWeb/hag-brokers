@@ -40,6 +40,16 @@ class CompanyWorkspaceController extends Controller
 
     public function store(Request $request, CompanyWorkspaceService $service)
     {
+        $existing = CompanyMember::where('user_id', $request->user()->id)->first();
+        if ($existing) {
+            $workspace = \App\Models\CompanyWorkspace::findOrFail($existing->company_workspace_id);
+            if ($request->expectsJson()) {
+                return response()->json(['data' => ['workspace_id' => $workspace->id, 'status' => $workspace->status, 'role' => $existing->role]]);
+            }
+
+            return redirect()->route('company.workspace');
+        }
+
         $data = $request->validate([
             'company_name' => ['required', 'string', 'max:255'],
             'country_code' => ['required', 'string', 'regex:/^[A-Za-z]{2}$/D'],
