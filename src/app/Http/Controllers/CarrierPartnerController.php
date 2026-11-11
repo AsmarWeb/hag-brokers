@@ -90,7 +90,7 @@ final class CarrierPartnerController extends Controller
         $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D', \Illuminate\Validation\Rule::unique('users', 'phone')->ignore($request->user()->id)],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D', \Illuminate\Validation\Rule::unique('users', 'phone')],
             'password' => ['required', 'confirmed', Password::defaults()->min(8)->max(128)],
         ]);
 
@@ -171,7 +171,7 @@ final class CarrierPartnerController extends Controller
         $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
+            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D', \Illuminate\Validation\Rule::unique('users', 'phone')->ignore($request->user()->id)],
         ]);
         $user = $request->user();
         $phoneChanged = $user->phone !== $data['phone'];
