@@ -57,7 +57,7 @@ class LoginRequest extends FormRequest
             ]);
         }
 
-        if (! Auth::user()?->hasVerifiedAccount() || Auth::user()?->blocked_at) {
+        if (! Auth::user()?->hasVerifiedEmail() || Auth::user()?->blocked_at) {
             Auth::logout();
             RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages(['email' => trans('auth.failed')]);
