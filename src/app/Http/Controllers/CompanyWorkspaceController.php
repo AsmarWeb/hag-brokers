@@ -17,7 +17,9 @@ class CompanyWorkspaceController extends Controller
             return redirect()->route('phone.verification.notice');
         }
 
-        abort_if(CompanyMember::where('user_id', $request->user()->id)->exists(), 409);
+        if (CompanyMember::where('user_id', $request->user()->id)->exists()) {
+            return redirect()->route('company.workspace');
+        }
 
         return view('company.onboarding');
     }
