@@ -13,7 +13,7 @@ final class EnsureCompanyWorkspace
     {
         $user = $request->user();
         abort_unless($user?->hasVerifiedEmail(), 403, 'Email verification is required.');
-        if (! $user->hasVerifiedPhone()) {
+        if ($user->phone_verification_required && ! $user->hasVerifiedPhone()) {
             if ($request->expectsJson()) {
                 abort(403, 'Phone verification is required.');
             }
