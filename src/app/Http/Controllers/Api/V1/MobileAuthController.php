@@ -34,6 +34,7 @@ class MobileAuthController extends Controller
             'email_verified' => $u->hasVerifiedEmail(), 'phone_verified' => $u->hasVerifiedPhone(),
             'account_verified' => $u->hasVerifiedAccount(),
             'account_type' => $member ? 'company' : 'individual',
+            'is_carrier' => $u->carrierPartnership()->whereHas('carrier', fn ($q) => $q->where('is_active', true))->exists(),
             'company' => $workspace ? ['workspace_id' => $workspace->id, 'role' => $member->role, 'status' => $workspace->status] : null];
     }
 
