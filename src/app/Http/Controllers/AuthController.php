@@ -106,14 +106,19 @@ class AuthController extends Controller
 
         /*
          * 3. Welcome notification after successful registration.
+         * Notification storage failure must not undo account creation.
          */
-        $user->notify(new \App\Notifications\AdminPlatformNotification(
-            type: 'account.welcome',
-            title: 'Welcome to HAG Brokers',
-            message: 'Welcome ' . $user->name . '! Your account has been created successfully.',
-            url: '/dashboard',
-            extra: ['action' => 'complete_profile']
-        ));
+        try {
+            $user->notify(new \App\Notifications\AdminPlatformNotification(
+                type: 'account.welcome',
+                title: 'Welcome to HAG Brokers',
+                message: 'Welcome ' . $user->name . '! Your account has been created successfully.',
+                url: '/dashboard',
+                extra: ['action' => 'complete_profile']
+            ));
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         /*
          * Notify administrators after successful registration.
@@ -152,7 +157,7 @@ class AuthController extends Controller
         } catch (\Throwable $exception) {
             report($exception);
         }
-        app(PhoneVerificationService::class)->send($user);
+        app(PhoneVerificationService::class)->sendSafely($user);
 
         return redirect()
             ->route('login')

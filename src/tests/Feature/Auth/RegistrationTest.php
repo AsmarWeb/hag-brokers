@@ -173,4 +173,43 @@ class RegistrationTest extends TestCase
         \Illuminate\Support\Facades\Mail::assertNotQueued(\App\Mail\WelcomeAccountMail::class);
         \Illuminate\Support\Facades\Mail::assertNotSent(\App\Mail\WelcomeAccountMail::class);
     }
+
+    public function test_registration_succeeds_when_sms_provider_rejects_verification_message(): void
+    {
+        \Illuminate\Support\Facades\Http::fake([
+            'https://api.twilio.com/*' => \Illuminate\Support\Facades\Http::response(
+                ['message' => 'Provider unavailable'],
+                503
+            ),
+        ]);
+
+        config()->set('services.twilio.account_sid', 'AC_TEST_ACCOUNT');
+        config()->set('services.twilio.auth_token', 'test-token');
+        config()->set('services.twilio.from', '+15005550006');
+
+        $response = $this->post('/register', $this->welcomeRegistrationPayload(
+            'sms-provider-failure@example.test'
+        ));
+
+        $response->assertSessionHasNoErrors()
+            ->assertRedirect(route('login'));
+
+        $user = User::where('email', 'sms-provider-failure@example.test')
+            ->firstOrFail();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'phone' => '+971501234567',
+        ]);
+
+        $this->assertDatabaseMissing('phone_verifications', [
+            'user_id' => $user->id,
+        ]);
+
+        \Illuminate\Support\Facades\Http::assertSent(
+            fn ($request) => str_contains($request->url(), 'Messages.json')
+                && $request['To'] === '+971501234567'
+        );
+    }
+
 }

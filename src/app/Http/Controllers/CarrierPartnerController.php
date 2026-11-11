@@ -119,7 +119,7 @@ final class CarrierPartnerController extends Controller
             report($exception);
         }
 
-        app(PhoneVerificationService::class)->send($user);
+        app(PhoneVerificationService::class)->sendSafely($user);
 
         return redirect()->route('login')->with('status', __('auth.verification_email_sent'));
     }
@@ -184,7 +184,7 @@ final class CarrierPartnerController extends Controller
         }
         $user->save();
         if ($phoneChanged) {
-            app(PhoneVerificationService::class)->send($user);
+            app(PhoneVerificationService::class)->sendSafely($user);
         }
 
         return back()->with('carrier_status', __('carrier_partner.profile_saved'));

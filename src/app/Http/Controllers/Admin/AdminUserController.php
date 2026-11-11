@@ -161,6 +161,18 @@ class AdminUserController extends Controller
         }
         $request->merge($normalized);
 
+        // Preserve existing assignments on partial updates. The edit form sends
+        // explicit markers so an intentionally empty selection can clear them.
+        $rolesProvided = $request->boolean('roles_present') || $request->exists('roles');
+        $permissionsProvided = $request->boolean('permissions_present') || $request->exists('permissions');
+
+        if ($request->boolean('roles_present') && ! $request->exists('roles')) {
+            $request->merge(['roles' => []]);
+        }
+        if ($request->boolean('permissions_present') && ! $request->exists('permissions')) {
+            $request->merge(['permissions' => []]);
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user), new \App\Rules\NonDisposableEmail()],
@@ -168,13 +180,15 @@ class AdminUserController extends Controller
             'phone' => ['nullable', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
             'password' => ['nullable', 'string', 'min:8', 'max:128', 'confirmed'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
+            'roles_present' => ['sometimes', 'boolean'],
+            'permissions_present' => ['sometimes', 'boolean'],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
             'permissions' => ['sometimes', 'array'],
             'permissions.*' => ['required', 'integer', 'distinct', 'exists:permissions,id'],
         ]);
 
-        if ((string) $request->user()->getKey() === (string) $user->getKey()) {
+        if ($rolesProvided && (string) $request->user()->getKey() === (string) $user->getKey()) {
             $retainsAdminAccess = \App\Models\Role::query()
                 ->whereIn('id', $data['roles'] ?? [])
                 ->whereIn('name', ['admin', 'super-admin'])
@@ -192,10 +206,12 @@ class AdminUserController extends Controller
         $emailChanged = $user->email !== $data['email'];
         $phoneChanged = array_key_exists('phone', $data) && $user->phone !== $data['phone'];
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user, $emailChanged, $phoneChanged) {
+        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $user, $emailChanged, $phoneChanged, $rolesProvided, $permissionsProvided) {
             $user->name = $data['name'];
             $user->email = $data['email'];
-            $user->customer_id = $data['customer_id'] ?? null;
+            if (array_key_exists('customer_id', $data)) {
+                $user->customer_id = $data['customer_id'];
+            }
             if (array_key_exists('phone', $data)) {
                 $user->phone = $data['phone'];
             }
@@ -216,8 +232,12 @@ class AdminUserController extends Controller
             }
 
             $user->save();
-            $user->syncRoles(array_map('intval', $data['roles'] ?? []));
-            $user->syncPermissions(array_map('intval', $data['permissions'] ?? []));
+            if ($rolesProvided) {
+                $user->syncRoles(array_map('intval', $data['roles'] ?? []));
+            }
+            if ($permissionsProvided) {
+                $user->syncPermissions(array_map('intval', $data['permissions'] ?? []));
+            }
 
             if ($emailChanged || $phoneChanged) {
                 $user->tokens()->delete();
@@ -232,7 +252,7 @@ class AdminUserController extends Controller
             }
         }
         if ($phoneChanged) {
-            app(PhoneVerificationService::class)->send($user);
+            app(PhoneVerificationService::class)->sendSafely($user);
         }
 
         return redirect()
@@ -298,7 +318,7 @@ class AdminUserController extends Controller
         } catch (\Throwable $exception) {
             report($exception);
         }
-        app(PhoneVerificationService::class)->send($user);
+        app(PhoneVerificationService::class)->sendSafely($user);
 
         return redirect()
             ->route('admin.users.show', $user)

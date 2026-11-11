@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 final class PhoneVerificationService
@@ -67,6 +68,24 @@ final class PhoneVerificationService
         }
 
         return true;
+    }
+
+    /**
+     * Best-effort delivery: a provider or persistence failure must not
+     * interrupt account registration or profile updates.
+     */
+    public function sendSafely(User $user): bool
+    {
+        try {
+            return $this->send($user);
+        } catch (\Throwable $exception) {
+            Log::error('Phone verification delivery could not be completed.', [
+                'user_id' => $user->getKey(),
+                'exception' => $exception::class,
+            ]);
+
+            return false;
+        }
     }
 
     public function verify(User $user, string $code): bool

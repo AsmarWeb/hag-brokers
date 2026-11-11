@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Customer;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -51,16 +53,55 @@ class AdminUserManagementTest extends TestCase
         $this->assertDatabaseCount('users', 1);
     }
 
-    public function test_updating_name_with_blank_password_keeps_existing_password(): void
+    public function test_updating_name_with_blank_password_preserves_existing_assignments(): void
     {
         $admin = $this->admin();
-        $target = User::factory()->create();
+
+        $customer = Customer::create([
+            'company_name' => 'Partial Update Test Customer',
+        ]);
+        $role = Role::firstOrCreate(
+            ['name' => 'partial-update-role'],
+            ['display_name' => 'Partial Update Role']
+        );
+        $permission = Permission::firstOrCreate(
+            ['name' => 'partial-update-permission'],
+            ['display_name' => 'Partial Update Permission']
+        );
+
+        $target = User::factory()->create(['customer_id' => $customer->id]);
+        $target->syncRoles([$role->id]);
+        $target->syncPermissions([$permission->id]);
+
         $oldHash = $target->password;
+
         $this->actingAs($admin)->put(route('admin.users.update', $target), [
-            'name' => 'Updated Team Member', 'email' => $target->email, 'password' => '',
+            'name' => 'Updated Team Member',
+            'email' => $target->email,
+            'password' => '',
         ])->assertRedirect()->assertSessionHasNoErrors();
-        $this->assertSame('Updated Team Member', $target->fresh()->name);
-        $this->assertSame($oldHash, $target->fresh()->password);
+
+        $updated = $target->fresh();
+
+        $this->assertSame('Updated Team Member', $updated->name);
+        $this->assertSame($oldHash, $updated->password);
+        $this->assertSame($customer->id, $updated->customer_id);
+        $this->assertTrue($updated->roles()->whereKey($role->id)->exists());
+        $this->assertTrue($updated->permissions()->whereKey($permission->id)->exists());
+    }
+
+    public function test_admin_can_update_own_profile_without_resubmitting_roles(): void
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->put(route('admin.users.update', $admin), [
+            'name' => 'Updated Administrator',
+            'email' => $admin->email,
+            'password' => '',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $this->assertSame('Updated Administrator', $admin->fresh()->name);
+        $this->assertTrue($admin->fresh()->hasRole('admin'));
     }
 
     public function test_admin_email_change_resets_verification_and_sends_a_new_link(): void
@@ -98,11 +139,50 @@ class AdminUserManagementTest extends TestCase
     public function test_administrator_cannot_remove_own_admin_access_or_delete_self(): void
     {
         $admin = $this->admin();
+
         $this->actingAs($admin)->put(route('admin.users.update', $admin), [
-            'name' => $admin->name, 'email' => $admin->email, 'roles' => [],
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'roles' => [],
         ])->assertSessionHasErrors('roles');
+
+        $this->assertTrue($admin->fresh()->hasRole('admin'));
+
         $this->delete(route('admin.users.destroy', $admin))->assertSessionHas('error');
         $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    }
+
+    public function test_edit_form_markers_allow_intentionally_clearing_roles_and_permissions(): void
+    {
+        $admin = $this->admin();
+
+        $role = Role::firstOrCreate(
+            ['name' => 'clear-test-role'],
+            ['display_name' => 'Clear Test Role']
+        );
+        $permission = Permission::firstOrCreate(
+            ['name' => 'clear-test-permission'],
+            ['display_name' => 'Clear Test Permission']
+        );
+
+        $target = User::factory()->create();
+        $target->syncRoles([$role->id]);
+        $target->syncPermissions([$permission->id]);
+
+        $this->assertTrue($target->roles()->whereKey($role->id)->exists());
+        $this->assertTrue($target->permissions()->whereKey($permission->id)->exists());
+
+        $this->actingAs($admin)->put(route('admin.users.update', $target), [
+            'name' => $target->name,
+            'email' => $target->email,
+            'roles_present' => '1',
+            'permissions_present' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $updated = $target->fresh();
+
+        $this->assertFalse($updated->roles()->whereKey($role->id)->exists());
+        $this->assertFalse($updated->permissions()->whereKey($permission->id)->exists());
     }
 
     public function test_admin_can_delete_unlinked_test_account(): void

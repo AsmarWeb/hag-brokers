@@ -88,7 +88,7 @@ class MobileAuthController extends Controller
         } catch (\Throwable $e) {
             report($e);
         }
-        app(PhoneVerificationService::class)->send($u);
+        app(PhoneVerificationService::class)->sendSafely($u);
 
         return response()->json([
             'message' => 'If the account exists, a verification email has been sent. Verify the address before signing in.',

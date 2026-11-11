@@ -31,7 +31,7 @@ final class PhoneVerificationController extends Controller
             : $request->user();
 
         if ($user && ! $user->hasVerifiedPhone()) {
-            $verification->send($user);
+            $verification->sendSafely($user);
         }
 
         $message = __('auth.phone_code_sent');

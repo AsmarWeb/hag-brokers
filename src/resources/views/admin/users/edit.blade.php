@@ -71,6 +71,8 @@
 
             @csrf
             @method('PUT')
+            <input type="hidden" name="roles_present" value="1">
+            <input type="hidden" name="permissions_present" value="1">
 
 
             {{-- Account --}}

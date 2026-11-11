@@ -5,3 +5,6 @@ src/vendor
 src/.env
 src/storage/logs/*
 .DS_Store
+
+# Never bake the live SQLite database into Docker images
+src/database/database.sqlite
