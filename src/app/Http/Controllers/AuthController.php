@@ -82,4 +82,5 @@ class AuthController extends Controller
         return redirect()
             ->route('login')
             ->with('status', __('auth.verification_email_sent'));
-    }}
+    }
+}
