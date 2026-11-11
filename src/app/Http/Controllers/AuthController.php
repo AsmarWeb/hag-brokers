@@ -35,6 +35,9 @@ class AuthController extends Controller
             'country_code' => ['prohibited'],
             'city' => ['prohibited'],
             'phone_country_code' => ['prohibited'],
+            'email_verified_at' => ['prohibited'],
+            'phone_verified_at' => ['prohibited'],
+            'phone_verification_required' => ['prohibited'],
         ]);
 
         $user = User::create([
