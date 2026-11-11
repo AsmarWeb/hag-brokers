@@ -64,6 +64,7 @@ class MobileAuthController extends Controller
             'account_type' => ['prohibited'], 'phone' => ['prohibited'], 'phone_country_code' => ['prohibited'],
             'company_name' => ['prohibited'], 'country_code' => ['prohibited'], 'city' => ['prohibited'],
             'customer_id' => ['prohibited'], 'role' => ['prohibited'], 'email_verified_at' => ['prohibited'],
+            'phone_verified_at' => ['prohibited'], 'phone_verification_required' => ['prohibited'],
         ]);
         $u = User::create([
             'name' => $d['name'], 'email' => $d['email'], 'password' => Hash::make($d['password']),
