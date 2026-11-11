@@ -31,7 +31,7 @@ class MobileAuthController extends Controller
         $workspace = $member ? CompanyWorkspace::find($member->company_workspace_id) : null;
 
         return ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'phone' => $u->phone,
-            'email_verified' => $u->hasVerifiedEmail(), 'phone_verified' => $u->hasVerifiedPhone(),
+            'email_verified' => $u->hasVerifiedEmail(), 'phone_verified' => $u->hasVerifiedPhone(), 'phone_verification_required' => (bool) $u->phone_verification_required,
             'account_verified' => $u->hasVerifiedAccount(),
             'account_type' => $member ? 'company' : 'individual',
             'is_carrier' => $u->carrierPartnership()->whereHas('carrier', fn ($q) => $q->where('is_active', true))->exists(),
