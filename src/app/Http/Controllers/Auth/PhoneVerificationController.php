@@ -1,17 +1,17 @@
 <?php
 
-namespace App\\Http\\Controllers\\Auth;
+namespace App\Http\Controllers\Auth;
 
-use App\\Http\\Controllers\\Controller;
-use App\\Models\\User;
-use App\\Services\\Auth\\PhoneNumber;
-use App\\Services\\Auth\\PhoneVerificationService;
-use Illuminate\\Http\\RedirectResponse;
-use Illuminate\\Http\\Request;
-use Illuminate\\Support\\Facades\\DB;
-use Illuminate\\Support\\Facades\\Hash;
-use Illuminate\\Validation\\ValidationException;
-use Illuminate\\View\\View;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Services\Auth\PhoneNumber;
+use App\Services\Auth\PhoneVerificationService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 final class PhoneVerificationController extends Controller
 {
@@ -24,14 +24,14 @@ final class PhoneVerificationController extends Controller
         ]);
     }
 
-    public function updatePhone(Request $request, PhoneVerificationService $verification): RedirectResponse|\\Illuminate\\Http\\JsonResponse
+    public function updatePhone(Request $request, PhoneVerificationService $verification): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $request->merge([
             'phone' => PhoneNumber::normalize($request->input('phone'), $request->input('phone_country_code')),
         ]);
         $data = $request->validate([
-            'phone_country_code' => ['required', 'string', \\Illuminate\\Validation\\Rule::in(array_keys(config('phone.countries', [])))],
-            'phone' => ['required', 'string', 'regex:/^\\+[1-9][0-9]{7,14}$/D'],
+            'phone_country_code' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
+            'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
             'current_password' => ['nullable', 'string', 'max:128'],
         ]);
 
@@ -67,7 +67,7 @@ final class PhoneVerificationController extends Controller
         return back()->with('status', $sent ? __('auth.phone_code_sent') : __('auth.phone_code_delivery_unavailable'));
     }
 
-    public function resend(Request $request, PhoneVerificationService $verification): RedirectResponse|\\Illuminate\\Http\\JsonResponse
+    public function resend(Request $request, PhoneVerificationService $verification): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $user = $request->user();
         abort_unless($user->phone, 422, 'Add a phone number first.');
@@ -79,7 +79,7 @@ final class PhoneVerificationController extends Controller
         return back()->with('status', $sent ? __('auth.phone_code_sent') : __('auth.phone_code_delivery_unavailable'));
     }
 
-    public function verify(Request $request, PhoneVerificationService $verification): RedirectResponse|\\Illuminate\\Http\\JsonResponse
+    public function verify(Request $request, PhoneVerificationService $verification): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $data = $request->validate(['code' => ['required', 'digits:6']]);
         $user = $request->user();
