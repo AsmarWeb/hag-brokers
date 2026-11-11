@@ -100,7 +100,7 @@
             @endif
 
 
-            @if (!($hasCompanyWorkspace ?? false))
+            @if (!($hasCompanyWorkspace ?? false) && !($hasCarrierFleet ?? false))
                 <section class="mb-8 rounded-2xl border border-cyan-200 bg-cyan-50 p-6 dark:border-cyan-900 dark:bg-cyan-950/40" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
                     <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ $isRtl ? 'خطوة واحدة لتفعيل مساحة شركتك' : 'One step to activate your company workspace' }}</h2>
                     <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
