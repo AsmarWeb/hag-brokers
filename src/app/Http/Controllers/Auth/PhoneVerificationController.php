@@ -95,6 +95,6 @@ final class PhoneVerificationController extends Controller
             ]]);
         }
 
-        return redirect()->route('company.onboarding.show')->with('status', __('auth.phone_verified_login'));
+        return redirect()->route('dashboard')->with('status', __('auth.phone_verified_login'));
     }
 }
