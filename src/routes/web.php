@@ -119,6 +119,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
     |--------------------------------------------------------------------------
     */
 
+    Route::middleware(\App\Http\Middleware\EnsureCompanyWorkspace::class)->group(function () {
     Route::get('/shipments', [
         ShipmentController::class,
         'index',
@@ -188,6 +189,8 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
 | Notifications
 |--------------------------------------------------------------------------
 */
+
+    });
 
     Route::get('/notifications', [
         NotificationController::class,
@@ -620,6 +623,12 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
 */
 
 require __DIR__ . '/auth.php';
+
+Route::middleware(['auth', 'verified', \\App\\Http\\Middleware\\EnsureUserNotBlocked::class])->group(function () {
+    Route::get('/company/onboarding', [\\App\\Http\\Controllers\\CompanyWorkspaceController::class, 'create'])->name('company.onboarding.show');
+    Route::post('/company/onboarding', [\\App\\Http\\Controllers\\CompanyWorkspaceController::class, 'store'])->middleware('throttle:5,1,company-onboarding:')->name('company.onboarding.store');
+    Route::get('/company/workspace', [\\App\\Http\\Controllers\\CompanyWorkspaceController::class, 'show'])->name('company.workspace');
+});
 
 Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->name('company.workspace');
 
