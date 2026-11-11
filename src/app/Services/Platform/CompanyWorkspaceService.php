@@ -176,7 +176,7 @@ final class CompanyWorkspaceService
         abort_unless($member, 403);
         $w = CompanyWorkspace::findOrFail($member->company_workspace_id);
         $customer = Customer::findOrFail($w->customer_id);
-        abort_unless($w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id && $user->hasVerifiedPhone(), 403);
+        abort_unless($w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id && (! $user->phone_verification_required || $user->hasVerifiedPhone()), 403);
 
         return $w;
     }
