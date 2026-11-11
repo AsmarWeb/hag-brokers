@@ -34,7 +34,7 @@ class MobileApiFoundationTest extends TestCase
 
     private function payload(array $x = []): array
     {
-        return array_replace(['account_type' => 'individual', 'name' => 'Person', 'email' => 'mobile@example.test', 'phone' => '+971501234567', 'password' => 'correct-password-123', 'password_confirmation' => 'correct-password-123', 'device_name' => 'phone'], $x);
+        return array_replace(['name' => 'Person', 'email' => 'mobile@example.test', 'password' => 'correct-password-123', 'password_confirmation' => 'correct-password-123', 'device_name' => 'phone'], $x);
     }
 
     private function bearer(User $u, array $abilities = ['mobile:v1']): array
@@ -80,20 +80,46 @@ class MobileApiFoundationTest extends TestCase
         Notification::assertSentTo($u, MobileVerifyEmail::class);
     }
 
-    public function test_company_registration_is_atomic_and_uses_free_workspace(): void
+    public function test_company_onboarding_is_atomic_and_uses_the_existing_free_plan(): void
     {
         Notification::fake();
         $this->artisan('platform:install-plans');
         PlatformPlan::where('code', 'free')->update(['is_available' => false]);
-        $d = $this->payload(['account_type' => 'company', 'company_name' => 'Global Co', 'phone' => '+971500000001', 'country_code' => 'AE']);
-        $this->postJson('/api/v1/auth/register', $d)->assertUnprocessable();
-        $this->assertDatabaseCount('users', 0);
+
+        $this->postJson('/api/v1/auth/register', $this->payload())
+            ->assertAccepted()
+            ->assertJsonPath('data.verification_required', true);
+
+        $u = User::where('email', 'mobile@example.test')->firstOrFail();
+        $u->forceFill([
+            'email_verified_at' => now(),
+            'phone' => '+971500000001',
+            'phone_verified_at' => now(),
+            'phone_verification_required' => true,
+        ])->save();
+
+        $login = $this->postJson('/api/v1/auth/login', [
+            'email' => $u->email,
+            'password' => 'correct-password-123',
+            'device_name' => 'phone',
+        ])->assertOk();
+        $headers = ['Authorization' => 'Bearer '.$login->json('data.access_token')];
+
+        $payload = ['company_name' => 'Global Co', 'country_code' => 'AE', 'city' => 'Dubai'];
+        $this->withHeaders($headers)->postJson('/api/v1/company/onboarding', $payload)->assertUnprocessable();
         $this->assertDatabaseCount('customers', 0);
+        $this->assertDatabaseCount('company_workspaces', 0);
+
         PlatformPlan::where('code', 'free')->update(['is_available' => true]);
         config(['platform_billing.free_launch' => true]);
-        $this->postJson('/api/v1/auth/register', $d)->assertAccepted()->assertJsonPath('data.verification_required', true);
-        $this->assertDatabaseCount('personal_access_tokens', 0);
-        $this->assertSame('free', app(CompanyWorkspaceService::class)->plan(CompanyWorkspace::first())['code']);
+        $this->withHeaders($headers)->postJson('/api/v1/company/onboarding', $payload)
+            ->assertCreated()
+            ->assertJsonPath('data.role', 'owner');
+
+        $this->assertDatabaseCount('customers', 1);
+        $this->assertDatabaseCount('company_workspaces', 1);
+        $this->assertDatabaseHas('company_members', ['user_id' => $u->id, 'role' => 'owner']);
+        $this->assertSame('free', app(CompanyWorkspaceService::class)->plan(CompanyWorkspace::firstOrFail())['code']);
     }
 
     public function test_registration_rejects_privileges_weak_password_and_duplicates(): void
