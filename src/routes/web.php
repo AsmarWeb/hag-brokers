@@ -624,13 +624,13 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
 
 require __DIR__ . '/auth.php';
 
-Route::middleware(['auth', 'verified', \\App\\Http\\Middleware\\EnsureUserNotBlocked::class])->group(function () {
-    Route::get('/company/onboarding', [\\App\\Http\\Controllers\\CompanyWorkspaceController::class, 'create'])->name('company.onboarding.show');
-    Route::post('/company/onboarding', [\\App\\Http\\Controllers\\CompanyWorkspaceController::class, 'store'])->middleware('throttle:5,1,company-onboarding:')->name('company.onboarding.store');
-    Route::get('/company/workspace', [\\App\\Http\\Controllers\\CompanyWorkspaceController::class, 'show'])->name('company.workspace');
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () {
+    Route::get('/company/onboarding', [\App\Http\Controllers\CompanyWorkspaceController::class, 'create'])->name('company.onboarding.show');
+    Route::post('/company/onboarding', [\App\Http\Controllers\CompanyWorkspaceController::class, 'store'])->middleware('throttle:5,1,company-onboarding:')->name('company.onboarding.store');
+    Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->name('company.workspace');
 });
 
-Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->name('company.workspace');
+
 
 Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class])->prefix('company')->name('company.')->group(function () {
     Route::get('/trade-offers/{offer}/room',[\App\Http\Controllers\TradeOfferRoomController::class,'show'])->name('trade-offers.room');
