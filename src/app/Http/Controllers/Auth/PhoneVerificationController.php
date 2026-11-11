@@ -33,6 +33,7 @@ final class PhoneVerificationController extends Controller
             'phone_country_code' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys(config('phone.countries', [])))],
             'phone' => ['required', 'string', 'regex:/^\+[1-9][0-9]{7,14}$/D'],
             'current_password' => ['nullable', 'string', 'max:128'],
+            'email' => ['prohibited'], 'phone_verified_at' => ['prohibited'], 'phone_verification_required' => ['prohibited'],
         ]);
 
         $user = DB::transaction(function () use ($request, $data): User {
@@ -69,6 +70,7 @@ final class PhoneVerificationController extends Controller
 
     public function resend(Request $request, PhoneVerificationService $verification): RedirectResponse|\Illuminate\Http\JsonResponse
     {
+        $request->validate(['email' => ['prohibited']]);
         $user = $request->user();
         abort_unless($user->phone, 422, 'Add a phone number first.');
         $sent = $user->hasVerifiedPhone() || $verification->sendSafely($user);
@@ -81,7 +83,7 @@ final class PhoneVerificationController extends Controller
 
     public function verify(Request $request, PhoneVerificationService $verification): RedirectResponse|\Illuminate\Http\JsonResponse
     {
-        $data = $request->validate(['code' => ['required', 'digits:6']]);
+        $data = $request->validate(['code' => ['required', 'digits:6'], 'email' => ['prohibited']]);
         $user = $request->user();
         if (! $verification->verify($user, $data['code'])) {
             throw ValidationException::withMessages(['code' => [__('auth.phone_code_invalid')]]);
