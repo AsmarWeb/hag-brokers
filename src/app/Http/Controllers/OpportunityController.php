@@ -6,6 +6,7 @@ use App\Models\Opportunity;
 use App\Models\OpportunityInterest;
 use App\Models\Port;
 use App\Services\Platform\CompanyMarketplaceService;
+use App\Services\Platform\MobileAppSettings;
 use App\Services\Platform\OpportunityCatalog;
 use App\Services\Platform\OpportunityInput;
 use App\Services\Platform\OpportunitySubmission;
@@ -16,7 +17,11 @@ use Illuminate\Validation\Rule;
 
 final class OpportunityController extends Controller
 {
-    public function index(Request $request, CompanyMarketplaceService $service)
+    public function index(
+        Request $request,
+        CompanyMarketplaceService $service,
+        MobileAppSettings $settings
+)
     {
         $filters = $request->validate([
             'search' => ['nullable', 'string', 'max:150'],
@@ -69,7 +74,14 @@ final class OpportunityController extends Controller
         }
         $opportunities = $query->orderByDesc('id')->paginate(12)->withQueryString();
 
-        return view('opportunities.index', compact('opportunities'));
+        $categoryCards = $settings->publicContent()['category_cards'];
+        $selectedCategory = collect($categoryCards)->firstWhere('code', $filters['category'] ?? null);
+
+        return view('opportunities.index', compact(
+            'opportunities',
+            'categoryCards',
+            'selectedCategory'
+        ));
     }
 
     public function create(Request $request, CompanyMarketplaceService $service)

@@ -397,4 +397,45 @@ return [$u, $w];
         $this->postJson(route('opportunities.interest.store', $o), $this->application())->assertUnprocessable();
         $this->assertDatabaseCount('opportunity_interests', 0);
     }
+
+    public function test_public_marketplace_category_filter_shows_only_visible_opportunities_in_selected_category(): void
+    {
+        [$u] = $this->company('owner', 4);
+
+        $food = $this->listing($u, [
+            'title' => 'Fresh Food Supply Opportunity',
+            'category' => 'food',
+        ]);
+
+        $marine = $this->listing($u, [
+            'title' => 'Marine Equipment Opportunity',
+            'category' => 'marine',
+        ]);
+
+        $hiddenFood = $this->listing($u, [
+            'title' => 'Hidden Food Opportunity',
+            'category' => 'food',
+        ]);
+
+        $hiddenFood->moderation()->create(['hidden' => true]);
+
+        $this->get(route('opportunities.index', [
+            'category' => 'food',
+            'lang' => 'en',
+        ]))
+            ->assertOk()
+            ->assertSee('Explore Business Sectors')
+            ->assertSee('Fresh Food Supply Opportunity')
+            ->assertDontSee('Marine Equipment Opportunity')
+            ->assertDontSee('Hidden Food Opportunity');
+
+        $this->get(route('opportunities.index', [
+            'category' => 'marine',
+            'lang' => 'en',
+        ]))
+            ->assertOk()
+            ->assertSee('Marine Equipment Opportunity')
+            ->assertDontSee('Fresh Food Supply Opportunity');
+    }
+
 }

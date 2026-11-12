@@ -39,6 +39,53 @@
 @endif
 </section>
 @endforeach
+
+<section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
+    <h3 class="mb-2 text-xl font-bold">{{ $ar ? 'مجالات السوق والبطاقات المصورة' : 'Marketplace categories and image cards' }}</h3>
+    <p class="mb-5 text-sm text-slate-600 dark:text-slate-300">
+        {{ $ar ? 'خصص أسماء المجالات وأوصافها وصورها وترتيبها. إخفاء المجال هنا يخفي بطاقته من الاستكشاف، ولا يغيّر تصنيف الفرص المنشورة أو صلاحياتها.' : 'Customize category names, descriptions, images and display order. Hiding a category removes its discovery card; it does not change listing taxonomy or publishing permissions.' }}
+    </p>
+    <div class="grid gap-5 lg:grid-cols-2">
+        @foreach($categories as $category)
+            @php($card = $settings['content']['category_cards'][$category])
+            <article class="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+                <div class="mb-3 flex items-center justify-between gap-3">
+                    <h4 class="font-bold">{{ __('trade.categories.'.$category) }}</h4>
+                    <code class="text-xs text-slate-500">{{ $category }}</code>
+                </div>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    @foreach(['ar' => 'العربية', 'en' => 'English'] as $lang => $language)
+                        <div dir="{{ $lang === 'ar' ? 'rtl' : 'ltr' }}">
+                            <label class="mb-1 block text-sm" for="category-{{ $category }}-title-{{ $lang }}">{{ $ar ? 'العنوان' : 'Title' }} — {{ $language }}</label>
+                            <input class="w-full rounded-lg dark:bg-slate-800" id="category-{{ $category }}-title-{{ $lang }}" name="category_cards[{{ $category }}][title_{{ $lang }}]" maxlength="100" required value="{{ old("category_cards.$category.title_$lang", $card["title_$lang"]) }}">
+                            <label class="mb-1 mt-3 block text-sm" for="category-{{ $category }}-description-{{ $lang }}">{{ $ar ? 'وصف مختصر' : 'Short description' }} — {{ $language }}</label>
+                            <textarea class="w-full rounded-lg dark:bg-slate-800" id="category-{{ $category }}-description-{{ $lang }}" name="category_cards[{{ $category }}][description_{{ $lang }}]" maxlength="240" rows="2">{{ old("category_cards.$category.description_$lang", $card["description_$lang"]) }}</textarea>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div>
+                        <label class="mb-1 block text-sm" for="category-{{ $category }}-order">{{ $ar ? 'ترتيب العرض' : 'Display order' }}</label>
+                        <input class="w-full rounded-lg dark:bg-slate-800" id="category-{{ $category }}-order" type="number" min="0" max="999" name="category_cards[{{ $category }}][sort_order]" value="{{ old("category_cards.$category.sort_order", $card['sort_order']) }}">
+                    </div>
+                    <div class="flex flex-wrap items-end gap-4 pb-2">
+                        <label><input type="hidden" name="category_cards[{{ $category }}][enabled]" value="0"><input type="checkbox" name="category_cards[{{ $category }}][enabled]" value="1" @checked(old("category_cards.$category.enabled", $card['enabled']))> {{ $ar ? 'إظهار المجال' : 'Show category' }}</label>
+                        <label><input type="hidden" name="category_cards[{{ $category }}][featured]" value="0"><input type="checkbox" name="category_cards[{{ $category }}][featured]" value="1" @checked(old("category_cards.$category.featured", $card['featured']))> {{ $ar ? 'مجال مميز' : 'Featured' }}</label>
+                    </div>
+                </div>
+                <label class="mb-2 mt-3 block text-sm" for="category-{{ $category }}-image">{{ $ar ? 'صورة المجال (JPG / PNG / WebP، حتى 3 MB)' : 'Category image (JPG / PNG / WebP, up to 3 MB)' }}</label>
+                <input id="category-{{ $category }}-image" type="file" name="category_cards[{{ $category }}][image]" accept="image/jpeg,image/png,image/webp" class="block w-full text-sm">
+                @if($card['image'])
+                    <img class="mt-3 h-36 w-full rounded-lg object-cover" src="{{ Storage::disk('public')->url($card['image']) }}" alt="{{ $card['title_en'] }}">
+                    <label class="mt-2 block text-sm"><input type="checkbox" name="category_cards[{{ $category }}][remove_image]" value="1"> {{ $ar ? 'إزالة الصورة' : 'Remove image' }}</label>
+                @else
+                    <p class="mt-2 text-xs text-slate-500">{{ $ar ? 'لم ترفع صورة لهذا المجال بعد.' : 'No image uploaded for this category yet.' }}</p>
+                @endif
+            </article>
+        @endforeach
+    </div>
+</section>
+
 <section class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-900">
 <h3 class="mb-4 text-xl font-bold">{{ $ar ? 'التخصيص' : 'Customization' }}</h3>
 @foreach(['welcome_enabled' => ($ar ? 'عرض الترحيب عند أول استخدام' : 'Show first-use welcome'), 'show_marine' => ($ar ? 'عرض قسم الفرص البحرية' : 'Show marine opportunities')] as $key => $label)

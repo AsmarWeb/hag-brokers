@@ -10,13 +10,91 @@
                 <p>{{ __('marketplace.intro') }}</p>
             </div><a class="trade-button" href="{{ route('opportunities.create') }}">{{ __('trade.new') }} ↗</a>
         </header>
-        <nav class="market-sectors" aria-label="{{ __('trade.fields.category') }}"><a @class(['active' => !request('category')])
-                href="{{ route('opportunities.index') }}">{{ __('trade.all') }}</a>
-            @foreach (['marine', 'automotive', 'machinery', 'food', 'electronics', 'real_estate', 'professional_services'] as $sector)
-                <a @class(['active' => request('category') === $sector])
-                    href="{{ route('opportunities.index', ['category' => $sector, 'lang' => app()->getLocale()]) }}">{{ __('trade.categories.' . $sector) }}</a>
-            @endforeach
-        </nav>
+
+        @php
+            $marketLocale = app()->getLocale() === 'ar' ? 'ar' : 'en';
+        @endphp
+
+        <section class="market-category-section" aria-labelledby="market-category-heading">
+            <div class="market-category-heading">
+                <div>
+                    <p class="trade-eyebrow">HAG BROKERS · MARKET SECTORS</p>
+                    <h2 id="market-category-heading">
+                        {{ $marketLocale === 'ar' ? 'استكشف المجالات التجارية' : 'Explore Business Sectors' }}
+                    </h2>
+                    <p>
+                        {{ $marketLocale === 'ar'
+                            ? 'اكتشف المنتجات والقطاعات والفرص التجارية المتاحة عبر شبكة HAG Brokers.'
+                            : 'Explore products, industries and business opportunities across the HAG Brokers network.' }}
+                    </p>
+                </div>
+                @if (request('category'))
+                    <a class="market-category-reset" href="{{ route('opportunities.index', ['lang' => $marketLocale]) }}">
+                        {{ $marketLocale === 'ar' ? 'عرض جميع المجالات' : 'View all sectors' }}
+                    </a>
+                @endif
+            </div>
+
+            @if ($selectedCategory)
+                <div class="market-category-detail">
+                    @if ($selectedCategory['image'])
+                        <img src="{{ $selectedCategory['image'] }}"
+                            alt="{{ $selectedCategory['title_' . $marketLocale] }}"
+                            loading="eager">
+                    @else
+                        <div class="market-category-detail-fallback"><span>HAG</span></div>
+                    @endif
+                    <div class="market-category-detail-copy">
+                        <span>{{ $marketLocale === 'ar' ? 'استكشف المجال' : 'EXPLORE SECTOR' }}</span>
+                        <h2>{{ $selectedCategory['title_' . $marketLocale] }}</h2>
+                        @if ($selectedCategory['description_' . $marketLocale])
+                            <p>{{ $selectedCategory['description_' . $marketLocale] }}</p>
+                        @endif
+                        <strong>
+                            {{ $opportunities->total() }}
+                            {{ $marketLocale === 'ar' ? 'فرصة متاحة' : 'opportunities available' }}
+                        </strong>
+                    </div>
+                </div>
+            @endif
+
+            <div class="market-category-grid">
+                @foreach ($categoryCards as $card)
+                    @php
+                        $cardTitle = $card['title_' . $marketLocale] ?: __('trade.categories.' . $card['code']);
+                        $cardDescription = $card['description_' . $marketLocale] ?? '';
+                        $cardActive = request('category') === $card['code'];
+                    @endphp
+                    <a class="market-category-card{{ $cardActive ? ' is-active' : '' }}"
+                        href="{{ route('opportunities.index', ['category' => $card['code'], 'lang' => $marketLocale]) }}"
+                        @if ($cardActive) aria-current="page" @endif>
+                        <div class="market-category-cover">
+                            @if ($card['image'])
+                                <img src="{{ $card['image'] }}" alt="{{ $cardTitle }}" loading="lazy">
+                            @else
+                                <div class="market-category-fallback">
+                                    <span>HAG</span>
+                                    <small>{{ strtoupper($card['code']) }}</small>
+                                </div>
+                            @endif
+                            @if ($card['featured'])
+                                <span class="market-category-featured">
+                                    {{ $marketLocale === 'ar' ? 'مجال مميز' : 'Featured' }}
+                                </span>
+                            @endif
+                            <span class="market-category-arrow" aria-hidden="true">↗</span>
+                        </div>
+                        <div class="market-category-copy">
+                            <h3>{{ $cardTitle }}</h3>
+                            @if ($cardDescription)
+                                <p>{{ $cardDescription }}</p>
+                            @endif
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </section>
+
         @include('admin.platform.messages')
         <div class="market-catalog">
             <aside>
@@ -110,9 +188,22 @@
                                 <p class="market-publisher">{{ $opportunity->customer?->company_name }}</p>
                             </div>
                         </article>
-                    @empty<div class="trade-panel">
-                            <h3>{{ __('trade.empty') }}</h3><a class="trade-link"
-                                href="{{ route('opportunities.index') }}">{{ __('trade.reset') }}</a>
+                    @empty
+                        <div class="trade-panel market-empty-state">
+                            @if (request()->hasAny(['search', 'category', 'type', 'country', 'subcategory', 'vessel_category', 'currency', 'min_price', 'max_price']))
+                                <h3>{{ __('trade.empty') }}</h3>
+                                <a class="trade-link" href="{{ route('opportunities.index', ['lang' => $marketLocale]) }}">
+                                    {{ __('trade.reset') }}
+                                </a>
+                            @else
+                                <span class="market-empty-mark">HAG</span>
+                                <h3>{{ $marketLocale === 'ar' ? 'فرص جديدة بانتظارك' : 'New opportunities are on the way' }}</h3>
+                                <p>
+                                    {{ $marketLocale === 'ar'
+                                        ? 'استكشف المجالات أعلاه، وستظهر الفرص المنشورة ضمن كل مجال هنا.'
+                                        : 'Explore the sectors above. Published opportunities will appear here as they become available.' }}
+                                </p>
+                            @endif
                         </div>
                     @endforelse
                 </div>

@@ -881,88 +881,95 @@
 
             <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-                {{-- =====================================================
-             HEADER
-        ====================================================== --}}
-                <div class="mb-8 sm:mb-10">
-
-                    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-
-                        <div class="max-w-2xl">
-
-                            <div
-                                class="mb-4 inline-flex items-center gap-2 rounded-full
-                               border border-cyan-400/20 bg-cyan-400/5
-                               px-3 py-1.5 text-xs font-semibold text-cyan-300">
-                                <span class="h-1.5 w-1.5 rounded-full bg-cyan-400"></span>
-
-                                {{ $isAr ? 'سوق الفرص التجارية' : 'Business Opportunities Marketplace' }}
+                {{-- ADMIN-MANAGED CATEGORY DISCOVERY --}}
+                <div class="mb-10 sm:mb-14">
+                    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <div class="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/[0.07] px-3 py-1.5 text-[11px] font-bold tracking-wide text-amber-200">
+                                <span class="h-1.5 w-1.5 rounded-full bg-amber-300"></span>
+                                {{ $isAr ? 'استكشف عالم التجارة' : 'EXPLORE THE MARKETPLACE' }}
                             </div>
-
-
-                            <h2
-                                class="text-3xl font-black tracking-tight text-white
-                               sm:text-4xl lg:text-5xl">
-                                {{ $isAr ? 'اكتشف فرصتك القادمة' : 'Discover Your Next Opportunity' }}
+                            <h2 class="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
+                                {{ $isAr ? 'اكتشف المجالات والمنتجات' : 'Explore Sectors & Products' }}
                             </h2>
-
-
-                            <p class="mt-4 text-sm leading-7 text-slate-400 sm:text-base">
-
+                            <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
                                 {{ $isAr
-                                    ? 'فرص تجارية واستثمارية وشراكات مختارة عبر شبكة HAG Brokers.'
-                                    : 'Discover selected business, investment and partnership opportunities through HAG Brokers.' }}
-
+                                    ? 'اختر المجال الذي يهمك واستكشف الفرص التجارية المتاحة.'
+                                    : 'Choose an industry and discover relevant business opportunities.' }}
                             </p>
-
                         </div>
 
-
-                        {{-- Desktop CTA --}}
-                        <div class="hidden lg:flex items-center gap-3">
-
-                            <a href="{{ route('opportunities.index') }}"
-                                class="inline-flex h-11 items-center justify-center gap-2
-                               rounded-xl border border-white/10
-                               bg-white/[0.04] px-5
-                               text-sm font-semibold text-white
-                               transition hover:bg-white/[0.08]">
-                                {{ $isAr ? 'كل الفرص' : 'All Opportunities' }}
-
-                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                    @if ($isAr)
-                                        <path fill-rule="evenodd"
-                                            d="M12.79 3.79a1 1 0 010 1.42L8 10l4.79 4.79a1 1 0 01-1.42 1.42l-5.5-5.5a1 1 0 010-1.42l5.5-5.5a1 1 0 011.42 0z"
-                                            clip-rule="evenodd" />
-                                    @else
-                                        <path fill-rule="evenodd"
-                                            d="M7.21 16.21a1 1 0 010-1.42L12 10 7.21 5.21a1 1 0 011.42 0l5.5 5.5a1 1 0 010 1.42z"
-                                            clip-rule="evenodd" />
-                                    @endif
-                                </svg>
-                            </a>
-
-                            @auth
-                                <a href="{{ route('opportunities.create') }}"
-                                    class="inline-flex h-11 items-center justify-center gap-2
-                                   rounded-xl bg-cyan-400 px-5
-                                   text-sm font-bold text-slate-950
-                                   transition hover:bg-cyan-300">
-                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                        <path
-                                            d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
-                                    </svg>
-
-                                    {{ $isAr ? 'أضف فرصة' : 'Add Opportunity' }}
-                                </a>
-                            @endauth
-
-                        </div>
-
+                        <a href="{{ route('opportunities.index') }}"
+                           class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-5 text-sm font-semibold text-white transition hover:border-amber-300/30 hover:bg-white/[0.08]">
+                            {{ $isAr ? 'جميع المجالات والفرص' : 'All sectors & opportunities' }}
+                        </a>
                     </div>
 
-                </div>
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                        @forelse ($categoryCards ?? [] as $card)
+                            @php
+                                $code = $card['code'] ?? 'other';
+                                $title = $isAr
+                                    ? ($card['title_ar'] ?: ($categoryLabels[$code] ?? $code))
+                                    : ($card['title_en'] ?: ($categoryLabels[$code] ?? $code));
+                                $description = $isAr
+                                    ? ($card['description_ar'] ?? '')
+                                    : ($card['description_en'] ?? '');
+                                $image = $card['image'] ?? null;
+                            @endphp
 
+                            <a href="{{ route('opportunities.index', ['category' => $code]) }}"
+                               class="group relative isolate flex min-h-[170px] overflow-hidden rounded-2xl border border-white/10 bg-[#102238] shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-1 hover:border-amber-300/40 hover:shadow-xl hover:shadow-black/20 sm:min-h-[205px] sm:rounded-3xl">
+                                @if ($image)
+                                    <img src="{{ $image }}" alt="{{ $title }}"
+                                         class="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                                         loading="lazy">
+                                @else
+                                    <div class="absolute inset-0 -z-20 bg-gradient-to-br from-[#173d55] via-[#102238] to-[#091522]"></div>
+                                    <div class="absolute inset-0 -z-10 opacity-30"
+                                         style="background-image: radial-gradient(circle at 75% 20%, rgba(217,184,121,.35), transparent 42%), linear-gradient(135deg, transparent 45%, rgba(34,211,238,.10));"></div>
+                                    <div class="absolute {{ $isAr ? 'left-4' : 'right-4' }} top-4 -z-10 text-amber-200/30">
+                                        <svg class="h-12 w-12 sm:h-16 sm:w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5A2.5 2.5 0 015.5 5h3l1.5-2h4L15.5 5h3A2.5 2.5 0 0121 7.5v9a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 16.5v-9z"/>
+                                            <circle cx="12" cy="12" r="3.5"/>
+                                        </svg>
+                                    </div>
+                                @endif
+
+                                <div class="absolute inset-0 -z-10 bg-gradient-to-t from-[#06101d] via-[#06101d]/55 to-black/5"></div>
+
+                                <div class="mt-auto flex w-full flex-col p-3 sm:p-5">
+                                    @if (!empty($card['featured']))
+                                        <span class="mb-2 inline-flex w-fit rounded-full border border-amber-200/30 bg-amber-200/15 px-2.5 py-1 text-[9px] font-bold tracking-wider text-amber-100">
+                                            {{ $isAr ? 'مجال مميز' : 'FEATURED' }}
+                                        </span>
+                                    @endif
+
+                                    <h3 class="line-clamp-2 text-sm font-extrabold leading-6 text-white sm:text-lg">
+                                        {{ $title }}
+                                    </h3>
+
+                                    @if ($description)
+                                        <p class="mt-1 line-clamp-2 text-[10px] leading-5 text-slate-200/80 sm:text-xs">
+                                            {{ $description }}
+                                        </p>
+                                    @endif
+
+                                    <span class="mt-3 inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-200 sm:text-xs">
+                                        {{ $isAr ? 'استكشف المجال' : 'Explore sector' }}
+                                        <svg class="h-3.5 w-3.5 {{ $isAr ? 'rotate-180' : '' }}" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M7.21 16.21a1 1 0 010-1.42L12 10 7.21 5.21a1 1 0 011.42 0l5.5 5.5a1 1 0 010 1.42l-5.5 5.5a1 1 0 01-1.42 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="col-span-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-slate-400">
+                                {{ $isAr ? 'سيتم عرض المجالات هنا قريباً.' : 'Business sectors will appear here soon.' }}
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
 
                 {{-- =====================================================
              QUICK FILTERS
@@ -1345,14 +1352,14 @@
 
 
                         <h3 class="mt-5 text-xl font-bold text-white sm:text-2xl">
-                            {{ $isAr ? 'لا توجد فرص منشورة حالياً' : 'No Opportunities Published Yet' }}
+                            {{ $isAr ? 'استكشف المجالات التجارية' : 'Explore Business Sectors' }}
                         </h3>
 
 
                         <p class="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-400">
                             {{ $isAr
-                                ? 'يمكنك أن تكون من أوائل من يضيف فرصة تجارية إلى HAG Brokers.'
-                                : 'Be among the first to publish a business opportunity on HAG Brokers.' }}
+                                ? 'تصفح المجالات المتاحة واكتشف فرص التعاون والتوريد والاستثمار. ستظهر الفرص الجديدة هنا عند نشرها.'
+                                : 'Explore available sectors and discover trade, supply and investment opportunities. New listings will appear here as they are published.' }}
                         </p>
 
 

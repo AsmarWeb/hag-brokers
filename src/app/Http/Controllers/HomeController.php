@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\Platform\CompanyMarketplaceService;
 use App\Services\Platform\PublicExperience;
+use App\Services\Platform\MobileAppSettings;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -21,7 +22,9 @@ class HomeController extends Controller
 
         $experience = app(PublicExperience::class);
 
-        return response()->view('welcome', compact('opportunities') + [
+        $categoryCards = app(MobileAppSettings::class)->publicContent()['category_cards'] ?? [];
+
+        return response()->view('welcome', compact('opportunities', 'categoryCards') + [
             'maritimeMap' => $experience->map(),
             'androidRelease' => $experience->download(),
             'mapEnabled' => (bool) $experience->settings()['map_enabled'],
