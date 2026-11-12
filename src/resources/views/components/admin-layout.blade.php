@@ -999,6 +999,17 @@
                         </a>
                     @endif
 
+                    @if(auth()->user()?->hasRole(['admin', 'super-admin']))
+                        <a href="{{ route('admin.mobile-app.edit') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                            {{ request()->routeIs('admin.mobile-app.*')
+                                ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                            <span class="text-base">▣</span>
+                            <span>{{ $isAr ? 'إعدادات تطبيق الهاتف' : 'Mobile App Settings' }}</span>
+                        </a>
+                    @endif
+
                     {{-- Settings --}}
 
                     @if ($canViewSettings)
