@@ -51,10 +51,25 @@ class AccountCompletionTest extends TestCase
         $payload = ['name' => 'New Name', 'email' => $u->email, 'revision' => $record['revision']];
         $a = $this->putJson('/api/v1/auth/account', $payload)->assertOk()->assertJsonPath('data.user.name', 'New Name')->assertJsonPath('data.user.email_verified', true)->assertJsonPath('meta.email_changed', false)->json('data');
         $payload = ['name' => 'New Name', 'email' => 'NEW@example.test', 'revision' => $a['revision']];
+
+        DB::table('phone_verifications')->insert([
+            'user_id' => $u->id,
+            'phone' => $u->phone,
+            'code_hash' => Hash::make('123456'),
+            'attempts' => 0,
+            'expires_at' => now()->addMinutes(10),
+            'sent_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->putJson('/api/v1/auth/account', $payload)->assertUnprocessable()->assertJsonValidationErrors('current_password');
         $this->assertSame($u->email, $u->fresh()->email);
         $this->putJson('/api/v1/auth/account', $payload + ['current_password' => 'Current-pass-123'])->assertOk()->assertJsonPath('data.user.email', 'new@example.test')->assertJsonPath('data.user.email_verified', false);
         $this->assertNull($u->fresh()->email_verified_at);
+        $this->assertDatabaseMissing('phone_verifications', [
+            'user_id' => $u->id,
+        ]);
         $this->assertDatabaseMissing('personal_access_tokens', ['id' => $other->accessToken->id]);
         $this->assertDatabaseCount('personal_access_tokens', 0);
         auth()->forgetGuards();

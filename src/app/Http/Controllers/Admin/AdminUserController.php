@@ -241,6 +241,10 @@ class AdminUserController extends Controller
 
             if ($emailChanged || $phoneChanged) {
                 $user->tokens()->delete();
+
+                \Illuminate\Support\Facades\DB::table('phone_verifications')
+                    ->where('user_id', $user->getKey())
+                    ->delete();
             }
         });
 

@@ -13,10 +13,6 @@ class CompanyWorkspaceController extends Controller
     public function create(Request $request)
     {
         abort_unless($request->user()->hasVerifiedEmail(), 403);
-        if (! $request->user()->hasVerifiedPhone()) {
-            return redirect()->route('phone.verification.notice');
-        }
-
         if (CompanyMember::where('user_id', $request->user()->id)->exists()) {
             return redirect()->route('company.workspace');
         }
@@ -34,6 +30,7 @@ class CompanyWorkspaceController extends Controller
             'email_verified' => $user->hasVerifiedEmail(),
             'phone' => $user->phone,
             'phone_verified' => $user->hasVerifiedPhone(),
+            'phone_setup_completed' => $user->hasCompletedPhoneSetup(),
             'company' => $member ? ['workspace_id' => $member->company_workspace_id, 'role' => $member->role] : null,
         ]]);
     }

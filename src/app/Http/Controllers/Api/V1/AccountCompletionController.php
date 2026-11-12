@@ -54,6 +54,10 @@ final class AccountCompletionController extends Controller
                 $u->save();
                 if ($changed) {
                     $u->tokens()->delete();
+
+                    DB::table('phone_verifications')
+                        ->where('user_id', $u->getKey())
+                        ->delete();
                 }
 
                 return [$u, $changed];

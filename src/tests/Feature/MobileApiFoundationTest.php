@@ -94,8 +94,8 @@ class MobileApiFoundationTest extends TestCase
         $u->forceFill([
             'email_verified_at' => now(),
             'phone' => '+971500000001',
-            'phone_verified_at' => now(),
-            'phone_verification_required' => true,
+            'phone_verified_at' => null,
+            'phone_verification_required' => false,
         ])->save();
 
         $login = $this->postJson('/api/v1/auth/login', [
@@ -104,6 +104,11 @@ class MobileApiFoundationTest extends TestCase
             'device_name' => 'phone',
         ])->assertOk();
         $headers = ['Authorization' => 'Bearer '.$login->json('data.access_token')];
+
+        $this->withHeaders($headers)->getJson('/api/v1/company/onboarding')
+            ->assertOk()
+            ->assertJsonPath('data.phone_verified', false)
+            ->assertJsonPath('data.phone_setup_completed', true);
 
         $payload = ['company_name' => 'Global Co', 'country_code' => 'AE', 'city' => 'Dubai'];
         $this->withHeaders($headers)->postJson('/api/v1/company/onboarding', $payload)->assertUnprocessable();

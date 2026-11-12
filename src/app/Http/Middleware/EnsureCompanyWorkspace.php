@@ -20,14 +20,6 @@ final class EnsureCompanyWorkspace
             return $next($request);
         }
 
-        if ($user->phone_verification_required && ! $user->hasVerifiedPhone()) {
-            if ($request->expectsJson()) {
-                abort(403, 'Phone verification is required.');
-            }
-
-            return redirect()->route('phone.verification.notice');
-        }
-
         $member = CompanyMember::where('user_id', $user->id)->first();
         if ($member) {
             app(CompanyWorkspaceService::class)->workspaceFor($user);

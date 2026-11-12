@@ -128,7 +128,7 @@ final class CompanyWorkspaceService
         return DB::transaction(function () use ($owner, $data): CompanyWorkspace {
             $user = User::whereKey($owner->id)->lockForUpdate()->firstOrFail();
 
-            abort_unless($user->hasVerifiedEmail() && $user->hasVerifiedPhone(), 403, 'Verify your email and phone before creating a company workspace.');
+            abort_unless($user->hasVerifiedEmail() && $user->hasCompletedPhoneSetup(), 403, 'Complete your email and phone setup before creating a company workspace.');
             abort_if($user->isPlatformAdministrator() || $user->carrierPartnership()->exists(), 403);
             abort_unless($user->customer_id === null && ! CompanyMember::where('user_id', $user->id)->exists(), 409, 'This account already belongs to a company.');
 
@@ -176,7 +176,7 @@ final class CompanyWorkspaceService
         abort_unless($member, 403);
         $w = CompanyWorkspace::findOrFail($member->company_workspace_id);
         $customer = Customer::findOrFail($w->customer_id);
-        abort_unless($w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id && (! $user->phone_verification_required || $user->hasVerifiedPhone()), 403);
+        abort_unless($w->status === 'active' && $customer->is_active && (int) $user->customer_id === (int) $w->customer_id, 403);
 
         return $w;
     }
