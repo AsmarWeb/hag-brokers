@@ -20,7 +20,7 @@ final class PhoneVerificationController extends Controller
         return view('auth.verify-phone', [
             'phone' => $request->user()->phone,
             'phoneCountryCode' => PhoneNumber::countryFor($request->user()->phone),
-            'phoneVerified' => $request->user()->hasVerifiedPhone(),
+            'phoneSetupCompleted' => $request->user()->hasCompletedPhoneSetup(),
         ]);
     }
 
@@ -61,6 +61,7 @@ final class PhoneVerificationController extends Controller
             return response()->json(['data' => [
                 'phone' => $user->phone,
                 'phone_verified' => $user->hasVerifiedPhone(),
+                'phone_setup_completed' => $user->hasCompletedPhoneSetup(),
                 'verification_sent' => $sent,
             ]], 202);
         }
@@ -91,7 +92,8 @@ final class PhoneVerificationController extends Controller
 
         if ($request->expectsJson()) {
             return response()->json(['data' => [
-                'phone_verified' => true,
+                'phone_verified' => $user->fresh()->hasVerifiedPhone(),
+                'phone_setup_completed' => $user->fresh()->hasCompletedPhoneSetup(),
                 'email_verified' => $user->fresh()->hasVerifiedEmail(),
                 'account_verified' => $user->fresh()->hasVerifiedAccount(),
             ]]);

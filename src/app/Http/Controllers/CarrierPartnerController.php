@@ -192,9 +192,8 @@ final class CarrierPartnerController extends Controller
 
     public function issueToken(Request $request)
     {
-        if ($request->user()->phone_verification_required && ! $request->user()->hasVerifiedPhone()) {
-            abort(403, 'Phone verification is required before issuing a carrier API token.');
-        }
+        abort_unless($request->user()->hasCompletedPhoneSetup(), 403);
+
         $request->validate(['password' => ['required', 'current_password']]);
         $token = DB::transaction(function () use ($request) {
             $user = User::lockForUpdate()->findOrFail($request->user()->id);

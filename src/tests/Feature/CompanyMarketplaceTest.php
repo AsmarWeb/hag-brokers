@@ -94,8 +94,8 @@ return [$u, $w];
         $u->forceFill([
             'email_verified_at' => now(),
             'phone' => '+971500000001',
-            'phone_verified_at' => now(),
-            'phone_verification_required' => true,
+            'phone_verified_at' => null,
+            'phone_verification_required' => false,
         ])->save();
 
         $this->actingAs($u)->post(route('company.onboarding.store'), [

@@ -1,15 +1,15 @@
 <x-guest-layout>
     <div class="mb-8 text-center">
         <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500 text-xl font-extrabold text-slate-950">HAG</div>
-        <h1 class="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">{{ app()->getLocale() === 'ar' ? 'توثيق رقم الهاتف' : 'Verify your phone number' }}</h1>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ app()->getLocale() === 'ar' ? 'أضف رقم هاتفك بعد تسجيل الدخول، ثم أدخل رمز التحقق المرسل إليك.' : 'Add your phone number after signing in, then enter the verification code we send you.' }}</p>
+        <h1 class="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">{{ app()->getLocale() === 'ar' ? 'إكمال خطوة تأكيد رقم الهاتف' : 'Complete phone confirmation' }}</h1>
+        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ app()->getLocale() === 'ar' ? 'أضف رقم هاتفك بعد تسجيل الدخول، ثم أدخل الرمز المرسل إلى بريدك الإلكتروني الموثّق.' : 'Add your phone number after signing in, then enter the code sent to your verified email address.' }}</p>
     </div>
 
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    @if ($phoneVerified)
+    @if ($phoneSetupCompleted)
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
-            {{ app()->getLocale() === 'ar' ? 'رقم هاتفك موثّق بالفعل.' : 'Your phone number is already verified.' }}
+            {{ app()->getLocale() === 'ar' ? 'تم إكمال خطوة تأكيد الرقم باستخدام بريدك الإلكتروني.' : 'The phone confirmation step was completed using your email.' }}
         </div>
         <a href="{{ route('company.onboarding.show') }}" class="mt-5 block text-center font-semibold text-cyan-600">{{ app()->getLocale() === 'ar' ? 'متابعة إعداد الشركة' : 'Continue to company setup' }}</a>
     @else

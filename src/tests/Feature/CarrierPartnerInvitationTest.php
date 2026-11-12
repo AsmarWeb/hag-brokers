@@ -129,11 +129,21 @@ final class CarrierPartnerInvitationTest extends TestCase
             ->assertRedirect();
         $this->assertSame('Verified Representative', $user->fresh()->name);
 
-        // Changing the phone invalidates verification and must block token issuance.
+        // Changing the phone requires completing the email-code setup before token issuance.
+        $updatedUser = $user->fresh();
+
+        $this->assertNull($updatedUser->phone_verified_at);
+        $this->assertTrue($updatedUser->phone_verification_required);
+
         $this->postJson(route('carrier.token.issue'), ['password' => $password])->assertForbidden();
 
-        // Simulate successful verification of the newly registered phone number.
-        $user->forceFill(['phone_verified_at' => now()])->save();
+        // Simulate successful email-code setup; this does not verify phone ownership.
+        $updatedUser->forceFill(['phone_verification_required' => false])->save();
+
+        $this->assertNull($updatedUser->fresh()->phone_verified_at);
+        $this->assertTrue($updatedUser->fresh()->hasCompletedPhoneSetup());
+        $this->assertFalse($updatedUser->fresh()->hasVerifiedPhone());
+
         auth()->forgetGuards();
         $this->postJson(route('carrier.token.issue'), ['password' => 'wrong'])->assertUnprocessable();
         $this->post(route('carrier.token.issue'), ['password' => $password])->assertRedirect();

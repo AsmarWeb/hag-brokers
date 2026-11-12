@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Middleware\EnsureUserNotBlocked;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 
-    Route::middleware('verified')->group(function () {
+    Route::middleware([EnsureUserNotBlocked::class, 'verified'])->group(function () {
         Route::get('verify-phone', [PhoneVerificationController::class, 'notice'])->name('phone.verification.notice');
         Route::put('phone', [PhoneVerificationController::class, 'updatePhone'])
             ->middleware('throttle:5,1,phone-number-update:')->name('phone.update');

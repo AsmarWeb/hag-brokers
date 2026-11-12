@@ -39,6 +39,10 @@ class ProfileController extends Controller
         $user->save();
 
         if ($emailChanged) {
+            \Illuminate\Support\Facades\DB::table('phone_verifications')
+                ->where('user_id', $user->getKey())
+                ->delete();
+
             // Force every device to authenticate again after changing the account identity.
             $user->tokens()->delete();
 

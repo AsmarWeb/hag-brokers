@@ -109,6 +109,17 @@ class AdminUserManagementTest extends TestCase
         $admin = $this->admin();
         $target = User::factory()->create(['email' => 'existing@example.test']);
 
+        \Illuminate\Support\Facades\DB::table('phone_verifications')->insert([
+            'user_id' => $target->id,
+            'phone' => $target->phone,
+            'code_hash' => Hash::make('123456'),
+            'attempts' => 0,
+            'expires_at' => now()->addMinutes(10),
+            'sent_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $this->actingAs($admin)->put(route('admin.users.update', $target), [
             'name' => $target->name,
             'email' => 'New.Address@Example.Test',
@@ -118,6 +129,9 @@ class AdminUserManagementTest extends TestCase
         $target->refresh();
         $this->assertSame('new.address@example.test', $target->email);
         $this->assertNull($target->email_verified_at);
+        $this->assertDatabaseMissing('phone_verifications', [
+            'user_id' => $target->id,
+        ]);
         Notification::assertSentTo($target, VerifyEmail::class);
     }
 

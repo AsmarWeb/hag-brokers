@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -29,6 +31,17 @@ class ProfileTest extends TestCase
         $user = User::factory()->create();
         $user->createToken('mobile:phone', ['mobile:v1']);
 
+        DB::table('phone_verifications')->insert([
+            'user_id' => $user->id,
+            'phone' => $user->phone,
+            'code_hash' => Hash::make('123456'),
+            'attempts' => 0,
+            'expires_at' => now()->addMinutes(10),
+            'sent_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
@@ -46,6 +59,9 @@ class ProfileTest extends TestCase
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
+        $this->assertDatabaseMissing('phone_verifications', [
+            'user_id' => $user->id,
+        ]);
         $this->assertGuest();
         $this->assertDatabaseCount('personal_access_tokens', 0);
         Notification::assertSentTo($user, VerifyEmail::class);
