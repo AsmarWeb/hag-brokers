@@ -9,6 +9,8 @@ use App\Models\Opportunity;
 use App\Models\User;
 use App\Services\Platform\CompanyMarketplaceService;
 use App\Services\Platform\PublicExperience;
+use App\Services\Seo\PublicSeo;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +26,20 @@ class PublicExperienceController extends Controller
     {
         $release = $service->download();
         abort_unless($release, 404);
+
+        $apkPath = $service->localApkPath($release);
+
+        if ($apkPath) {
+            $response = response()->download($apkPath, basename($apkPath), [
+                'Content-Type' => 'application/vnd.android.package-archive',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+
+            $response->setPrivate();
+            $response->headers->set('Cache-Control', 'private, no-store');
+
+            return $response;
+        }
 
         return response()->view('public-experience.download', compact('release'))->header('Cache-Control', 'no-store');
     }
@@ -44,27 +60,111 @@ class PublicExperienceController extends Controller
     public function update(Request $r, PublicExperience $service)
     {
         $this->admin($r);
-        $data = $r->validate(['version' => 'required|integer|min:0', 'download_enabled' => 'required|boolean',
-            'map_enabled' => 'required|boolean', 'android_url' => 'nullable|string|max:500',
+
+        $data = $r->validate([
+            'version' => 'required|integer|min:0',
+            'download_enabled' => 'required|boolean',
+            'map_enabled' => 'required|boolean',
+            'android_url' => 'nullable|string|max:500',
+            'android_apk' => 'nullable|file|max:204800',
             'android_version' => ['nullable', 'string', 'max:40', 'regex:/^[A-Za-z0-9._+-]+$/D'],
-            'released_on' => 'nullable|date_format:Y-m-d|before_or_equal:today']);
-        if (($data['android_url'] ?? null) && ! $service->safeDownloadUrl($data['android_url'])) {
-            throw ValidationException::withMessages(['android_url' => __('public_experience.invalid_url')]);
+            'released_on' => 'nullable|date_format:Y-m-d|before_or_equal:today',
+        ]);
+
+        $apk = $r->file('android_apk');
+
+        if ($apk) {
+            $handle = fopen($apk->getRealPath(), 'rb');
+            $signature = $handle ? fread($handle, 4) : false;
+
+            if ($handle) {
+                fclose($handle);
+            }
+
+            if (strtolower($apk->getClientOriginalExtension()) !== 'apk'
+                || ! in_array($signature, ["PK\x03\x04", "PK\x05\x06", "PK\x07\x08"], true)) {
+                throw ValidationException::withMessages([
+                    'android_apk' => __('public_experience.invalid_apk'),
+                ]);
+            }
         }
-        if ($r->boolean('download_enabled') && (empty($data['android_url']) || empty($data['android_version']) || empty($data['released_on']))) {
-            throw ValidationException::withMessages(['android_url' => __('public_experience.release_required')]);
+
+        if (($data['android_url'] ?? null) && ! $service->safeDownloadUrl($data['android_url']) && ! $apk) {
+            throw ValidationException::withMessages([
+                'android_url' => __('public_experience.invalid_url'),
+            ]);
         }
-        DB::transaction(function () use ($r, $data) {
-            DB::table('public_experience_settings')->insertOrIgnore(['id' => 1, 'created_at' => now(), 'updated_at' => now()]);
-            $row = DB::table('public_experience_settings')->where('id', 1)->lockForUpdate()->first();
-            abort_if((int) $row->version !== (int) $data['version'], 409);
-            $values = array_diff_key($data, ['version' => true]);
-            $values['version'] = $row->version + 1;
-            $values['updated_at'] = now();
-            DB::table('public_experience_settings')->where('id', 1)->update($values);
-            DB::table('public_experience_audits')->insert(['actor_id' => $r->user()->id, 'action' => 'settings',
-                'version' => $values['version'], 'payload' => json_encode($data, JSON_THROW_ON_ERROR), 'created_at' => now()]);
-        });
+
+        if ($r->boolean('download_enabled')
+            && (empty($data['android_url']) && ! $apk
+                || empty($data['android_version'])
+                || empty($data['released_on']))) {
+            throw ValidationException::withMessages([
+                'android_url' => __('public_experience.release_required'),
+            ]);
+        }
+
+        $uploadedPath = null;
+
+        try {
+            DB::transaction(function () use ($r, $data, $apk, &$uploadedPath) {
+                DB::table('public_experience_settings')->insertOrIgnore([
+                    'id' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                $row = DB::table('public_experience_settings')->where('id', 1)->lockForUpdate()->first();
+                abort_if((int) $row->version !== (int) $data['version'], 409);
+
+                $values = array_diff_key($data, [
+                    'version' => true,
+                    'android_apk' => true,
+                ]);
+
+                if ($apk) {
+                    $directory = public_path('downloads');
+
+                    if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+                        throw new \RuntimeException('Unable to create APK download directory.');
+                    }
+
+                    $filename = 'hag-brokers-'.Str::slug($data['android_version'] ?: 'release')
+                        .'-'.Str::uuid().'.apk';
+
+                    $apk->move($directory, $filename);
+                    $uploadedPath = $directory.DIRECTORY_SEPARATOR.$filename;
+
+                    $values['android_url'] = rtrim(app(PublicSeo::class)->base(), '/')
+                        .'/downloads/'.$filename;
+                }
+
+                $values['version'] = $row->version + 1;
+                $values['updated_at'] = now();
+
+                DB::table('public_experience_settings')->where('id', 1)->update($values);
+
+                $auditPayload = array_diff_key($data, [
+                    'version' => true,
+                    'android_apk' => true,
+                ]);
+                $auditPayload['android_url'] = $values['android_url'] ?? null;
+
+                DB::table('public_experience_audits')->insert([
+                    'actor_id' => $r->user()->id,
+                    'action' => 'settings',
+                    'version' => $values['version'],
+                    'payload' => json_encode($auditPayload, JSON_THROW_ON_ERROR),
+                    'created_at' => now(),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            if ($uploadedPath && is_file($uploadedPath)) {
+                unlink($uploadedPath);
+            }
+
+            throw $exception;
+        }
 
         return back()->with('success', __('public_experience.saved'));
     }

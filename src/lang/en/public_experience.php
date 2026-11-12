@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'invalid_apk' => 'Invalid APK file. Choose a valid APK no larger than 200 MB.',
+    'apk_help' => 'Upload an APK directly, up to 200 MB. A direct download URL will be generated automatically. Leave empty to keep the current release.',
+    'apk_file' => 'Upload Android app (APK)',
     'admin_title' => 'App download & maritime map',
     'saved' => 'Saved successfully.',
     'invalid_url' => 'Use an HTTPS URL in this site’s downloads directory or a HAG Expo build URL, without query parameters.',
@@ -42,8 +45,8 @@ return [
     'back' => 'Back',
     'enable_download' => 'Show Android download on Home and in the footer',
     'enable_map' => 'Show the maritime opportunities map',
-    'download_url' => 'Android download URL',
-    'url_help' => 'Download the APK from EAS, upload it manually to src/public/downloads with a versioned filename, then enter its full HTTPS URL. Alternatively use the HAG Expo build page URL. Do not upload credential files.',
+    'download_url' => 'Android download URL (optional when uploading an APK)',
+    'url_help' => 'You may use the HAG Expo build page URL instead of uploading an APK. Other external URLs and credential files are not accepted.',
     'marine_list' => 'Manage marine listing locations',
     'no_marine' => 'No marine listings are available for location management yet.',
     'privacy' => 'Privacy policy',

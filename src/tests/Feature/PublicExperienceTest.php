@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\Platform\CompanyWorkspaceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -70,6 +71,104 @@ return [$u, $w];
         $this->put('/admin/public-experience', $this->settings(['version' => 1, 'download_enabled' => 0]))->assertRedirect();
         $this->get('/download')->assertNotFound();
         $this->get('/')->assertDontSee('id="android-app"', false);
+    }
+
+    public function test_local_apk_download_is_served_as_an_attachment(): void
+    {
+        $filename = 'hag-test-'.Str::random(12).'.apk';
+        $directory = public_path('downloads');
+        $file = $directory.DIRECTORY_SEPARATOR.$filename;
+
+        if (! is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        file_put_contents($file, 'fake-apk-content');
+
+        try {
+            $url = 'https://hagbrokers.net/downloads/'.$filename;
+
+            $this->actingAs($this->admin())
+                ->put('/admin/public-experience', $this->settings(['android_url' => $url]))
+                ->assertRedirect();
+
+            $response = $this->get('/download');
+
+            $response->assertDownload($filename)
+                ->assertHeader('X-Content-Type-Options', 'nosniff')
+                ->assertHeader('Content-Type', 'application/vnd.android.package-archive');
+
+            $cacheControl = strtolower($response->headers->get('Cache-Control', ''));
+            $this->assertStringContainsString('no-store', $cacheControl);
+            $this->assertStringNotContainsString('public', $cacheControl);
+        } finally {
+            if (is_file($file)) {
+                unlink($file);
+            }
+        }
+    }
+
+    public function test_admin_can_upload_apk_and_download_it_directly(): void
+    {
+        $apk = UploadedFile::fake()->createWithContent(
+            'hag-release.apk',
+            "PK\x03\x04".str_repeat('A', 128)
+        );
+
+        $this->actingAs($this->admin())
+            ->put('/admin/public-experience', $this->settings([
+                'android_url' => null,
+                'android_apk' => $apk,
+            ]))
+            ->assertRedirect();
+
+        $settings = DB::table('public_experience_settings')->where('id', 1)->first();
+
+        $this->assertSame(1, (int) $settings->version);
+        $this->assertStringContainsString('/downloads/hag-brokers-100-', $settings->android_url);
+        $this->assertStringEndsWith('.apk', $settings->android_url);
+
+        $filename = basename(parse_url($settings->android_url, PHP_URL_PATH));
+        $path = public_path('downloads/'.$filename);
+
+        try {
+            $this->assertFileExists($path);
+            $this->get('/download')->assertDownload($filename);
+        } finally {
+            if (is_file($path)) {
+                unlink($path);
+            }
+        }
+    }
+
+    public function test_invalid_apk_upload_does_not_replace_existing_release(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)
+            ->put('/admin/public-experience', $this->settings())
+            ->assertRedirect();
+
+        $previousUrl = DB::table('public_experience_settings')->where('id', 1)->value('android_url');
+
+        $invalidApk = UploadedFile::fake()->createWithContent(
+            'invalid.apk',
+            'This is not an APK file'
+        );
+
+        $this->put('/admin/public-experience', $this->settings([
+            'version' => 1,
+            'android_apk' => $invalidApk,
+        ]))->assertSessionHasErrors('android_apk');
+
+        $this->assertSame(
+            $previousUrl,
+            DB::table('public_experience_settings')->where('id', 1)->value('android_url')
+        );
+
+        $this->assertSame(
+            1,
+            (int) DB::table('public_experience_settings')->where('id', 1)->value('version')
+        );
     }
 
     public function test_settings_permissions_url_validation_stale_and_audit(): void

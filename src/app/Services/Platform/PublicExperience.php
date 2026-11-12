@@ -47,6 +47,40 @@ final class PublicExperience
         return $s['download_enabled'] && $this->safeDownloadUrl($s['android_url']) ? $s : null;
     }
 
+    public function localApkPath(array $release): ?string
+    {
+        $url = $release['android_url'] ?? null;
+
+        if (! $this->safeDownloadUrl($url)) {
+            return null;
+        }
+
+        $u = parse_url($url);
+        $base = parse_url(app(PublicSeo::class)->base());
+        $prefix = rtrim($base['path'] ?? '', '/').'/downloads/';
+
+        if (strtolower($u['host'] ?? '') !== strtolower($base['host'] ?? '')
+            || ! str_starts_with($u['path'] ?? '', $prefix)) {
+            return null;
+        }
+
+        $filename = substr($u['path'], strlen($prefix));
+
+        if (! preg_match('/^[A-Za-z0-9_-][A-Za-z0-9_.-]*\\.apk$/D', $filename)) {
+            return null;
+        }
+
+        $directory = realpath(public_path('downloads'));
+        $file = realpath(public_path('downloads/'.$filename));
+
+        if (! $directory || ! $file || ! is_file($file)
+            || ! str_starts_with($file, $directory.DIRECTORY_SEPARATOR)) {
+            return null;
+        }
+
+        return $file;
+    }
+
     public function marineQuery()
     {
         return Opportunity::query()->whereIn('opportunity_type', ['sell', 'vessel_brokerage', 'service_offer'])
