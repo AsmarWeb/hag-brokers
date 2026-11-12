@@ -411,3 +411,45 @@ main>.cw-navigation{padding-inline:24px}
     z-index: 100;
     max-width: min(320px, 90vw);
 }
+
+/* HAG marketplace category showcase */
+
+
+/* HAG marketplace category showcase */
+.market-category-section{margin:8px 0 42px}
+.market-category-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:22px}
+.market-category-heading h2{font-size:clamp(23px,2.5vw,34px);font-weight:750;line-height:1.3;margin:8px 0}
+.market-category-heading>div>p:last-child{font-size:13px;color:var(--hag-public-muted);line-height:1.9;max-width:720px}
+.market-category-reset{flex:none;border:1px solid var(--hag-public-border);border-radius:9px;padding:11px 16px;font-size:12px;font-weight:700}
+.market-category-reset:hover{border-color:var(--hag-public-accent);color:var(--hag-public-accent)}
+.market-category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.market-category-card{display:block;min-width:0;overflow:hidden;border:1px solid var(--hag-public-border);border-radius:15px;background:var(--hag-public-surface);transition:transform .2s,border-color .2s,box-shadow .2s}
+.market-category-card:hover,.market-category-card.is-active{transform:translateY(-3px);border-color:var(--hag-public-accent);box-shadow:0 12px 28px #071b2a12}
+.market-category-cover{position:relative;aspect-ratio:5/4;overflow:hidden;background:var(--hag-public-field)}
+.market-category-cover>img{width:100%;height:100%;object-fit:cover;transition:transform .45s}
+.market-category-card:hover .market-category-cover>img{transform:scale(1.045)}
+.market-category-fallback,.market-category-detail-fallback{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at 75% 15%,#36576a,#0a1b2b 72%);color:#d8bd88}
+.market-category-fallback>span,.market-category-detail-fallback>span{font:42px Georgia,serif;letter-spacing:.16em}
+.market-category-fallback small{font-size:10px;letter-spacing:.2em;color:#c2d0d9}
+.market-category-featured{position:absolute;top:12px;inset-inline-start:12px;padding:6px 10px;border-radius:20px;background:#071321dc;color:#fff;font-size:10px;font-weight:700}
+.market-category-arrow{position:absolute;inset-inline-end:12px;bottom:12px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid #ffffff70;border-radius:50%;background:#071321b8;color:white;font-size:17px}
+.market-category-copy{padding:15px 17px 18px}
+.market-category-copy h3{font-size:16px;font-weight:750;line-height:1.5}
+.market-category-copy p{margin-top:6px;color:var(--hag-public-muted);font-size:11px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.market-category-detail{position:relative;display:grid;grid-template-columns:minmax(220px,34%) minmax(0,1fr);min-height:190px;margin-bottom:22px;overflow:hidden;border:1px solid var(--hag-public-border);border-radius:16px;background:var(--hag-public-surface)}
+.market-category-detail>img{width:100%;height:100%;min-height:190px;object-fit:cover}
+.market-category-detail-fallback{min-height:190px}
+.market-category-detail-copy{align-self:center;padding:25px 30px}
+.market-category-detail-copy>span{font-size:10px;font-weight:750;letter-spacing:.16em;color:var(--hag-public-accent)}
+.market-category-detail-copy h2{font-size:clamp(22px,3vw,34px);font-weight:800;margin:8px 0}
+.market-category-detail-copy p{font-size:13px;color:var(--hag-public-muted);line-height:1.9;margin-bottom:12px}
+.market-category-detail-copy strong{font-size:12px;color:var(--hag-public-accent)}
+.market-empty-state{text-align:center;padding:42px 24px}
+.market-empty-state h3{font-size:19px;font-weight:750;margin:10px 0}
+.market-empty-state p{font-size:13px;color:var(--hag-public-muted);line-height:1.9}
+.market-empty-mark{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border:1px solid var(--hag-public-border);border-radius:15px;color:var(--hag-public-accent);font:20px Georgia,serif;letter-spacing:.1em}
+.market-body .market-category-card:focus-visible,.market-body .market-category-reset:focus-visible{outline:3px solid var(--hag-public-accent);outline-offset:4px}
+@media(max-width:1100px){.market-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.market-category-heading{align-items:start;flex-direction:column;gap:14px}.market-category-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.market-category-copy{padding:12px}.market-category-copy h3{font-size:14px}.market-category-detail{grid-template-columns:1fr}.market-category-detail>img,.market-category-detail-fallback{height:170px;min-height:170px}.market-category-detail-copy{padding:20px}.market-category-section{margin-bottom:30px}}
+@media(max-width:390px){.market-category-grid{grid-template-columns:1fr}.market-category-cover{aspect-ratio:16/9}}
+@media(prefers-reduced-motion:reduce){.market-category-card,.market-category-cover>img{transition:none}}

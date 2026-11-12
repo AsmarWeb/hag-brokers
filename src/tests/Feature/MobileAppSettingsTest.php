@@ -95,4 +95,48 @@ class MobileAppSettingsTest extends TestCase
         }
         $this->getJson('/api/v1/app-config')->assertDontSee('do-not-expose')->assertJsonMissingPath('data.plan');
     }
+
+    public function test_public_category_cards_follow_admin_visibility_order_and_image_settings(): void
+    {
+        Storage::fake('public');
+
+        $cards = $this->payload()['category_cards'];
+
+        $cards['agriculture']['sort_order'] = 0;
+        $cards['food']['sort_order'] = 1;
+        $cards['food']['title_ar'] = 'الأغذية والمنتجات';
+        $cards['food']['title_en'] = 'Food and Products';
+        $cards['food']['description_en'] = 'Explore food supply opportunities.';
+        $cards['food']['image'] = UploadedFile::fake()->image('food.jpg', 900, 600);
+        $cards['marine']['enabled'] = false;
+
+        $this->actingAs($this->administrator())
+            ->put('/admin/mobile-app', $this->payload([
+                'category_cards' => $cards,
+            ]))
+            ->assertRedirect();
+
+        $response = $this->getJson('/api/v1/app-config')->assertOk();
+
+        $publicCards = $response->json('data.category_cards');
+        $codes = array_column($publicCards, 'code');
+
+        $this->assertSame('agriculture', $codes[0]);
+        $this->assertSame('food', $codes[1]);
+        $this->assertNotContains('marine', $codes);
+
+        $foodCard = collect($publicCards)->firstWhere('code', 'food');
+
+        $this->assertSame('الأغذية والمنتجات', $foodCard['title_ar']);
+        $this->assertSame('Food and Products', $foodCard['title_en']);
+        $this->assertSame('Explore food supply opportunities.', $foodCard['description_en']);
+        $this->assertNotNull($foodCard['image']);
+
+        $storedCards = app(MobileAppSettings::class)->stored()['content']['category_cards'];
+        $imagePath = $storedCards['food']['image'];
+
+        $this->assertTrue(Storage::disk('public')->exists($imagePath));
+        $this->assertSame(Storage::disk('public')->url($imagePath), $foodCard['image']);
+    }
+
 }
