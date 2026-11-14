@@ -67,19 +67,10 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
+        $status = app()->getLocale() === 'ar'
+            ? 'لحماية حسابك وبياناتك، يجب تقديم طلب الحذف والتحقق من البريد الإلكتروني ومراجعة الطلب أولاً.'
+            : 'To protect your account and data, deletion requires an email-verified request and administrative review.';
 
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return Redirect::route('account-deletion.request')->with('status', $status);
     }
 }
