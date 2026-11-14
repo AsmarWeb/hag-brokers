@@ -337,104 +337,13 @@ class AdminUserController extends Controller
      */
     public function destroy(Request $request, User $user): RedirectResponse
     {
-        $isAr = app()->getLocale() === 'ar';
+        $message = app()->getLocale() === 'ar'
+            ? 'الحذف المباشر من إدارة المستخدمين غير متاح. يجب تقديم طلب حذف الحساب والتحقق من البريد الإلكتروني أولاً.'
+            : 'Direct deletion from user management is unavailable. A verified account deletion request is required.';
 
-        if ((string) $request->user()->getKey() === (string) $user->getKey()) {
-            return redirect()->route('admin.users.index')->with('error', $isAr
-                ? 'لا يمكنك حذف حسابك الحالي.'
-                : 'You cannot delete your own account.');
-        }
-
-        try {
-            $error = \Illuminate\Support\Facades\DB::transaction(function () use ($user, $isAr) {
-                $target = User::query()
-                    ->whereKey($user->getKey())
-                    ->lockForUpdate()
-                    ->firstOrFail();
-
-                $adminRoles = ['admin', 'super-admin'];
-
-                if ($target->roles()->whereIn('name', $adminRoles)->exists()) {
-                    $otherAdminExists = User::query()
-                        ->where($target->getKeyName(), '!=', $target->getKey())
-                        ->whereHas('roles', function ($query) use ($adminRoles) {
-                            $query->whereIn('name', $adminRoles);
-                        })
-                        ->lockForUpdate()
-                        ->first();
-
-                    if (! $otherAdminExists) {
-                        return $isAr
-                            ? 'لا يمكن حذف آخر مسؤول في المنصة.'
-                            : 'The last administrator cannot be deleted.';
-                    }
-                }
-
-                // Check references before deletion, including cascading references.
-                $schema = $target->getConnection()->getSchemaBuilder();
-
-                foreach ($schema->getTableListing() as $table) {
-                    foreach ($schema->getForeignKeys($table) as $foreignKey) {
-                        if ($foreignKey['foreign_table'] !== $target->getTable()) {
-                            continue;
-                        }
-
-                        $query = $target->getConnection()->table($table);
-                        $matches = true;
-
-                        foreach ($foreignKey['columns'] as $index => $column) {
-                            $value = $target->getAttribute(
-                                $foreignKey['foreign_columns'][$index]
-                            );
-
-                            if ($value === null) {
-                                $matches = false;
-                                break;
-                            }
-
-                            $query->where($column, $value);
-                        }
-
-                        if ($matches && $query->exists()) {
-                            return $isAr
-                                ? 'لا يمكن حذف المستخدم لوجود سجلات مرتبطة به. راجع ارتباطاته أولاً.'
-                                : 'This user has linked records. Review those records before deleting the account.';
-                        }
-                    }
-                }
-
-                $target->syncRoles([]);
-                $target->syncPermissions([]);
-                $target->delete();
-
-                return null;
-            });
-        } catch (\Illuminate\Database\QueryException $exception) {
-            $constraintError = in_array(
-                (string) $exception->getCode(),
-                ['23000', '23503'],
-                true
-            ) || in_array(
-                (int) ($exception->errorInfo[1] ?? 0),
-                [19, 787, 1451],
-                true
-            );
-
-            if (! $constraintError) {
-                throw $exception;
-            }
-
-            return redirect()->route('admin.users.index')->with('error', $isAr
-                ? 'تعذر الحذف بسبب ارتباطات المستخدم بالبيانات.'
-                : 'The user could not be deleted because of related data.');
-        }
-
-        return redirect()->route('admin.users.index')->with(
-            $error === null ? 'success' : 'error',
-            $error ?? ($isAr
-                ? 'تم حذف المستخدم بنجاح.'
-                : 'User deleted successfully.')
-        );
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('error', $message);
     }
 
 }

@@ -328,16 +328,6 @@
         </form>
 
 
-        {{-- Delete Form --}}
-        @if (auth()->id() !== $user->id)
-            <form id="delete-user-form" method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                onsubmit="return confirm('{{ $isAr ? 'هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذه العملية.' : 'Are you sure you want to delete this user? This action cannot be undone.' }}')">
-
-                @csrf
-                @method('DELETE')
-
-            </form>
-        @endif
 
     </div>
 

@@ -29,22 +29,6 @@
 
                 </a>
 
-                @if (auth()->id() !== $user->id)
-                    <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                        onsubmit="return confirm('{{ $isAr ? 'هل أنت متأكد من حذف هذا المستخدم؟' : 'Are you sure you want to delete this user?' }}')">
-
-                        @csrf
-                        @method('DELETE')
-
-                        <button type="submit"
-                            class="inline-flex items-center justify-center rounded-xl bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100">
-
-                            {{ $isAr ? 'حذف' : 'Delete' }}
-
-                        </button>
-
-                    </form>
-                @endif
 
             </div>
 

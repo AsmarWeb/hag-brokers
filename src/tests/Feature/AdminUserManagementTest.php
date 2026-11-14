@@ -199,13 +199,17 @@ class AdminUserManagementTest extends TestCase
         $this->assertFalse($updated->permissions()->whereKey($permission->id)->exists());
     }
 
-    public function test_admin_can_delete_unlinked_test_account(): void
+    public function test_admin_cannot_directly_delete_a_user_account(): void
     {
         $admin = $this->admin();
         $target = User::factory()->create();
-        $this->actingAs($admin)->delete(route('admin.users.destroy', $target))
-            ->assertRedirect(route('admin.users.index'))->assertSessionHas('success');
-        $this->assertDatabaseMissing('users', ['id' => $target->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $target))
+            ->assertRedirect(route('admin.users.show', $target))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('users', ['id' => $target->id]);
     }
 
     public function test_admin_can_block_and_unblock_a_user_and_revoke_api_tokens(): void

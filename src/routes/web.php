@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\AdminVesselController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminSettingController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AccountDeletionConfirmationController;
+use App\Http\Controllers\AccountDeletionRequestController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\DashboardController;
@@ -45,6 +47,51 @@ Route::get('/language/{locale}', function (string $locale) {
     return redirect(app(\App\Services\Seo\PublicSeo::class)->languageReturn(request(), $locale));
 })->name('language.switch');
 
+
+
+// Public account deletion request and email ownership verification.
+Route::get('/account-deletion', [
+    AccountDeletionRequestController::class,
+    'create',
+])->middleware('throttle:30,1')->name('account-deletion.request');
+
+Route::post('/account-deletion', [
+    AccountDeletionRequestController::class,
+    'store',
+])->middleware('throttle:5,1,account-deletion-request:')->name('account-deletion.request.store');
+
+Route::get('/account-deletion/request/{token}', [
+    AccountDeletionRequestController::class,
+    'showVerification',
+])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:10,1')
+    ->name('account-deletion.request.verify.show');
+
+Route::post('/account-deletion/request/{token}', [
+    AccountDeletionRequestController::class,
+    'verify',
+])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:5,1')
+    ->name('account-deletion.request.verify');
+
+// Public account deletion confirmation (no login required).
+Route::get('/account-deletion/confirm/{token}', [
+    AccountDeletionConfirmationController::class,
+    'show',
+])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:10,1')
+    ->name('account-deletion.confirm.show');
+
+Route::post('/account-deletion/confirm/{token}', [
+    AccountDeletionConfirmationController::class,
+    'confirm',
+])
+    ->where('token', '[A-Za-z0-9]{64}')
+    ->middleware('throttle:5,1')
+    ->name('account-deletion.confirm');
 
 /*
 |--------------------------------------------------------------------------
@@ -465,6 +512,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
         Route::get('/account-center', [\App\Http\Controllers\Admin\AdminAccountCenterController::class,'index'])->name('account-center.index');
         Route::put('/account-center/legal/{slug}', [\App\Http\Controllers\Admin\AdminAccountCenterController::class,'save'])->where('slug','privacy|terms')->name('account-center.legal');
         Route::post('/account-center/requests/{id}/review', [\App\Http\Controllers\Admin\AdminAccountCenterController::class,'review'])->whereNumber('id')->name('account-center.review');
+        Route::post('/account-center/requests/{id}/send-confirmation', [\App\Http\Controllers\Admin\AdminAccountCenterController::class, 'sendConfirmation'])->whereNumber('id')->name('account-center.send-confirmation');
+        Route::post('/account-center/requests/{id}/complete-deletion', [\App\Http\Controllers\Admin\AdminAccountCenterController::class, 'completeDeletion'])->whereNumber('id')->name('account-center.complete-deletion');
+        Route::post('/account-center/requests/{id}/reject', [\App\Http\Controllers\Admin\AdminAccountCenterController::class, 'reject'])->whereNumber('id')->name('account-center.reject');
         Route::get('/mobile-app', [\App\Http\Controllers\Admin\AdminMobileAppController::class, 'edit'])->name('mobile-app.edit');
         Route::put('/mobile-app', [\App\Http\Controllers\Admin\AdminMobileAppController::class, 'update'])->name('mobile-app.update');
         Route::get('/settings', [AdminSettingController::class, 'edit'])
