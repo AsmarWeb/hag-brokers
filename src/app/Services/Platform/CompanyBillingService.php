@@ -307,6 +307,48 @@ final class CompanyBillingService
         $this->sync($a);
     }
 
+    /** Cancel a paid workspace subscription during an owner-confirmed closure.
+     *  Unlike owner(), this deliberately permits the workspace to be suspended.
+     *  The idempotency key is stable across admin retries.
+     */
+    public function cancelForClosure(CompanyWorkspace $workspace, User $owner, int $closureRequestId): void
+    {
+        abort_unless(CompanyMember::where('company_workspace_id', $workspace->id)
+            ->where('user_id', $owner->id)->where('role', 'owner')->exists(), 403);
+
+        $account = CompanyBillingAccount::where('company_workspace_id', $workspace->id)->first();
+        if (! $account || ! $account->stripe_subscription_id) {
+            if ($account && in_array($account->status, ['active', 'past_due', 'trialing'], true)) {
+                throw new \RuntimeException('Active billing state has no subscription identifier.');
+            }
+            return;
+        }
+
+        if (in_array($account->status, ['canceled', 'incomplete_expired'], true)) {
+            return;
+        }
+        $this->sync($account);
+        $account->refresh();
+        if (in_array($account->status, ['canceled', 'incomplete_expired'], true)) {
+            return;
+        }
+        if (! in_array($account->status, ['active', 'past_due', 'trialing'], true)) {
+            throw new \RuntimeException('Subscription state requires manual billing review before workspace closure.');
+        }
+
+        $this->gateway->call(
+            'POST',
+            'subscriptions/'.$this->gateway->id($account->stripe_subscription_id, 'sub_'),
+            ['cancel_at_period_end' => 'true'],
+            'hag-workspace-closure-'.$closureRequestId,
+        );
+        $this->sync($account);
+        $account->refresh();
+        if (in_array($account->status, ['active', 'past_due', 'trialing'], true) && ! $account->cancel_at_period_end) {
+            throw new \RuntimeException('The provider did not confirm subscription cancellation at period end.');
+        }
+    }
+
     public function portal(User $u): string
     {
         $a = $this->account($this->owner($u));
