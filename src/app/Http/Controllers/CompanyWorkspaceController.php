@@ -76,6 +76,7 @@ class CompanyWorkspaceController extends Controller
         return view('company.workspace', [
             'workspace' => $w, 'company' => Customer::findOrFail($w->customer_id), 'plan' => $service->plan($w),
             'members' => CompanyMember::where('company_workspace_id', $w->id)->get()->map(fn ($m) => ['name' => User::find($m->user_id)?->name, 'role' => $m->role]),
+            'closureRequest' => \App\Models\CompanyWorkspaceClosureRequest::where('company_workspace_id', $w->id)->latest('id')->first(),
         ]);
     }
 }

@@ -398,6 +398,8 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
         Route::delete('/platform/companies/{workspace}/members/{member}', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'remove'])->name('platform.members.remove');
         Route::post('/platform/companies/{workspace}/trial', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'trial'])->name('platform.trial');
         Route::post('/platform/companies/{workspace}/status', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceController::class, 'status'])->name('platform.status');
+        Route::post('/platform/closure-requests/{closure}/approve', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceClosureController::class, 'approve'])->middleware('throttle:10,1')->name('platform.closure.approve');
+        Route::post('/platform/closure-requests/{closure}/reject', [\App\Http\Controllers\Admin\AdminCompanyWorkspaceClosureController::class, 'reject'])->middleware('throttle:10,1')->name('platform.closure.reject');
         Route::get('/invoices', [\App\Http\Controllers\Admin\AdminInvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}/payments', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'show'])->name('invoices.payments');
         Route::post('/invoices/{invoice}/payments', [\App\Http\Controllers\Admin\AdminInvoicePaymentController::class, 'store'])->name('invoices.payments.store');
@@ -674,10 +676,19 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
 
 require __DIR__ . '/auth.php';
 
+// Email ownership verification is separate from the owner's final authenticated confirmation.
+Route::get('/company/workspace/closure/verify/{token}', [\App\Http\Controllers\CompanyWorkspaceClosureController::class, 'showVerification'])
+    ->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:10,1')->name('company.workspace.closure.verify.show');
+Route::post('/company/workspace/closure/verify/{token}', [\App\Http\Controllers\CompanyWorkspaceClosureController::class, 'verify'])
+    ->where('token', '[A-Za-z0-9]{64}')->middleware('throttle:5,1')->name('company.workspace.closure.verify');
+
 Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->group(function () {
     Route::get('/company/onboarding', [\App\Http\Controllers\CompanyWorkspaceController::class, 'create'])->name('company.onboarding.show');
     Route::post('/company/onboarding', [\App\Http\Controllers\CompanyWorkspaceController::class, 'store'])->middleware('throttle:5,1,company-onboarding:')->name('company.onboarding.store');
     Route::get('/company/workspace', [\App\Http\Controllers\CompanyWorkspaceController::class, 'show'])->name('company.workspace');
+    Route::get('/company/workspace/closure', [\App\Http\Controllers\CompanyWorkspaceClosureController::class, 'status'])->name('company.workspace.closure.status');
+    Route::post('/company/workspace/closure/request', [\App\Http\Controllers\CompanyWorkspaceClosureController::class, 'start'])->middleware('throttle:3,60,company-closure-start:')->name('company.workspace.closure.start');
+    Route::post('/company/workspace/closure/confirm', [\App\Http\Controllers\CompanyWorkspaceClosureController::class, 'confirm'])->middleware('throttle:3,60,company-closure-confirm:')->name('company.workspace.closure.confirm');
 });
 
 

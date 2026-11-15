@@ -245,7 +245,7 @@ final class CompanyWorkspaceService
         $this->admin($actor);
         DB::transaction(function () use ($workspace, $status, $reason, $actor): void {
             $w = CompanyWorkspace::whereKey($workspace->id)->lockForUpdate()->firstOrFail();
-            if (! in_array($status, ['active', 'suspended'], true) || trim($reason) === '') {
+            if ($w->status === 'closed' || ! in_array($status, ['active', 'suspended'], true) || trim($reason) === '') {
                 $this->fail('invalid_status');
             }
             $this->audit($w, $actor, 'status_changed', ['from' => $w->status, 'to' => $status, 'reason' => $reason]);

@@ -9,4 +9,19 @@
 <section class="trade-panel cw-team"><header class="cw-section-heading"><div><p class="cw-eyebrow">{{ __('company_ui.your_people') }}</p><h2>{{ __('platform.team') }}</h2></div><span class="cw-count">{{ $members->count() }}</span></header><div class="cw-member-list">@foreach($members as $member)<article><span class="cw-avatar" aria-hidden="true">{{ mb_substr($member['name'] ?: 'H',0,1) }}</span><div><h3>{{ $member['name'] ?: '—' }}</h3><p>{{ __('platform.role_'.$member['role']) }}</p></div><span class="cw-member-role">{{ __('platform.role_'.$member['role']) }}</span></article>@endforeach</div><p class="cw-help">{{ __('platform.portal_help') }}</p></section>
 </div><aside class="cw-workspace-aside"><section class="cw-identity-card"><span class="cw-identity-monogram" aria-hidden="true">{{ mb_substr($company->company_name,0,1) }}</span><p class="cw-eyebrow">{{ __('company_ui.company_identity') }}</p><h2>{{ $company->company_name }}</h2><p>{{ __('company_ui.profile_intro') }}</p>@if($cwLeader)<a class="cw-button cw-button-gold" href="{{ route('company.profile.edit') }}">{{ __('company_ui.nav.profile') }} ↗</a>@endif</section>
 <section class="trade-panel cw-quick-links"><h2>{{ __('company_ui.quick_actions') }}</h2><a href="{{ route('company.marketplace') }}">{{ __('company_ui.nav.overview') }} <span>↗</span></a>@if($cwOwner)<a href="{{ route('company.billing') }}">{{ __('company_ui.nav.billing') }} <span>↗</span></a>@endif @if($cwLeader)<a href="{{ route('company.mail.edit') }}">{{ __('company_ui.nav.email') }} <span>↗</span></a>@endif<a href="{{ route('opportunities.index') }}">{{ __('company_ui.browse') }} <span>↗</span></a></section></aside></div>
+@if($cwOwner)
+<section class="trade-panel mt-6 space-y-3">
+    <h2 class="text-lg font-bold">{{ app()->getLocale() === 'ar' ? 'إغلاق مساحة الشركة' : 'Close company workspace' }}</h2>
+    @if($closureRequest && in_array($closureRequest->status, ['email_pending','owner_confirmation','pending_review']))
+        <p>{{ app()->getLocale() === 'ar' ? 'يوجد طلب إغلاق قيد المعالجة.' : 'A workspace closure request is already in progress.' }}</p>
+        <a class="cw-button" href="{{ route('company.workspace.closure.status') }}">{{ app()->getLocale() === 'ar' ? 'عرض حالة الطلب' : 'View closure request' }}</a>
+    @else
+        <p>{{ app()->getLocale() === 'ar' ? 'سيُطلب التحقق من البريد الإلكتروني ثم تأكيد نهائي مستقل. لن يُحذف حسابك الشخصي أو السجلات المالية والتجارية.' : 'Email verification and a separate final confirmation are required. Your personal account and financial or commercial history will not be deleted.' }}</p>
+        <form method="POST" action="{{ route('company.workspace.closure.start') }}" onsubmit="return confirm('{{ app()->getLocale() === 'ar' ? 'إرسال رابط التحقق لبدء طلب إغلاق مساحة الشركة؟' : 'Send an email verification link to start the workspace closure request?' }}')">
+            @csrf
+            <button class="cw-button cw-button-gold">{{ app()->getLocale() === 'ar' ? 'طلب إغلاق مساحة الشركة' : 'Request workspace closure' }}</button>
+        </form>
+    @endif
+</section>
+@endif
 </div></x-app-layout>

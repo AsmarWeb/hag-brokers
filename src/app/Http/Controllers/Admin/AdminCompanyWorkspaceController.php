@@ -21,6 +21,7 @@ class AdminCompanyWorkspaceController extends Controller
             'customers' => Customer::where('is_active', true)->orderBy('company_name')->get(['id', 'company_name']),
             'users' => User::whereNotNull('customer_id')->orderBy('name')->get(['id', 'name', 'email', 'customer_id']),
             'plans' => PlatformPlan::orderBy('monthly_amount_minor')->get(),
+            'closureQueue' => \App\Models\CompanyWorkspaceClosureRequest::where('status', 'pending_review')->latest('id')->get(),
         ]);
     }
 
@@ -40,6 +41,7 @@ class AdminCompanyWorkspaceController extends Controller
             'members' => CompanyMember::where('company_workspace_id', $workspace->id)->get(),
             'users' => User::where('customer_id', $workspace->customer_id)->get(),
             'audits' => CompanyPlatformAudit::where('company_workspace_id', $workspace->id)->latest('id')->paginate(15),
+            'closureRequests' => \App\Models\CompanyWorkspaceClosureRequest::where('company_workspace_id', $workspace->id)->latest('id')->get(),
         ]);
     }
 
