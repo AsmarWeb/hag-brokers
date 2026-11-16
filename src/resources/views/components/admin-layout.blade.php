@@ -993,6 +993,8 @@
 
                     @if(auth()->user()?->hasRole(['admin', 'super-admin']))
                         <a href="{{ route('admin.freight-sailings.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold {{ request()->routeIs('admin.freight-sailings.*') ? 'bg-cyan-400' : '' }}">{{ __('sailings.admin_title') }}</a>
+                        <a href="{{ route('admin.freight-rates.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold {{ request()->routeIs('admin.freight-rates.*') ? 'bg-cyan-400 text-slate-950' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">{{ app()->isLocale('ar') ? 'إدارة أسعار الشحن' : 'Freight rates' }}</a>
+                        <a href="{{ route('admin.freight-bookings.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold {{ request()->routeIs('admin.freight-bookings.*') ? 'bg-cyan-400 text-slate-950' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">{{ app()->isLocale('ar') ? 'طلبات حجز الشحن' : 'Freight booking requests' }}</a>
                         <a href="{{ route('admin.public-experience.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">{{ __('public_experience.admin_title') }}</a>
                         <a href="{{ route('admin.account-center.index') }}" class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold text-slate-400 hover:bg-slate-900 hover:text-white">
                             {{ $isAr ? 'الحسابات والسياسات' : 'Accounts & policies' }}

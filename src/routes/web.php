@@ -102,6 +102,8 @@ Route::post('/account-deletion/confirm/{token}', [
 Route::middleware('maintenance.check')->group(function () {
     Route::get('/freight/sailings', [\App\Http\Controllers\FreightSailingController::class, 'index'])
         ->middleware('throttle:60,1')->name('freight.sailings');
+    Route::get('/freight/rates', [\App\Http\Controllers\FreightRateController::class, 'page'])
+        ->middleware('throttle:60,1')->name('freight.rates');
     Route::get('/freight/sailings/{sailing}/select', [\App\Http\Controllers\FreightSailingController::class, 'select'])
         ->whereNumber('sailing')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->name('freight.sailings.select');
 
@@ -129,6 +131,10 @@ Route::middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \Ap
             ->where('token', '[A-Za-z0-9]{64}')->name('invitation.show');
         Route::post('/invitations/{token}', [\App\Http\Controllers\CarrierPartnerController::class, 'accept'])
             ->where('token', '[A-Za-z0-9]{64}')->name('invitation.accept');
+        Route::get('/freight-bookings', [\App\Http\Controllers\CarrierFreightRateBookingController::class, 'index'])->name('freight-bookings.index');
+        Route::get('/freight-bookings/{booking}', [\App\Http\Controllers\CarrierFreightRateBookingController::class, 'show'])->whereNumber('booking')->name('freight-bookings.show');
+        Route::patch('/freight-bookings/{booking}/decision', [\App\Http\Controllers\CarrierFreightRateBookingController::class, 'decision'])
+            ->whereNumber('booking')->middleware('throttle:10,1,carrier-booking-decision:')->name('freight-bookings.decision');
         Route::get('/schedules', [\App\Http\Controllers\CarrierScheduleController::class, 'index'])->name('schedules.index');
         Route::get('/schedules/template', [\App\Http\Controllers\CarrierScheduleController::class, 'template'])->name('schedules.template');
         Route::post('/schedules', [\App\Http\Controllers\CarrierScheduleController::class, 'preview'])
@@ -220,6 +226,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
         QuotationController::class,
         'store',
     ])->name('quotations.store');
+
+    Route::post('/freight/rates/{rate}/select', [\App\Http\Controllers\FreightRateSelectionController::class, 'store'])
+        ->whereNumber('rate')->middleware('throttle:10,1')->name('freight.rates.select');
 
     Route::get('/quotations/{quotation}', [
         QuotationController::class,
@@ -349,6 +358,19 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/freight-bookings', [\App\Http\Controllers\Admin\AdminFreightRateBookingController::class, 'index'])->name('freight-bookings.index');
+        Route::get('/freight-bookings/{booking}', [\App\Http\Controllers\Admin\AdminFreightRateBookingController::class, 'show'])->whereNumber('booking')->name('freight-bookings.show');
+        Route::patch('/freight-bookings/{booking}/status', [\App\Http\Controllers\Admin\AdminFreightRateBookingController::class, 'updateStatus'])->whereNumber('booking')->middleware('throttle:20,1')->name('freight-bookings.status');
+
+        Route::get('/freight-rates', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'index'])->name('freight-rates.index');
+        Route::post('/freight-rates/sources', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'storeSource'])->middleware('throttle:20,1')->name('freight-rates.sources.store');
+        Route::put('/freight-rates/sources/{source}', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'updateSource'])->middleware('throttle:20,1')->name('freight-rates.sources.update');
+        Route::patch('/freight-rates/sources/{source}/toggle', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'toggleSource'])->middleware('throttle:20,1')->name('freight-rates.sources.toggle');
+        Route::get('/freight-rates/create', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'create'])->name('freight-rates.create');
+        Route::post('/freight-rates', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'store'])->middleware('throttle:30,1')->name('freight-rates.store');
+        Route::get('/freight-rates/{rate}/edit', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'edit'])->name('freight-rates.edit');
+        Route::put('/freight-rates/{rate}', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'update'])->middleware('throttle:30,1')->name('freight-rates.update');
+        Route::delete('/freight-rates/{rate}', [\App\Http\Controllers\Admin\AdminFreightRateController::class, 'destroy'])->middleware('throttle:10,1')->name('freight-rates.destroy');
         Route::prefix('freight-sailings/import')->name('freight-sailings.')->middleware('throttle:15,1')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'show'])->name('import');
             Route::get('/template', [\App\Http\Controllers\Admin\AdminSailingImportController::class, 'template'])->name('import.template');

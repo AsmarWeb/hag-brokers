@@ -10,6 +10,11 @@ class Quotation extends Model
 
     protected $fillable = ['customer_id', 'origin_port_id', 'destination_port_id', 'cargo_type', 'container_type', 'quantity', 'weight', 'preferred_date', 'total_charge', 'status', 'reference_no', 'assigned_to', 'freight_sailing_id', 'sailing_snapshot'];
 
+    public function freightRateBooking(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(FreightRateBooking::class);
+    }
+
     public function freightBookingOffer(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(FreightBookingOffer::class);

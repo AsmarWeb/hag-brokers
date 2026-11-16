@@ -48,6 +48,7 @@ Route::prefix('v1')->middleware([MobileApi::class, 'throttle:120,1,mobile-api:']
     $auth = MobileAuthController::class;
     $public = PublicMarketplaceController::class;
     Route::get('/freight/sailings', [\App\Http\Controllers\FreightSailingController::class, 'index'])->name('api.freight.sailings');
+    Route::get('/freight/rates', [\App\Http\Controllers\FreightRateController::class, 'index'])->middleware('throttle:60,1')->name('api.freight.rates');
     Route::get('/maritime-map', [\App\Http\Controllers\PublicExperienceController::class, 'map']);
     Route::get('/app-config', \App\Http\Controllers\Api\V1\MobileAppConfigController::class);
     Route::get('/legal/{slug}', [\App\Http\Controllers\LegalDocumentController::class, 'api'])->where('slug','privacy|terms');
