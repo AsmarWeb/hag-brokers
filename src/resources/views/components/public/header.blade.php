@@ -1,4 +1,4 @@
-    <header id="navbar" class="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#07111f]/85 backdrop-blur-xl">
+    <header id="navbar" class="market-header fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#07111f]/85 backdrop-blur-xl">
 
         <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
 
