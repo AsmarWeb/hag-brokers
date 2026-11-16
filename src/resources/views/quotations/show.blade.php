@@ -197,6 +197,25 @@
             </div>
 
 
+            @if ($quotation->freightRateBooking)
+                @php($selectedRate = $quotation->freightRateBooking)
+                @php($selectedSnapshot = $selectedRate->rate_snapshot ?? [])
+                <section class="rounded-3xl border border-cyan-200 bg-white p-6 shadow-sm dark:border-cyan-900 dark:bg-slate-900">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ __('freight_selection.selected_offer') }}</h2>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $selectedSnapshot['carrier']['name'] ?? $selectedSnapshot['source']['name'] ?? 'HAG Brokers' }} · {{ $selectedSnapshot['container_type'] ?? $quotation->container_type }} × {{ $selectedSnapshot['quantity'] ?? $quotation->quantity }}</p>
+                        </div>
+                        <span class="rounded-full bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 dark:bg-amber-400/10 dark:text-amber-300">{{ __('freight_selection.'.($selectedRate->status ?? 'request_pending')) }}</span>
+                    </div>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                        <div><p class="text-xs font-bold text-slate-500">{{ __('freight_selection.customer_total') }}</p><p class="mt-1 text-2xl font-black text-slate-950 dark:text-white"><bdi>{{ number_format((float) $selectedRate->customer_total, 2) }} {{ $selectedRate->currency }}</bdi></p></div>
+                        <div><p class="text-xs font-bold text-slate-500">{{ __('freight_selection.rate_reference') }}</p><p class="mt-1 font-bold text-slate-800 dark:text-slate-200">#{{ $selectedRate->rate_id ?? '—' }}</p></div>
+                    </div>
+                    <p class="mt-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900 dark:bg-amber-400/10 dark:text-amber-200">{{ __('freight_selection.not_a_booking') }}</p>
+                </section>
+            @endif
+
             {{-- Main --}}
             <div class="grid gap-6 lg:grid-cols-3">
 

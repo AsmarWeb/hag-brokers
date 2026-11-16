@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'select_offer' => 'Select this offer',
+    'sign_in_to_select' => 'Sign in to request this offer',
+    'submitted' => 'Your selected freight offer was sent for confirmation. This is not a confirmed booking yet.',
+    'already_submitted' => 'This request was already submitted. We opened the existing quotation.',
+    'idempotency_conflict' => 'This request key was already used for a different freight offer or quantity.',
+    'rate_unavailable' => 'This freight offer is no longer available. Please search again.',
+    'sailing_unavailable' => 'The sailing attached to this offer is no longer available. Please search again.',
+    'selected_offer' => 'Selected freight offer',
+    'request_status' => 'Request status',
+    'request_pending' => 'Awaiting HAG review',
+    'awaiting_carrier' => 'Sent to carrier — awaiting reply',
+    'admin_rejected' => 'HAG could not proceed with this request',
+    'carrier_rejected' => 'The carrier declined this request',
+    'cancelled' => 'Request cancelled',
+    'status_help' => 'Submitting a freight request does not confirm a booking. HAG reviews the request and then contacts the carrier. Final confirmation appears only after the carrier has confirmed.',
+    'awaiting_carrier_help' => 'The request has been recorded as sent to the carrier. We are waiting for its response; the booking is not confirmed yet.',
+    'admin_rejected_help' => 'HAG could not proceed with this request. Review the note or contact the HAG team for details.',
+    'carrier_rejected_help' => 'The carrier did not accept this request. You can search for another offer or contact HAG.',
+    'cancelled_help' => 'This request has been cancelled and will not continue through the confirmation process.',
+    'confirmed' => 'Confirmed by carrier',
+    'rejected' => 'Declined',
+    'customer_total' => 'Selected customer total',
+    'not_a_booking' => 'Your request is awaiting review and carrier confirmation. No final booking has been made.',
+    'rate_reference' => 'Rate reference',
+];

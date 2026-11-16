@@ -53,6 +53,8 @@
     @if($workspace)
         <div class="mx-auto grid max-w-7xl items-start gap-4 px-4 py-6 sm:px-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
             <nav aria-label="{{ __('carrier_partner.portal') }}" class="hag-broker-card flex flex-wrap gap-2 lg:sticky lg:top-4 lg:flex-col">
+                <a href="{{ route('carrier.freight-bookings.index') }}" @if(request()->routeIs('carrier.freight-bookings.*')) aria-current="page" @endif
+                    class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-cyan-50 dark:text-slate-200 dark:hover:bg-slate-800">{{ __('carrier_freight_bookings.title') }}</a>
                 @foreach(['fleet' => __('carrier_partner.fleet'), 'vessel-requests' => __('carrier_vessels.history'), 'profile' => __('carrier_partner.profile'), 'api' => __('carrier_partner.api')] as $section => $label)
                     <a href="{{ request()->routeIs('carrier.fleet') ? '' : route('carrier.fleet') }}#carrier-{{ $section }}" class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-cyan-50 dark:text-slate-200 dark:hover:bg-cyan-950">{{ $label }}</a>
                 @endforeach

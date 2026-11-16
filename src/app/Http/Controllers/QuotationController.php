@@ -132,7 +132,7 @@ class QuotationController extends Controller
         );
 
         return view('quotations.show', [
-            'quotation' => $quotation,
+            'quotation' => $quotation->load('freightRateBooking'),
         ]);
     }
 }
