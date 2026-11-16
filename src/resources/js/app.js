@@ -1,6 +1,7 @@
 import 'intl-tel-input/styles';
 import intlTelInput from 'intl-tel-input';
 import "./bootstrap";
+import "./public-navigation";
 
 import Alpine from "alpinejs";
 
