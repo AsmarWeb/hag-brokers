@@ -101,18 +101,76 @@
 
 
             @if (!($hasCompanyWorkspace ?? false) && !($hasCarrierFleet ?? false))
-                <section class="mb-8 rounded-2xl border border-cyan-200 bg-cyan-50 p-6 dark:border-cyan-900 dark:bg-cyan-950/40" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-white">{{ $isRtl ? 'خطوة واحدة لتفعيل مساحة شركتك' : 'One step to activate your company workspace' }}</h2>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                        @if (!($phoneSetupCompleted ?? false))
-                            {{ $isRtl ? 'أكمل إعداد رقم هاتفك باستخدام الرمز المرسل إلى بريدك الإلكتروني، ثم أضف بيانات شركتك.' : 'Complete phone setup using the code sent to your email, then add your company details.' }}
-                        @else
-                            {{ $isRtl ? 'أكمل بيانات شركتك لإنشاء مساحة عمل مستقلة تكون أنت مالكها.' : 'Add your company details to create a dedicated workspace that you own.' }}
-                        @endif
-                    </p>
-                    <a href="{{ !($phoneSetupCompleted ?? false) ? route('phone.verification.notice') : route('company.onboarding.show') }}" class="mt-4 inline-flex rounded-lg bg-cyan-500 px-5 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-400">
-                        {{ !($phoneSetupCompleted ?? false) ? ($isRtl ? 'إكمال إعداد الهاتف' : 'Complete setup') : ($isRtl ? 'إعداد الشركة' : 'Set up company') }}
-                    </a>
+                <section
+                    class="relative isolate mb-8 overflow-hidden rounded-2xl border border-cyan-200/80 bg-gradient-to-br from-white via-cyan-50 to-sky-50 p-6 shadow-sm shadow-cyan-900/5 dark:border-cyan-800/60 dark:from-slate-900 dark:via-slate-900 dark:to-cyan-950/50 dark:shadow-black/20 sm:p-8"
+                    dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
+                    {{-- Decorative background --}}
+                    <div
+                        class="pointer-events-none absolute -end-16 -top-20 h-56 w-56 rounded-full bg-cyan-300/20 blur-3xl dark:bg-cyan-500/10">
+                    </div>
+                    <div
+                        class="pointer-events-none absolute -bottom-24 -start-16 h-48 w-48 rounded-full bg-sky-300/20 blur-3xl dark:bg-sky-500/10">
+                    </div>
+
+                    <div class="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+
+                        {{-- Content --}}
+                        <div class="flex min-w-0 items-start gap-4">
+
+                            {{-- Icon --}}
+                            <div
+                                class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-cyan-200 bg-white text-cyan-700 shadow-sm dark:border-cyan-800 dark:bg-slate-800 dark:text-cyan-300">
+                                @if (!($phoneSetupCompleted ?? false))
+                                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.7">
+                                        <rect x="7" y="2.5" width="10" height="19" rx="2" />
+                                        <path d="M10 5.5h4M11 18.5h2" />
+                                        <path d="m10 11 2 2 3-3" />
+                                    </svg>
+                                @else
+                                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.7">
+                                        <path d="M3 21h18M5 21V7l7-4 7 4v14" />
+                                        <path d="M9 21v-6h6v6M9 9h.01M15 9h.01M9 12h.01M15 12h.01" />
+                                    </svg>
+                                @endif
+                            </div>
+
+                            <div class="min-w-0">
+                                <span
+                                    class="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/70 px-3 py-1 text-xs font-bold text-cyan-800 dark:border-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-cyan-500"></span>
+                                    {{ $isRtl ? 'إعداد الحساب' : 'ACCOUNT SETUP' }}
+                                </span>
+
+                                <h2
+                                    class="mt-3 text-lg font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-xl">
+                                    {{ $isRtl ? 'خطوة واحدة لتفعيل مساحة شركتك' : 'One step to activate your company workspace' }}
+                                </h2>
+
+                                <p class="mt-2 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
+                                    @if (!($phoneSetupCompleted ?? false))
+                                        {{ $isRtl ? 'أكمل إعداد رقم هاتفك باستخدام الرمز المرسل إلى بريدك الإلكتروني، ثم أضف بيانات شركتك.' : 'Complete phone setup using the code sent to your email, then add your company details.' }}
+                                    @else
+                                        {{ $isRtl ? 'أكمل بيانات شركتك لإنشاء مساحة عمل مستقلة تكون أنت مالكها.' : 'Add your company details to create a dedicated workspace that you own.' }}
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Action --}}
+                        <div class="relative shrink-0">
+                            <a href="{{ !($phoneSetupCompleted ?? false) ? route('phone.verification.notice') : route('company.onboarding.show') }}"
+                                class="group inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-xl bg-cyan-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-600/20 transition duration-200 hover:-translate-y-0.5 hover:bg-cyan-700 hover:shadow-cyan-600/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-white dark:bg-cyan-500 dark:text-slate-950 dark:shadow-cyan-500/10 dark:hover:bg-cyan-400 dark:focus:ring-offset-slate-900 sm:w-auto">
+                                {{ !($phoneSetupCompleted ?? false) ? ($isRtl ? 'إكمال إعداد الهاتف' : 'Complete setup') : ($isRtl ? 'إعداد الشركة' : 'Set up company') }}
+
+                                <svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14M12 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
                 </section>
             @endif
 
@@ -217,7 +275,7 @@
 
                         <div class="flex shrink-0 flex-col gap-3 sm:flex-row lg:flex-col">
 
-                            @if($hasCarrierFleet ?? false)
+                            @if ($hasCarrierFleet ?? false)
                                 <a href="{{ route('carrier.fleet') }}"
                                     class="inline-flex items-center justify-center rounded-xl border border-cyan-400/50 bg-cyan-400/10 px-5 py-3 text-sm font-semibold text-white hover:bg-cyan-400/20">
                                     {{ __('carrier_partner.fleet') }}
@@ -540,7 +598,8 @@
                                     @endphp
 
                                     @if ($media && $media->type === 'video')
-                                        <video class="h-full w-full object-cover" muted playsinline preload="metadata">
+                                        <video class="h-full w-full object-cover" muted playsinline
+                                            preload="metadata">
                                             <source src="{{ asset('storage/' . $media->path) }}"
                                                 type="{{ $media->mime_type }}">
                                         </video>
