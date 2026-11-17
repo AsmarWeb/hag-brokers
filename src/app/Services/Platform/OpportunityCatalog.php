@@ -8,7 +8,31 @@ final class OpportunityCatalog
 {
     public const TYPES = ['sell', 'buy', 'service_offer', 'service_request', 'partnership', 'distribution', 'procurement', 'trade', 'business', 'investment', 'logistics', 'vessel_brokerage', 'other'];
 
-    public const CATEGORIES = ['food', 'agriculture', 'construction', 'machinery', 'electronics', 'consumer_goods', 'automotive', 'energy', 'healthcare', 'hospitality', 'professional_services', 'technology', 'manufacturing', 'import', 'export', 'distribution', 'services', 'real_estate', 'sea_freight', 'marine', 'other'];
+    public const PRIMARY_SECTORS = [
+        'energy_petroleum' => ['crude_oil', 'diesel', 'jet_fuel', 'lng', 'base_oils', 'petroleum_products'],
+        'metals_minerals' => ['copper', 'aluminium', 'gold', 'iron_ore', 'steel', 'zinc'],
+        'agricultural_commodities' => ['wheat', 'corn', 'sugar', 'rice', 'soybeans'],
+        'construction_materials' => ['cement', 'steel_products', 'timber', 'glass', 'building_materials'],
+        'industrial_products' => ['industrial_chemicals', 'machinery', 'components', 'raw_materials'],
+    ];
+
+    public const PRODUCTS = [
+        'energy_petroleum' => ['crude_oil', 'diesel', 'jet_fuel', 'lng', 'base_oils', 'petroleum_products'],
+        'metals_minerals' => ['copper', 'aluminium', 'gold', 'iron_ore', 'steel', 'zinc'],
+        'agricultural_commodities' => ['wheat', 'corn', 'sugar', 'rice', 'soybeans'],
+        'construction_materials' => ['cement', 'steel_products', 'timber', 'glass', 'building_materials'],
+        'industrial_products' => ['industrial_chemicals', 'machinery', 'components', 'raw_materials'],
+    ];
+
+    public const CATEGORIES = [
+        'food', 'agriculture', 'construction', 'machinery', 'electronics',
+        'consumer_goods', 'automotive', 'energy', 'healthcare', 'hospitality',
+        'professional_services', 'technology', 'manufacturing', 'import',
+        'export', 'distribution', 'services', 'real_estate', 'sea_freight',
+        'marine', 'energy_petroleum', 'metals_minerals',
+        'agricultural_commodities', 'construction_materials',
+        'industrial_products', 'other',
+    ];
 
     public const CURRENCIES = ['AED', 'USD', 'EUR', 'GBP', 'SAR', 'QAR', 'KWD', 'OMR', 'BHD', 'INR', 'CNY'];
 
@@ -16,7 +40,7 @@ final class OpportunityCatalog
 
     public const TERMS = ['negotiable', 'exw', 'fca', 'fob', 'cfr', 'cif', 'dap', 'ddp', 'not_applicable'];
 
-    public const FIELDS = ['subcategory', 'product_name', 'specifications', 'quantity', 'unit', 'unit_price', 'price_basis', 'min_order_quantity', 'condition', 'delivery_terms', 'payment_terms', 'lead_time_days', 'target_market', 'certifications'];
+    public const FIELDS = ['subcategory', 'product_code', 'product_name', 'specifications', 'quantity', 'unit', 'unit_price', 'price_basis', 'min_order_quantity', 'condition', 'delivery_terms', 'payment_terms', 'lead_time_days', 'target_market', 'certifications'];
 
     public const SUBCATEGORIES = [
         'marine' => ['yachts', 'boats', 'sailboats', 'commercial_vessels', 'marine_equipment', 'marine_services'],
@@ -29,7 +53,13 @@ final class OpportunityCatalog
         'manufacturing' => ['contract_manufacturing', 'raw_materials'], 'import' => ['sourcing', 'import_services'],
         'export' => ['export_goods', 'export_services'], 'distribution' => ['wholesale', 'agency'],
         'services' => ['consulting', 'business_support'], 'real_estate' => ['commercial_property', 'residential_property', 'land'],
-        'sea_freight' => ['freight_services', 'marine_equipment'], 'other' => ['general'],
+        'sea_freight' => ['freight_services', 'marine_equipment'],
+        'energy_petroleum' => ['crude_oil', 'diesel', 'jet_fuel', 'lng', 'base_oils', 'petroleum_products'],
+        'metals_minerals' => ['copper', 'aluminium', 'gold', 'iron_ore', 'steel', 'zinc'],
+        'agricultural_commodities' => ['wheat', 'corn', 'sugar', 'rice', 'soybeans'],
+        'construction_materials' => ['cement', 'steel_products', 'timber', 'glass', 'building_materials'],
+        'industrial_products' => ['industrial_chemicals', 'machinery', 'components', 'raw_materials'],
+        'other' => ['general'],
     ];
 
     public const ATTRIBUTES = [
@@ -109,6 +139,7 @@ final class OpportunityCatalog
         return [
             'commercial_details' => ['nullable', 'array:'.implode(',', array_merge(self::FIELDS, ['features', 'attributes']))],
             'commercial_details.subcategory' => ['nullable', Rule::in(self::SUBCATEGORIES[$category] ?? [])],
+            'commercial_details.product_code' => ['nullable', 'string', Rule::in(self::PRODUCTS[$category] ?? [])],
             'commercial_details.features' => ['nullable', 'array', 'max:8'],
             'commercial_details.features.*' => [Rule::in(self::FEATURES), 'distinct'],
             'commercial_details.attributes' => ['nullable', 'array:'.implode(',', self::ATTRIBUTES[$category] ?? [])],

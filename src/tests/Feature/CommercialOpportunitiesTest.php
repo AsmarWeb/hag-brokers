@@ -92,6 +92,48 @@ class CommercialOpportunitiesTest extends TestCase
         $this->assertDatabaseCount('company_marketplace_requests', 0);
     }
 
+    public function test_product_code_must_belong_to_category_and_remains_optional_for_legacy_listings(): void
+    {
+        [$invalidUser] = $this->company();
+
+        $invalidPayload = $this->listingData();
+        $invalidPayload['category'] = 'metals_minerals';
+        $invalidPayload['commercial_details'] = array_replace(
+            $invalidPayload['commercial_details'],
+            ['product_code' => 'diesel']
+        );
+
+        $this->actingAs($invalidUser)
+            ->postJson(route('opportunities.store'), $invalidPayload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('commercial_details.product_code');
+
+        $this->assertDatabaseCount('opportunities', 0);
+        $this->assertDatabaseCount('company_marketplace_requests', 0);
+
+        [$validUser] = $this->company();
+
+        $validListing = $this->publish($validUser, [
+            'category' => 'energy_petroleum',
+            'commercial_details' => [
+                'product_code' => 'diesel',
+                'product_name' => 'Diesel',
+            ],
+        ]);
+
+        $this->assertSame('energy_petroleum', $validListing->category);
+        $this->assertSame('diesel', $validListing->commercial_details['product_code']);
+
+        [$legacyUser] = $this->company();
+
+        $legacyListing = $this->publish($legacyUser, [
+            'category' => 'consumer_goods',
+        ]);
+
+        $this->assertSame('consumer_goods', $legacyListing->category);
+        $this->assertArrayNotHasKey('product_code', $legacyListing->commercial_details);
+    }
+
     public function test_company_can_edit_details_but_not_identity_status_or_financial_source(): void
     {
         [$user] = $this->company();

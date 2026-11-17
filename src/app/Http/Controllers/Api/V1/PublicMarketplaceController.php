@@ -43,7 +43,12 @@ class PublicMarketplaceController extends Controller
             'per_page' => ['nullable', 'integer', 'between:1,50'], 'page' => ['nullable', 'integer', 'min:1', 'max:10000']]);
         $q = $market->publicQuery()->with('media');
         if ($s = trim($d['search'] ?? '')) {
-            $q->where(fn ($q) => $q->where('title', 'like', '%'.$s.'%')->orWhere('description', 'like', '%'.$s.'%'));
+            $q->where(fn ($q) => $q
+                ->where('title', 'like', '%'.$s.'%')
+                ->orWhere('description', 'like', '%'.$s.'%')
+                ->orWhere('commercial_details->product_name', 'like', '%'.$s.'%')
+                ->orWhere('commercial_details->product_code', 'like', '%'.$s.'%')
+                ->orWhere('commercial_details->subcategory', 'like', '%'.$s.'%'));
         }
         foreach (['type' => 'opportunity_type', 'category' => 'category', 'country' => 'country'] as $input => $field) {
             if (! empty($d[$input])) {
@@ -65,9 +70,16 @@ class PublicMarketplaceController extends Controller
 
     public function catalog()
     {
-        return response()->json(['data' => ['types' => OpportunityCatalog::TYPES, 'categories' => OpportunityCatalog::CATEGORIES,
-            'subcategories' => OpportunityCatalog::SUBCATEGORIES, 'currencies' => OpportunityCatalog::CURRENCIES,
-            'units' => OpportunityCatalog::UNITS, 'languages' => ['ar', 'en']]]);
+        return response()->json(['data' => [
+            'types' => OpportunityCatalog::TYPES,
+            'categories' => OpportunityCatalog::CATEGORIES,
+            'primary_sectors' => OpportunityCatalog::PRIMARY_SECTORS,
+            'products' => OpportunityCatalog::PRODUCTS,
+            'subcategories' => OpportunityCatalog::SUBCATEGORIES,
+            'currencies' => OpportunityCatalog::CURRENCIES,
+            'units' => OpportunityCatalog::UNITS,
+            'languages' => ['ar', 'en'],
+        ]]);
     }
 
     public function company(string $slug, CompanyMarketplaceService $market)
