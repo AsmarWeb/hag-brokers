@@ -232,6 +232,47 @@ class MobileApiFoundationTest extends TestCase
         $this->getJson('/api/v1/opportunities')->assertJsonPath('meta.total', 0);
     }
 
+    public function test_catalog_exposes_primary_sectors_and_api_search_finds_commercial_products(): void
+    {
+        [$u] = $this->company();
+        $o = $this->listing($u);
+
+        $o->update([
+            'category' => 'energy_petroleum',
+            'commercial_details' => [
+                'product_code' => 'diesel',
+                'product_name' => 'Ultra Low Sulphur Diesel',
+                'subcategory' => 'diesel',
+            ],
+        ]);
+
+        $catalog = $this->getJson('/api/v1/catalog?lang=en')->assertOk();
+        $catalog->assertJsonPath('data.primary_sectors.energy_petroleum.0', 'crude_oil');
+        $catalog->assertJsonPath('data.products.energy_petroleum.1', 'diesel');
+        $catalog->assertJsonPath('data.subcategories.energy_petroleum.1', 'diesel');
+
+        $this->getJson('/api/v1/opportunities?search=Sulphur%20Diesel')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1)
+            ->assertJsonPath('data.0.category', 'energy_petroleum');
+
+        $this->getJson('/api/v1/opportunities?search=crude_oil')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 0);
+
+        $o->update([
+            'commercial_details' => [
+                'product_code' => 'crude_oil',
+                'product_name' => 'Different product',
+                'subcategory' => 'crude_oil',
+            ],
+        ]);
+
+        $this->getJson('/api/v1/opportunities?search=crude_oil')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 1);
+    }
+
     public function test_closed_private_expired_opportunities_are_hidden(): void
     {
         [$u] = $this->company();

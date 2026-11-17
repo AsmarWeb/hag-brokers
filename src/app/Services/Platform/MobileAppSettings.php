@@ -20,7 +20,11 @@ class MobileAppSettings
                 'description_en' => '',
                 'image' => null,
                 'enabled' => true,
-                'featured' => in_array($code, ['food', 'agriculture', 'machinery', 'electronics'], true),
+                'featured' => in_array($code, [
+                    'food', 'agriculture', 'machinery', 'electronics',
+                    'energy_petroleum', 'metals_minerals', 'agricultural_commodities',
+                    'construction_materials', 'industrial_products',
+                ], true),
                 'sort_order' => $index + 1,
             ];
         }
