@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Storage;
 
 class MobileAppSettings
 {
+    private const DEFAULT_CATEGORY_IMAGES = [
+        'energy_petroleum' => 'mobile-app/categories/energy_petroleum.jpg',
+        'metals_minerals' => 'mobile-app/categories/metals_minerals.jpg',
+        'agricultural_commodities' => 'mobile-app/categories/agricultural_commodities.jpg',
+        'construction_materials' => 'mobile-app/categories/construction_materials.jpg',
+        'industrial_products' => 'mobile-app/categories/industrial_products.jpg',
+    ];
+
     public function defaults(): array
     {
         $cards = [];
@@ -66,6 +74,7 @@ class MobileAppSettings
                 $card,
                 is_array($savedCards[$code] ?? null) ? $savedCards[$code] : []
             );
+
         }
 
         return ['version' => (int) ($row->version ?? 0), 'content' => $content];
@@ -91,9 +100,19 @@ class MobileAppSettings
             }
 
             $path = $card['image'] ?? null;
-            $card['image'] = is_string($path) && str_starts_with($path, 'mobile-app/categories/')
-                ? Storage::disk('public')->url($path)
-                : null;
+
+            if (
+                ! is_string($path)
+                || ! str_starts_with($path, 'mobile-app/categories/')
+                || ! Storage::disk('public')->exists($path)
+            ) {
+                $path = self::DEFAULT_CATEGORY_IMAGES[$code] ?? null;
+            }
+
+            $card['image'] = is_string($path)
+                && Storage::disk('public')->exists($path)
+                    ? Storage::disk('public')->url($path)
+                    : null;
             $cards[] = $card;
         }
 
