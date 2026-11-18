@@ -7,6 +7,16 @@ use Illuminate\Support\Facades\Storage;
 
 class MobileAppSettings
 {
+    public const CATEGORY_CATALOG_VERSION = 1;
+
+    private const NEW_COMMERCIAL_CATEGORIES = [
+        'energy_petroleum',
+        'metals_minerals',
+        'agricultural_commodities',
+        'construction_materials',
+        'industrial_products',
+    ];
+
     private const DEFAULT_CATEGORY_IMAGES = [
         'energy_petroleum' => 'mobile-app/categories/energy_petroleum.jpg',
         'metals_minerals' => 'mobile-app/categories/metals_minerals.jpg',
@@ -52,30 +62,64 @@ class MobileAppSettings
             'welcome_enabled' => true,
             'show_marine' => true,
             'categories' => OpportunityCatalog::CATEGORIES,
+            'category_catalog_version' => self::CATEGORY_CATALOG_VERSION,
             'category_cards' => $cards,
             'welcome_image' => null,
             'home_image' => null,
         ];
     }
 
-    public function stored(): array
+    /**
+     * Normalize saved settings and upgrade legacy category selections once.
+     *
+     * The catalog version distinguishes old settings from deliberate admin
+     * choices made after the new commercial categories were introduced.
+     */
+    public function normalizeStoredContent(array $saved): array
     {
-        $row = DB::table('mobile_app_settings')->where('id', 1)->first();
-        $content = array_replace(
-            $this->defaults(),
-            $row ? json_decode($row->content, true, 512, JSON_THROW_ON_ERROR) : []
-        );
+        $catalogVersion = (int) ($saved['category_catalog_version'] ?? 0);
 
-        // Backfill newly introduced category-card fields for older saved configurations.
+        $content = array_replace($this->defaults(), $saved);
+
+        if ($catalogVersion < self::CATEGORY_CATALOG_VERSION) {
+            $categories = is_array($content['categories'] ?? null)
+                ? $content['categories']
+                : [];
+
+            $content['categories'] = array_values(array_unique([
+                ...$categories,
+                ...self::NEW_COMMERCIAL_CATEGORIES,
+            ]));
+        }
+
+        $content['category_catalog_version'] = self::CATEGORY_CATALOG_VERSION;
+
         $defaults = $this->defaults()['category_cards'];
-        $savedCards = is_array($content['category_cards'] ?? null) ? $content['category_cards'] : [];
+        $savedCards = is_array($content['category_cards'] ?? null)
+            ? $content['category_cards']
+            : [];
+
         foreach ($defaults as $code => $card) {
             $content['category_cards'][$code] = array_replace(
                 $card,
                 is_array($savedCards[$code] ?? null) ? $savedCards[$code] : []
             );
-
         }
+
+        return $content;
+    }
+
+    public function stored(): array
+    {
+        $row = DB::table('mobile_app_settings')->where('id', 1)->first();
+
+        $saved = $row
+            ? json_decode($row->content, true, 512, JSON_THROW_ON_ERROR)
+            : [];
+
+        $content = $this->normalizeStoredContent(
+            is_array($saved) ? $saved : []
+        );
 
         return ['version' => (int) ($row->version ?? 0), 'content' => $content];
     }

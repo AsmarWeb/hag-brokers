@@ -95,13 +95,13 @@ class AdminMobileAppController extends Controller
                 $row = DB::table('mobile_app_settings')->where('id', 1)->lockForUpdate()->first();
                 abort_if((int) $row->version !== (int) $data['version'], 409, 'Settings changed. Reload before saving.');
 
-                $content = array_replace(
-                    $settings->defaults(),
-                    json_decode($row->content, true, 512, JSON_THROW_ON_ERROR)
+                $savedContent = json_decode($row->content, true, 512, JSON_THROW_ON_ERROR);
+                $content = $settings->normalizeStoredContent(
+                    is_array($savedContent) ? $savedContent : []
                 );
 
                 foreach (array_keys($settings->defaults()) as $key) {
-                    if (! in_array($key, ['welcome_image', 'home_image', 'category_cards'], true)) {
+                    if (! in_array($key, ['welcome_image', 'home_image', 'category_cards', 'category_catalog_version'], true)) {
                         $content[$key] = $data[$key] ?? '';
                     }
                 }
@@ -115,6 +115,7 @@ class AdminMobileAppController extends Controller
                     }
                 }
 
+                $content['category_catalog_version'] = MobileAppSettings::CATEGORY_CATALOG_VERSION;
                 $content['welcome_enabled'] = $request->boolean('welcome_enabled');
                 $content['show_marine'] = $request->boolean('show_marine');
 
