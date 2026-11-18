@@ -139,4 +139,132 @@ class MobileAppSettingsTest extends TestCase
         $this->assertSame(Storage::disk('public')->url($imagePath), $foodCard['image']);
     }
 
+
+    public function test_legacy_settings_are_upgraded_in_public_response_without_database_writes(): void
+    {
+        $legacy = app(MobileAppSettings::class)->defaults();
+
+        unset($legacy['category_catalog_version']);
+
+        $legacy['categories'] = ['marine', 'food'];
+
+        foreach ([
+            'energy_petroleum',
+            'metals_minerals',
+            'agricultural_commodities',
+            'construction_materials',
+            'industrial_products',
+        ] as $code) {
+            unset($legacy['category_cards'][$code]);
+        }
+
+        DB::table('mobile_app_settings')->insert([
+            'id' => 1,
+            'content' => json_encode($legacy, JSON_THROW_ON_ERROR),
+            'version' => 4,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $expectedCategories = [
+            'marine',
+            'food',
+            'energy_petroleum',
+            'metals_minerals',
+            'agricultural_commodities',
+            'construction_materials',
+            'industrial_products',
+        ];
+
+        $this->getJson('/api/v1/app-config')
+            ->assertOk()
+            ->assertJsonPath('data.categories', $expectedCategories);
+
+        $stored = json_decode(
+            DB::table('mobile_app_settings')->where('id', 1)->value('content'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $this->assertSame(['marine', 'food'], $stored['categories']);
+        $this->assertArrayNotHasKey('category_catalog_version', $stored);
+        $this->assertDatabaseCount('mobile_app_setting_audits', 0);
+    }
+
+    public function test_admin_choices_are_preserved_after_legacy_catalog_upgrade(): void
+    {
+        $legacy = app(MobileAppSettings::class)->defaults();
+
+        unset($legacy['category_catalog_version']);
+
+        $legacy['categories'] = ['marine', 'food'];
+
+        foreach ([
+            'energy_petroleum',
+            'metals_minerals',
+            'agricultural_commodities',
+            'construction_materials',
+            'industrial_products',
+        ] as $code) {
+            unset($legacy['category_cards'][$code]);
+        }
+
+        DB::table('mobile_app_settings')->insert([
+            'id' => 1,
+            'content' => json_encode($legacy, JSON_THROW_ON_ERROR),
+            'version' => 4,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // The legacy response is upgraded for the admin's first edit.
+        $this->getJson('/api/v1/app-config')
+            ->assertOk()
+            ->assertJsonPath('data.categories', [
+                'marine',
+                'food',
+                'energy_petroleum',
+                'metals_minerals',
+                'agricultural_commodities',
+                'construction_materials',
+                'industrial_products',
+            ]);
+
+        $cards = $this->payload()['category_cards'];
+        $cards['energy_petroleum']['enabled'] = false;
+
+        $this->actingAs($this->administrator())
+            ->put('/admin/mobile-app', $this->payload([
+                'version' => 4,
+                'categories' => ['marine', 'food'],
+                'category_cards' => $cards,
+            ]))
+            ->assertRedirect();
+
+        $this->getJson('/api/v1/app-config')
+            ->assertOk()
+            ->assertJsonPath('data.version', 5)
+            ->assertJsonPath('data.categories', ['marine', 'food']);
+
+        $publicCards = $this->getJson('/api/v1/app-config')->json('data.category_cards');
+
+        $this->assertNotContains(
+            'energy_petroleum',
+            array_column($publicCards, 'code')
+        );
+
+        $saved = json_decode(
+            DB::table('mobile_app_settings')->where('id', 1)->value('content'),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $this->assertSame(1, $saved['category_catalog_version']);
+        $this->assertSame(['marine', 'food'], $saved['categories']);
+        $this->assertFalse($saved['category_cards']['energy_petroleum']['enabled']);
+        $this->assertDatabaseCount('mobile_app_setting_audits', 1);
+    }
+
 }
