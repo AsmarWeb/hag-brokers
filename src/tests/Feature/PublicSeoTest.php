@@ -161,15 +161,83 @@ class PublicSeoTest extends TestCase
     public function test_schema_is_valid_json_escaped_and_contains_no_private_financial_data(): void
     {
         $listing = $this->listing(['title' => '</script><script>SEO-XSS</script>', 'notes' => 'PRIVATE-SEO-NOTE', 'required_capital' => '123456.78']);
+
+        DB::table('opportunity_media')->insert([
+            'opportunity_id' => $listing->id,
+            'type' => 'image',
+            'path' => 'opportunities/1/seo-cover.jpg',
+            'mime_type' => 'image/jpeg',
+            'size' => 1024,
+            'original_name' => 'seo-cover.jpg',
+            'sort_order' => 5,
+            'is_primary' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         $html = $this->get(route('opportunities.show', $listing, ['lang' => 'en']))->assertOk()->getContent();
         preg_match_all('/<script type="application\/ld\+json">(.*?)<\/script>/s', $html, $matches);
-        $this->assertCount(2, $matches[1]);
+        $this->assertCount(4, $matches[1]);
         foreach ($matches[1] as $json) {
             $this->assertIsArray(json_decode($json, true, 32, JSON_THROW_ON_ERROR));
             $this->assertStringNotContainsString('PRIVATE-SEO-NOTE', $json);
             $this->assertStringNotContainsString('123456.78', $json);
         }
         $this->assertStringNotContainsString('<script>SEO-XSS</script>', $html);
+
+        $decodedSchemas = array_map(
+            fn ($json) => json_decode($json, true, 32, JSON_THROW_ON_ERROR),
+            $matches[1]
+        );
+
+        $schemaTypes = array_column($decodedSchemas, '@type');
+
+        $this->assertContains('Organization', $schemaTypes);
+        $this->assertContains('WebSite', $schemaTypes);
+        $this->assertContains('WebPage', $schemaTypes);
+        $this->assertContains('BreadcrumbList', $schemaTypes);
+
+        $webPage = collect($decodedSchemas)->firstWhere('@type', 'WebPage');
+
+        $this->assertSame(
+            ['@id' => 'https://market.example.test/#organization'],
+            $webPage['publisher']
+        );
+
+        $this->assertSame(
+            'https://market.example.test/storage/opportunities/1/seo-cover.jpg',
+            $webPage['primaryImageOfPage']['url']
+        );
+    }
+
+    public function test_marketplace_has_collection_schema_and_default_social_image(): void
+    {
+        config(['seo.social_image' => '']);
+
+        $response = $this->get('/opportunities?lang=en')->assertOk();
+
+        $response
+            ->assertSee(
+                'https://market.example.test/storage/hag-brokers-og.png',
+                false
+            )
+            ->assertSee('property="og:image:width" content="1734"', false)
+            ->assertSee('property="og:image:height" content="907"', false)
+            ->assertSee('name="twitter:image:alt"', false);
+
+        preg_match_all(
+            '/<script type="application\/ld\+json">(.*?)<\/script>/s',
+            $response->getContent(),
+            $matches
+        );
+
+        $schemas = array_map(
+            fn ($json) => json_decode($json, true, 32, JSON_THROW_ON_ERROR),
+            $matches[1]
+        );
+
+        $this->assertContains('CollectionPage', array_column($schemas, '@type'));
+        $this->assertContains('Organization', array_column($schemas, '@type'));
     }
 
     public function test_private_note_changes_do_not_falsify_public_lastmod(): void

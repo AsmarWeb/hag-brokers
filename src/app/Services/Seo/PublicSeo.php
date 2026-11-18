@@ -87,22 +87,83 @@ final class PublicSeo
             $description = __('bring_deal.intro');
         }
         $image = trim((string) config('seo.social_image'));
-        if ($image !== '' && ! str_starts_with($image, 'https://') && ! str_starts_with($image, 'http://')) {
+        $imageIsDefault = $image === '';
+
+        if ($imageIsDefault) {
+            $image = 'storage/hag-brokers-og.png';
+        }
+
+        if (! preg_match('#^https?://#i', $image)) {
             $image = $this->base().'/'.ltrim($image, '/');
         }
+
+        $imageParts = parse_url($image);
+
+        if (
+            ! is_array($imageParts)
+            || ! in_array($imageParts['scheme'] ?? '', ['http', 'https'], true)
+            || empty($imageParts['host'])
+            || isset($imageParts['user'])
+            || isset($imageParts['pass'])
+        ) {
+            $image = '';
+        }
+
+        $imageAlt = 'HAG Brokers — Business opportunities and maritime services';
+        $imageMimeType = $imageIsDefault ? 'image/png' : null;
+        $imageWidth = $imageIsDefault ? 1734 : null;
+        $imageHeight = $imageIsDefault ? 907 : null;
+
         $schemas = [];
-        $organization = ['@type' => 'Organization', '@id' => $this->base().'/#organization', 'name' => 'HAG Brokers', 'url' => $this->base().'/'];
-        if ($route === 'home') {
+        $organization = [
+            '@type' => 'Organization',
+            '@id' => $this->base().'/#organization',
+            'name' => 'HAG Brokers',
+            'url' => $this->base().'/',
+        ];
+
+        if ($public) {
             $schemas[] = ['@context' => 'https://schema.org'] + $organization;
-            $schemas[] = ['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => 'HAG Brokers', 'url' => $this->base().'/', 'inLanguage' => ['ar', 'en']];
+
+            $schemas[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                '@id' => $this->base().'/#website',
+                'name' => 'HAG Brokers',
+                'url' => $this->base().'/',
+                'inLanguage' => ['ar', 'en'],
+                'publisher' => ['@id' => $organization['@id']],
+            ];
+        }
+
+        if ($route === 'opportunities.index' && $public && ! $filtered) {
+            $schemas[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                '@id' => $canonical.'#collection',
+                'url' => $canonical,
+                'name' => $title,
+                'description' => $description,
+                'inLanguage' => $language,
+                'isPartOf' => ['@id' => $this->base().'/#website'],
+                'publisher' => ['@id' => $organization['@id']],
+            ];
         }
         if ($route === 'opportunities.show' && $opportunity instanceof Opportunity) {
             $title = $this->plain($opportunity->title, 150).' | HAG Brokers';
             $description = $this->plain($opportunity->description) ?: $description;
             $opportunity->loadMissing('media');
-            $cover = $opportunity->media->firstWhere('type', 'image');
+            $images = $opportunity->media->where('type', 'image');
+
+            $cover = $images->firstWhere('is_primary', true)
+                ?? $images->first();
+
             if ($cover) {
                 $image = $this->base().'/storage/'.ltrim($cover->path, '/');
+                $imageAlt = $this->plain($opportunity->title, 255);
+                $imageMimeType = $cover->mime_type ?: null;
+                $imageWidth = null;
+                $imageHeight = null;
             }
             $page = ['@context' => 'https://schema.org', '@type' => 'WebPage', '@id' => $canonical.'#webpage', 'url' => $canonical, 'name' => $this->plain($opportunity->title, 255), 'description' => $description, 'inLanguage' => $language, 'publisher' => ['@id' => $organization['@id']]];
             if ($opportunity->published_at) {
@@ -112,7 +173,11 @@ final class PublicSeo
                 $page['dateModified'] = $opportunity->seo_updated_at->toAtomString();
             }
             if ($image) {
-                $page['primaryImageOfPage'] = $image;
+                $page['primaryImageOfPage'] = [
+                    '@type' => 'ImageObject',
+                    'url' => $image,
+                    'caption' => $imageAlt,
+                ];
             }
             $schemas[] = $page;
             $schemas[] = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [
@@ -132,7 +197,19 @@ final class PublicSeo
             $alternates['x-default'] = $alternates[config('app.locale') === 'ar' ? 'ar' : 'en'];
         }
 
-        return compact('title', 'description', 'canonical', 'alternates', 'schemas', 'image', 'language') + [
+        return compact(
+            'title',
+            'description',
+            'canonical',
+            'alternates',
+            'schemas',
+            'image',
+            'imageAlt',
+            'imageMimeType',
+            'imageWidth',
+            'imageHeight',
+            'language'
+        ) + [
             'public' => $public,
             'indexable' => $public && ! $filtered && (bool) config('seo.indexing_enabled'),
         ];
