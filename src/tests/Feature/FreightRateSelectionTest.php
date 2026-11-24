@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Carrier;
 use App\Models\Customer;
 use App\Models\FreightRate;
+use App\Models\FreightRateBooking;
 use App\Models\FreightRateSource;
 use App\Models\Port;
 use App\Models\User;
@@ -91,6 +92,107 @@ final class FreightRateSelectionTest extends TestCase
 
         $this->assertDatabaseCount('quotations', 1);
         $this->assertDatabaseCount('freight_rate_bookings', 1);
+    }
+
+
+    public function test_customer_can_view_safe_booking_timeline_without_internal_event_data(): void
+    {
+        [$user, $rate] = $this->fixture();
+
+        $this->actingAs($user)->post(route('freight.rates.select', $rate), [
+            'request_key' => (string) Str::uuid(),
+            'quantity' => 2,
+            'cargo_type' => 'General cargo',
+        ])->assertRedirect();
+
+        $booking = FreightRateBooking::query()->firstOrFail();
+        $adminActor = User::factory()->create(['name' => 'PRIVATE ADMIN ACTOR NAME']);
+
+        $booking->events()->create([
+            'actor_id' => $adminActor->id,
+            'event_key' => 'marked_sent_to_carrier',
+            'from_status' => 'request_pending',
+            'to_status' => 'awaiting_carrier',
+            'note' => 'PRIVATE ADMIN NOTE 8472',
+            'metadata' => ['private_tracking_value' => 'PRIVATE METADATA 8472'],
+        ]);
+
+        $booking->events()->create([
+            'actor_id' => null,
+            'event_key' => 'carrier_confirmed',
+            'from_status' => 'awaiting_carrier',
+            'to_status' => 'carrier_confirmed',
+            'note' => 'PRIVATE CARRIER NOTE 8472',
+            'metadata' => ['carrier_internal_code' => 'PRIVATE CARRIER CODE 8472'],
+        ]);
+
+        $booking->forceFill([
+            'status' => 'carrier_confirmed',
+            'carrier_reference' => 'CARRIER-REF-PUBLIC-47',
+            'status_note' => 'PRIVATE BOOKING STATUS NOTE 8472',
+        ])->save();
+
+        $quotation = $booking->quotation()->firstOrFail();
+
+        $response = $this->actingAs($user)->get(route('quotations.show', $quotation));
+
+        $response->assertOk()
+            ->assertSee(__('freight_selection.carrier_confirmed'))
+            ->assertSee(__('freight_selection.timeline'))
+            ->assertSee(__('freight_selection.timeline_events.request_submitted'))
+            ->assertSee(__('freight_selection.timeline_events.marked_sent_to_carrier'))
+            ->assertSee(__('freight_selection.timeline_events.carrier_confirmed'))
+            ->assertSee('CARRIER-REF-PUBLIC-47')
+            ->assertDontSee('PRIVATE ADMIN ACTOR NAME')
+            ->assertDontSee('PRIVATE ADMIN NOTE 8472')
+            ->assertDontSee('PRIVATE METADATA 8472')
+            ->assertDontSee('PRIVATE CARRIER NOTE 8472')
+            ->assertDontSee('PRIVATE CARRIER CODE 8472')
+            ->assertDontSee('PRIVATE BOOKING STATUS NOTE 8472')
+            ->assertDontSee('HAG test rates')
+            ->assertDontSee('supplier_total')
+            ->assertDontSee('commission_total')
+            ->assertDontSee('payload_hash');
+
+        $html = $response->getContent();
+        $submittedPosition = strpos($html, __('freight_selection.timeline_events.request_submitted'));
+        $sentPosition = strpos($html, __('freight_selection.timeline_events.marked_sent_to_carrier'));
+        $confirmedPosition = strpos($html, __('freight_selection.timeline_events.carrier_confirmed'));
+
+        $this->assertNotFalse($submittedPosition);
+        $this->assertNotFalse($sentPosition);
+        $this->assertNotFalse($confirmedPosition);
+        $this->assertLessThan($sentPosition, $submittedPosition);
+        $this->assertLessThan($confirmedPosition, $sentPosition);
+
+        $otherCustomer = Customer::create([
+            'company_name' => 'Another freight customer',
+            'is_active' => true,
+        ]);
+        $otherUser = User::factory()->create([
+            'customer_id' => $otherCustomer->id,
+            'email_verified_at' => now(),
+        ]);
+
+        $this->actingAs($otherUser)
+            ->get(route('quotations.show', $quotation))
+            ->assertForbidden();
+    }
+
+    public function test_customer_quotation_list_displays_selected_freight_booking_status(): void
+    {
+        [$user, $rate] = $this->fixture();
+
+        $this->actingAs($user)->post(route('freight.rates.select', $rate), [
+            'request_key' => (string) Str::uuid(),
+            'quantity' => 1,
+            'cargo_type' => 'General cargo',
+        ])->assertRedirect();
+
+        $this->actingAs($user)
+            ->get(route('quotations.index'))
+            ->assertOk()
+            ->assertSee(__('freight_selection.request_pending'));
     }
 
     public function test_unavailable_rate_is_rejected_and_guest_cannot_select(): void
