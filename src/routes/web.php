@@ -104,8 +104,25 @@ Route::middleware('maintenance.check')->group(function () {
         ->middleware('throttle:60,1')->name('freight.sailings');
     Route::get('/freight/rates', [\App\Http\Controllers\FreightRateController::class, 'page'])
         ->middleware('throttle:60,1')->name('freight.rates');
+
+    // Public request forms. A guest may prepare a draft; account checks happen at final confirmation.
+    Route::get('/quotations/create', [QuotationController::class, 'create'])
+        ->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('quotations.create');
+    Route::post('/quotations', [QuotationController::class, 'store'])
+        ->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,freight-quotation-draft:'])->name('quotations.store');
+    Route::get('/quotations/continue/{draft}', [QuotationController::class, 'resume'])
+        ->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('quotations.resume');
+    Route::post('/quotations/continue/{draft}', [QuotationController::class, 'complete'])
+        ->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,freight-quotation-submit:'])->name('quotations.resume.submit');
+
+    Route::post('/freight/rates/{rate}/select', [\App\Http\Controllers\FreightRateSelectionController::class, 'store'])
+        ->whereNumber('rate')->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,freight-rate-selection:'])->name('freight.rates.select');
+    Route::get('/freight/rate-selection/continue/{draft}', [\App\Http\Controllers\FreightRateSelectionController::class, 'resume'])
+        ->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('freight.rates.resume');
+    Route::post('/freight/rate-selection/continue/{draft}', [\App\Http\Controllers\FreightRateSelectionController::class, 'complete'])
+        ->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,freight-rate-submit:'])->name('freight.rates.resume.submit');
     Route::get('/freight/sailings/{sailing}/select', [\App\Http\Controllers\FreightSailingController::class, 'select'])
-        ->whereNumber('sailing')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class])->name('freight.sailings.select');
+        ->whereNumber('sailing')->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('freight.sailings.select');
 
 
     // Public website routes
@@ -217,18 +234,10 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
         'index',
     ])->name('quotations.index');
 
-    Route::get('/quotations/create', [
-        QuotationController::class,
-        'create',
-    ])->name('quotations.create');
 
-    Route::post('/quotations', [
-        QuotationController::class,
-        'store',
-    ])->name('quotations.store');
 
-    Route::post('/freight/rates/{rate}/select', [\App\Http\Controllers\FreightRateSelectionController::class, 'store'])
-        ->whereNumber('rate')->middleware('throttle:10,1')->name('freight.rates.select');
+
+
 
     Route::get('/quotations/{quotation}', [
         QuotationController::class,
@@ -314,15 +323,14 @@ Route::get('/opportunities', [
     'index',
 ])->name('opportunities.index');
 
-Route::get('/opportunities/create', [
-    OpportunityController::class,
-    'create',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.create');
-
-Route::post('/opportunities', [
-    OpportunityController::class,
-    'store',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.store');
+Route::get('/opportunities/create', [OpportunityController::class, 'create'])
+    ->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('opportunities.create');
+Route::post('/opportunities', [OpportunityController::class, 'store'])
+    ->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,opportunity-publication-draft:'])->name('opportunities.store');
+Route::get('/opportunities/continue/{draft}', [OpportunityController::class, 'resumePublication'])
+    ->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('opportunities.create.resume');
+Route::post('/opportunities/continue/{draft}', [OpportunityController::class, 'completePublication'])
+    ->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,opportunity-publication-submit:'])->name('opportunities.create.resume.submit');
 
 Route::post('/company/opportunity-assistant', \App\Http\Controllers\OpportunityAssistantController::class)
     ->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:4,1'])->name('company.opportunity-assistant');
@@ -335,12 +343,22 @@ Route::get('/opportunities/{opportunity:slug}', [
 Route::get('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'interest',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.interest');
+])->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('opportunities.interest');
 
 Route::post('/opportunities/{opportunity:slug}/interest', [
     OpportunityController::class,
     'storeInterest',
-])->middleware(['auth', \App\Http\Middleware\EnsureUserNotBlocked::class, \App\Http\Middleware\EnsureCompanyEmailVerified::class, \App\Http\Middleware\EnsureCompanyWorkspace::class, 'throttle:30,1'])->name('opportunities.interest.store');
+])->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,opportunity-interest-draft:'])->name('opportunities.interest.store');
+
+Route::get('/opportunities/interest/continue/{draft}', [
+    OpportunityController::class,
+    'resumeInterest',
+])->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:30,1'])->name('opportunities.interest.resume');
+
+Route::post('/opportunities/interest/continue/{draft}', [
+    OpportunityController::class,
+    'completeInterest',
+])->whereUuid('draft')->middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:10,1,opportunity-interest-submit:'])->name('opportunities.interest.resume.submit');
 
 
 Route::get('/bring-a-deal', [LeadController::class, 'create'])

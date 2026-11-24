@@ -99,6 +99,6 @@ final class PhoneVerificationController extends Controller
             ]]);
         }
 
-        return redirect()->route('dashboard')->with('status', __('auth.phone_verified_login'));
+        return redirect()->intended(route('dashboard'))->with('status', __('auth.phone_verified_login'));
     }
 }

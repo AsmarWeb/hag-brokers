@@ -210,4 +210,58 @@ final class FreightRateSelectionTest extends TestCase
         $this->assertDatabaseCount('quotations', 0);
         $this->assertDatabaseCount('freight_rate_bookings', 0);
     }
+    public function test_guest_can_select_freight_rate_after_signup_phone_and_company_onboarding(): void
+    {
+        [, $rate] = $this->fixture();
+        $this->artisan('platform:install-plans');
+        $payload = [
+            'request_key' => (string) Str::uuid(),
+            'quantity' => 2,
+            'cargo_type' => 'General cargo',
+        ];
+        $this->post(route('freight.rates.select', $rate), $payload)->assertRedirect(route('login'));
+        $this->assertDatabaseCount('quotations', 0);
+        $drafts = session('pending_freight_rate_drafts', []);
+        $token = array_key_first($drafts);
+        $this->assertNotNull($token);
+
+        $this->post('/register', [
+            'name' => 'Deferred Rate Applicant',
+            'email' => 'deferred-rate@example.test',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertRedirect(route('login'));
+        $user = User::where('email', 'deferred-rate@example.test')->firstOrFail();
+        $user->forceFill([
+            'email_verified_at' => now(),
+            'phone' => '+971500000073',
+            'phone_verified_at' => null,
+            'phone_verification_required' => true,
+        ])->save();
+
+        $resumeUrl = route('freight.rates.resume', ['draft' => $token]);
+        $this->actingAs($user)->get($resumeUrl)->assertRedirect(route('phone.verification.notice'));
+        $user->forceFill(['phone_verified_at' => now(), 'phone_verification_required' => false])->save();
+        $user = User::findOrFail($user->id);
+        $this->actingAs($user)->get($resumeUrl)->assertRedirect(route('company.onboarding.show'));
+        $this->post(route('company.onboarding.store'), [
+            'company_name' => 'Deferred Rate Customer LLC',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+        ])->assertRedirect($resumeUrl);
+        $user = User::findOrFail($user->id);
+
+        $this->actingAs($user)->get($resumeUrl)->assertOk()
+            ->assertSee('Jebel Ali')
+            ->assertSee('Dammam');
+        $this->post(route('freight.rates.resume.submit', ['draft' => $token]))->assertRedirect();
+        $this->assertDatabaseCount('quotations', 1);
+        $this->assertDatabaseCount('freight_rate_bookings', 1);
+        $booking = \App\Models\FreightRateBooking::firstOrFail();
+        $this->assertSame((int) $user->fresh()->customer_id, (int) $booking->customer_id);
+        $this->assertSame((int) $rate->id, (int) $booking->rate_id);
+        $this->assertSame(2, (int) $booking->rate_snapshot['quantity']);
+        $this->assertSame('request_pending', $booking->status);
+        $this->assertSame([], session('pending_freight_rate_drafts', []));
+    }
 }
