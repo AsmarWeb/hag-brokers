@@ -175,6 +175,80 @@ class PortSeeder extends Seeder
                 'is_active' => true,
             ],
 
+            // 🇦🇪 Fujairah and Khorfakkan
+
+            [
+                'name' => 'Port of Fujairah',
+                'country' => 'United Arab Emirates',
+                'country_code' => 'AE',
+                'port_code' => 'FJR',
+                'unlocode' => 'AEFJR',
+                'timezone' => 'Asia/Dubai',
+                'latitude' => 25.1700,
+                'longitude' => 56.3600,
+                'is_gulf' => false,
+                'is_uae' => true,
+                'is_active' => true,
+            ],
+
+            [
+                'name' => 'Port of Khorfakkan',
+                'country' => 'United Arab Emirates',
+                'country_code' => 'AE',
+                'port_code' => 'KLF',
+                'unlocode' => 'AEKLF',
+                'timezone' => 'Asia/Dubai',
+                'latitude' => 25.35783,
+                'longitude' => 56.36544,
+                'is_gulf' => false,
+                'is_uae' => true,
+                'is_active' => true,
+            ],
+
+            // 🇮🇶 Iraq
+
+            [
+                'name' => 'Umm Qasr Port',
+                'country' => 'Iraq',
+                'country_code' => 'IQ',
+                'port_code' => 'UQR',
+                'unlocode' => 'IQUQR',
+                'timezone' => 'Asia/Baghdad',
+                'latitude' => 30.02737,
+                'longitude' => 47.97300,
+                'is_gulf' => true,
+                'is_uae' => false,
+                'is_active' => true,
+            ],
+
+            [
+                'name' => 'Khor Al Zubair Port',
+                'country' => 'Iraq',
+                'country_code' => 'IQ',
+                'port_code' => 'KAZ',
+                'unlocode' => 'IQKAZ',
+                'timezone' => 'Asia/Baghdad',
+                'latitude' => 30.19381,
+                'longitude' => 47.87670,
+                'is_gulf' => true,
+                'is_uae' => false,
+                'is_active' => true,
+            ],
+
+            [
+                'name' => 'Al Faw Grand Port',
+                'country' => 'Iraq',
+                'country_code' => 'IQ',
+                'port_code' => null,
+                'unlocode' => null,
+                'timezone' => 'Asia/Baghdad',
+                'latitude' => null,
+                'longitude' => null,
+                'is_gulf' => true,
+                'is_uae' => false,
+                'is_active' => false,
+            ],
+
             // 🇰🇼 Kuwait
 
             [
@@ -207,10 +281,14 @@ class PortSeeder extends Seeder
         ];
 
         foreach ($ports as $port) {
-            Port::updateOrCreate(
-                ['unlocode' => $port['unlocode']],
-                $port
-            );
+            $identity = $port['unlocode']
+                ? ['unlocode' => $port['unlocode']]
+                : [
+                    'country_code' => $port['country_code'],
+                    'name' => $port['name'],
+                ];
+
+            Port::updateOrCreate($identity, $port);
         }
     }
 }
