@@ -204,7 +204,7 @@
                     <div class="flex flex-wrap items-start justify-between gap-4">
                         <div>
                             <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ __('freight_selection.selected_offer') }}</h2>
-                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $selectedSnapshot['carrier']['name'] ?? $selectedSnapshot['source']['name'] ?? 'HAG Brokers' }} · {{ $selectedSnapshot['container_type'] ?? $quotation->container_type }} × {{ $selectedSnapshot['quantity'] ?? $quotation->quantity }}</p>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $selectedSnapshot['carrier']['name'] ?? 'HAG Brokers' }} · {{ $selectedSnapshot['container_type'] ?? $quotation->container_type }} × {{ $selectedSnapshot['quantity'] ?? $quotation->quantity }}</p>
                         </div>
                         <span class="rounded-full bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 dark:bg-amber-400/10 dark:text-amber-300">{{ __('freight_selection.'.($selectedRate->status ?? 'request_pending')) }}</span>
                     </div>
@@ -212,7 +212,57 @@
                         <div><p class="text-xs font-bold text-slate-500">{{ __('freight_selection.customer_total') }}</p><p class="mt-1 text-2xl font-black text-slate-950 dark:text-white"><bdi>{{ number_format((float) $selectedRate->customer_total, 2) }} {{ $selectedRate->currency }}</bdi></p></div>
                         <div><p class="text-xs font-bold text-slate-500">{{ __('freight_selection.rate_reference') }}</p><p class="mt-1 font-bold text-slate-800 dark:text-slate-200">#{{ $selectedRate->rate_id ?? '—' }}</p></div>
                     </div>
-                    <p class="mt-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900 dark:bg-amber-400/10 dark:text-amber-200">{{ __('freight_selection.not_a_booking') }}</p>
+                    @php($statusHelpKey = 'freight_selection.'.$selectedRate->status.'_help')
+                    @php($statusHelp = __($statusHelpKey))
+                    @if ($statusHelp === $statusHelpKey)
+                        @php($statusHelp = __('freight_selection.status_help'))
+                    @endif
+                    <p class="mt-4 rounded-xl bg-amber-50 p-3 text-sm leading-6 text-amber-900 dark:bg-amber-400/10 dark:text-amber-200">{{ $statusHelp }}</p>
+                    @if ($selectedRate->status === 'carrier_confirmed' && filled($selectedRate->carrier_reference))
+                        <div class="mt-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900 dark:bg-emerald-400/10 dark:text-emerald-200">
+                            <span class="font-bold">{{ __('freight_selection.carrier_reference') }}:</span>
+                            <bdi>{{ $selectedRate->carrier_reference }}</bdi>
+                        </div>
+                    @endif
+                </section>
+
+                <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="freight-booking-timeline-title">
+                    <div class="mb-5">
+                        <h2 id="freight-booking-timeline-title" class="text-lg font-black text-slate-950 dark:text-white">
+                            {{ __('freight_selection.timeline') }}
+                        </h2>
+                        <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                            {{ __('freight_selection.timeline_help') }}
+                        </p>
+                    </div>
+
+                    @if ($selectedRate->events->isNotEmpty())
+                        <ol class="space-y-0">
+                            @foreach ($selectedRate->events as $event)
+                                @php($eventTranslationKey = 'freight_selection.timeline_events.'.$event->event_key)
+                                @php($eventLabel = __($eventTranslationKey))
+                                @if ($eventLabel !== $eventTranslationKey)
+                                    <li class="relative flex gap-4 pb-6 last:pb-0">
+                                        <span class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200 dark:bg-cyan-400/10 dark:text-cyan-300 dark:ring-cyan-900" aria-hidden="true">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </span>
+                                        <div class="min-w-0 flex-1">
+                                            <p class="font-semibold text-slate-900 dark:text-white">{{ $eventLabel }}</p>
+                                            <time class="mt-1 block text-xs text-slate-500 dark:text-slate-400" datetime="{{ $event->created_at?->toIso8601String() }}">
+                                                {{ $event->created_at?->timezone('Asia/Dubai')->format('d M Y, H:i') ?? '—' }}
+                                            </time>
+                                        </div>
+                                    </li>
+                                @endif
+                            @endforeach
+                        </ol>
+                    @else
+                        <p class="rounded-xl bg-slate-50 p-4 text-sm text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                            {{ __('freight_selection.timeline_empty') }}
+                        </p>
+                    @endif
                 </section>
             @endif
 

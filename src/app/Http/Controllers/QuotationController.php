@@ -25,6 +25,7 @@ class QuotationController extends Controller
             'customer_id',
             $request->user()->customer_id
         )
+            ->with('freightRateBooking')
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -132,7 +133,12 @@ class QuotationController extends Controller
         );
 
         return view('quotations.show', [
-            'quotation' => $quotation->load('freightRateBooking'),
+            'quotation' => $quotation->load([
+                'freightRateBooking.events' => fn ($query) => $query
+                    ->reorder()
+                    ->orderBy('created_at')
+                    ->orderBy('id'),
+            ]),
         ]);
     }
 }

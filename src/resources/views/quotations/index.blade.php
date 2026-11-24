@@ -228,6 +228,11 @@
                                             <div class="mt-1 text-xs text-slate-400">
                                                 #{{ $quotation->id }}
                                             </div>
+                                            @if ($quotation->freightRateBooking)
+                                                <span class="mt-2 inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold text-cyan-800 dark:bg-cyan-400/10 dark:text-cyan-300">
+                                                    {{ __('freight_selection.'.$quotation->freightRateBooking->status) }}
+                                                </span>
+                                            @endif
 
                                         </td>
 
@@ -313,6 +318,11 @@
                                         <h3 class="mt-1 font-extrabold text-slate-950 dark:text-white">
                                             {{ $quotation->reference_no ?? 'QT-' . $quotation->id }}
                                         </h3>
+                                        @if ($quotation->freightRateBooking)
+                                            <span class="mt-2 inline-flex rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-bold text-cyan-800 dark:bg-cyan-400/10 dark:text-cyan-300">
+                                                {{ __('freight_selection.'.$quotation->freightRateBooking->status) }}
+                                            </span>
+                                        @endif
 
                                     </div>
 
