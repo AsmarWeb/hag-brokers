@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class QuotationFeatureTest extends TestCase
@@ -48,6 +49,7 @@ class QuotationFeatureTest extends TestCase
     private function validPayload(): array
     {
         return [
+            'request_key' => (string) Str::uuid(),
             'origin_port_id' => $this->port('Origin Port'),
             'destination_port_id' => $this->port('Destination Port'),
             'cargo_type' => 'General cargo',
@@ -70,10 +72,12 @@ class QuotationFeatureTest extends TestCase
         ]);
     }
 
-    public function test_guest_cannot_access_customer_quotation_pages(): void
+    public function test_guest_can_open_public_quotation_form_but_not_customer_quotation_index(): void
     {
         $this->get(route('quotations.index'))->assertRedirect(route('login'));
-        $this->get(route('quotations.create'))->assertRedirect(route('login'));
+        $this->get(route('quotations.create'))
+            ->assertOk()
+            ->assertSee('name="request_key"', false);
     }
 
     public function test_customer_can_submit_quotation_and_it_is_assigned_to_their_company(): void
@@ -119,6 +123,7 @@ class QuotationFeatureTest extends TestCase
         $user = $this->customerUser('one');
 
         $this->actingAs($user)->post(route('quotations.store'), [
+            'request_key' => (string) Str::uuid(),
             'origin_port_id' => 999999,
             'destination_port_id' => 999998,
             'cargo_type' => '',
