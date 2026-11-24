@@ -35,16 +35,10 @@ class QuotationController extends Controller
         ]);
     }
 
-    /**
-     * Show the quotation request form.
-     */
+    /** Public form: guests may prepare a freight quotation draft. */
     public function create(Request $request): View
     {
-        app(FreightQuotationService::class)->customer($request->user());
-        $ports = Port::query()->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
+        $ports = Port::query()->where('is_active', true)->orderBy('name')->get();
         $sailing = null;
         $selection = [];
         if ($request->filled('sailing')) {
@@ -58,67 +52,139 @@ class QuotationController extends Controller
             abort_unless(in_array($selection['container_type'], $sailing->container_types, true), 422);
         }
 
-        return view('quotations.create', compact('ports', 'sailing', 'selection'));
+        return view('quotations.create', [
+            'ports' => $ports,
+            'sailing' => $sailing,
+            'selection' => $selection,
+            'requestKey' => (string) Str::uuid(),
+        ]);
     }
 
     /**
-     * Store a new quotation request.
+     * Validate and either submit for an already-ready customer or keep a
+     * 24-hour session draft until sign-in, verification and company setup.
      */
     public function store(Request $request): RedirectResponse
     {
-        $data = $request->validate(FreightQuotationService::rules());
+        $data = $request->validate(FreightQuotationService::rules() + [
+            'request_key' => ['required', 'uuid'],
+        ]);
+        $requestKey = $data['request_key'];
+        unset($data['request_key']);
 
-        if (isset($data['freight_sailing_id'])) {
-            $validated = $request->validate(['request_key' => ['required', 'uuid']]);
-            [$quotation] = app(FreightQuotationService::class)->submit($request->user(), $data, $validated['request_key']);
+        $user = $request->user();
+        $service = app(FreightQuotationService::class);
+        if ($user && $user->hasVerifiedEmail() && $user->hasCompletedPhoneSetup() && $user->customer_id) {
+            // Existing legacy customers remain supported; workspace members must
+            // still pass the service's owner/manager authorization checks.
+            $service->customer($user);
+            [$quotation] = $service->submit($user, $data, $requestKey);
 
-            return redirect()->route('quotations.show', $quotation)
-                ->with('success', __('sailings.request_sent'));
+            return redirect()->route('quotations.show', $quotation)->with('success', __('sailings.request_sent'));
         }
 
-        unset($data['sailing_revision']);
-        $customerId = $request->user()->customer_id;
+        $token = (string) Str::uuid();
+        $drafts = $request->session()->get('pending_freight_quotation_drafts', []);
+        $drafts[$token] = ['data' => $data, 'request_key' => $requestKey, 'created_at' => now()->timestamp];
+        $request->session()->put('pending_freight_quotation_drafts', $drafts);
 
-        if (! $customerId || ! Customer::whereKey($customerId)->exists()) {
-            return back()->withInput()->withErrors([
-                'customer' => 'Please complete your customer profile before submitting a quotation.',
-            ]);
-        }
-
-        app(FreightQuotationService::class)->customer($request->user());
-        $data['customer_id'] = $customerId;
-
-        $data['reference_no'] =
-            'QT-'.
-            now()->format('Y').
-            '-'.
-            strtoupper(str_replace('-', '', (string) Str::uuid()));
-
-        $quotation = Quotation::create($data);
-
-        try {
-            NotificationService::admins(
-                type: 'quotation.created',
-                title: 'New quotation request',
-                message: 'New quotation '.$quotation->reference_no.' requires review.',
-                model: $quotation,
-                data: [
-                    'url' => route('admin.quotations.show', $quotation),
-                ]
-            );
-        } catch (\Throwable $exception) {
-            report($exception);
-        }
-
-        return redirect()
-            ->route('quotations.show', $quotation)
-            ->with(
-                'success',
-                'Quotation request submitted successfully.'
-            );
+        return $this->redirectToQuotationDraft($request, $token);
     }
 
-    /**
+    public function resume(Request $request, string $draft): View|RedirectResponse
+    {
+        $pending = $this->pendingQuotationDraft($request, $draft);
+        $user = $request->user();
+        $url = route('quotations.resume', ['draft' => $draft]);
+        if (! $user->hasCompletedPhoneSetup()) {
+            $request->session()->put('url.intended', $url);
+            return redirect()->route('phone.verification.notice');
+        }
+        if (! $user->customer_id) {
+            $request->session()->put('url.intended', $url);
+            return redirect()->route('company.onboarding.show');
+        }
+
+        app(FreightQuotationService::class)->customer($user);
+        $data = $pending['data'];
+        $origin = Port::find($data['origin_port_id']);
+        $destination = Port::find($data['destination_port_id']);
+        $sailing = isset($data['freight_sailing_id']) ? \App\Models\FreightSailing::find($data['freight_sailing_id']) : null;
+
+        return view('quotations.resume', compact('pending', 'data', 'origin', 'destination', 'sailing'));
+    }
+
+    public function complete(Request $request, string $draft): RedirectResponse
+    {
+        $pending = $this->pendingQuotationDraft($request, $draft);
+        $user = $request->user();
+        $url = route('quotations.resume', ['draft' => $draft]);
+        if (! $user->hasCompletedPhoneSetup()) {
+            $request->session()->put('url.intended', $url);
+            return redirect()->route('phone.verification.notice');
+        }
+        if (! $user->customer_id) {
+            $request->session()->put('url.intended', $url);
+            return redirect()->route('company.onboarding.show');
+        }
+
+        $service = app(FreightQuotationService::class);
+        $service->customer($user);
+        $data = \Illuminate\Support\Facades\Validator::make($pending['data'], FreightQuotationService::rules())->validate();
+        [$quotation] = $service->submit($user, $data, $pending['request_key']);
+        $this->forgetQuotationDraft($request, $draft);
+
+        return redirect()->route('quotations.show', $quotation)->with('success', __('sailings.request_sent'));
+    }
+
+    private function redirectToQuotationDraft(Request $request, string $token): RedirectResponse
+    {
+        $url = route('quotations.resume', ['draft' => $token]);
+        $request->session()->put('url.intended', $url);
+        if (! $request->user()) {
+            return redirect()->route('login');
+        }
+        if (! $request->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+        if (! $request->user()->hasCompletedPhoneSetup()) {
+            return redirect()->route('phone.verification.notice');
+        }
+        if (! $request->user()->customer_id) {
+            return redirect()->route('company.onboarding.show');
+        }
+
+        return redirect()->to($url);
+    }
+
+    private function pendingQuotationDraft(Request $request, string $token): array
+    {
+        $draft = $request->session()->get('pending_freight_quotation_drafts.'.$token);
+        abort_unless(is_array($draft) && isset($draft['data'], $draft['request_key'], $draft['created_at']), 404);
+        $userId = (int) $request->user()->id;
+        if (! isset($draft['bound_user_id'])) {
+            $draft['bound_user_id'] = $userId;
+            $drafts = $request->session()->get('pending_freight_quotation_drafts', []);
+            $drafts[$token] = $draft;
+            $request->session()->put('pending_freight_quotation_drafts', $drafts);
+        }
+        abort_unless((int) $draft['bound_user_id'] === $userId, 403);
+        if ((int) $draft['created_at'] < now()->subDay()->timestamp) {
+            $this->forgetQuotationDraft($request, $token);
+            abort(410, 'This freight quotation draft has expired.');
+        }
+
+        return $draft;
+    }
+
+    private function forgetQuotationDraft(Request $request, string $token): void
+    {
+        $drafts = $request->session()->get('pending_freight_quotation_drafts', []);
+        unset($drafts[$token]);
+        $request->session()->put('pending_freight_quotation_drafts', $drafts);
+    }
+
+        /**
      * Display a single quotation.
      */
     public function show(

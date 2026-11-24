@@ -533,7 +533,7 @@
                             class="rounded-xl bg-cyan-400 px-7 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/10 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60">
 
                             <span x-show="!submitting">
-                                {{ $isAr ? 'إرسال طلب الاهتمام' : 'Submit Interest' }}
+                                {{ auth()->check() ? ($isAr ? 'إرسال طلب الاهتمام' : 'Submit Interest') : ($isAr ? 'المتابعة لتسجيل الدخول والإرسال' : 'Continue to sign in & submit') }}
                             </span>
 
                             <span x-show="submitting">

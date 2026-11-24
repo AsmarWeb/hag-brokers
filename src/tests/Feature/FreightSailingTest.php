@@ -216,4 +216,66 @@ final class FreightSailingTest extends TestCase
             && $request['multimodal'] === 'false' && $request['cargo_type'] === 'GC');
         $this->assertDatabaseCount('freight_sailings', 1);
     }
+    public function test_guest_can_resume_standard_and_sailing_quotations_after_company_onboarding(): void
+    {
+        Notification::fake();
+        $this->artisan('platform:install-plans');
+        $sailing = $this->sailing();
+        $this->get(route('quotations.create'))->assertOk();
+        $this->get(route('freight.sailings.select', [
+            'sailing' => $sailing->id,
+            'container_type' => '40ft_hc',
+            'quantity' => 2,
+        ]))->assertRedirect();
+
+        $standardPayload = $this->requestData($sailing);
+        unset($standardPayload['freight_sailing_id'], $standardPayload['sailing_revision']);
+        $this->post(route('quotations.store'), $standardPayload)->assertRedirect(route('login'));
+        $sailingPayload = $this->requestData($sailing);
+        $this->post(route('quotations.store'), $sailingPayload)->assertRedirect(route('login'));
+        $this->assertDatabaseCount('quotations', 0);
+        $drafts = session('pending_freight_quotation_drafts', []);
+        $this->assertCount(2, $drafts);
+        $tokens = array_keys($drafts);
+
+        $this->post('/register', [
+            'name' => 'Deferred Freight Applicant',
+            'email' => 'deferred-freight@example.test',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertRedirect(route('login'));
+        $user = User::where('email', 'deferred-freight@example.test')->firstOrFail();
+        $user->forceFill([
+            'email_verified_at' => now(),
+            'phone' => '+971500000072',
+            'phone_verified_at' => null,
+            'phone_verification_required' => true,
+        ])->save();
+
+        $standardResume = route('quotations.resume', ['draft' => $tokens[0]]);
+        $this->actingAs($user)->get($standardResume)->assertRedirect(route('phone.verification.notice'));
+        $user->forceFill(['phone_verified_at' => now(), 'phone_verification_required' => false])->save();
+        $user = User::findOrFail($user->id);
+        $this->actingAs($user)->get($standardResume)->assertRedirect(route('company.onboarding.show'));
+        $this->post(route('company.onboarding.store'), [
+            'company_name' => 'Deferred Freight Customer LLC',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+        ])->assertRedirect($standardResume);
+        $user = User::findOrFail($user->id);
+
+        $this->actingAs($user)->get($standardResume)->assertOk()->assertSee('Equipment');
+        $this->post(route('quotations.resume.submit', ['draft' => $tokens[0]]))->assertRedirect();
+        $sailingResume = route('quotations.resume', ['draft' => $tokens[1]]);
+        $this->actingAs($user)->get($sailingResume)->assertOk()->assertSee($sailing->voyage_number);
+        $this->post(route('quotations.resume.submit', ['draft' => $tokens[1]]))->assertRedirect();
+
+        $quotes = Quotation::orderBy('id')->get();
+        $this->assertCount(2, $quotes);
+        $this->assertNull($quotes[0]->sailing_snapshot);
+        $this->assertSame($sailing->voyage_number, $quotes[1]->sailing_snapshot['voyage_number']);
+        $this->assertSame(2, (int) $quotes[1]->quantity);
+        $this->assertDatabaseCount('freight_request_keys', 2);
+        $this->assertSame([], session('pending_freight_quotation_drafts', []));
+    }
 }

@@ -155,6 +155,85 @@ return [$u, $w];
         $this->post(route('opportunities.interest.store', $o), $this->application())->assertRedirect(route('company.marketplace'));
     }
 
+    public function test_guest_can_complete_company_application_before_login_and_resume_without_reentering_it(): void
+    {
+        Notification::fake();
+        [$owner] = $this->company();
+        $opportunity = $this->listing($owner);
+        auth()->guard()->logout();
+        $application = $this->application();
+
+        $this->get(route('opportunities.interest', $opportunity))->assertOk();
+        $this->post(route('opportunities.interest.store', $opportunity), $application)
+            ->assertRedirect(route('login'));
+        $this->assertDatabaseCount('opportunity_interests', 0);
+
+        $resumeUrl = session('url.intended');
+        $this->assertNotEmpty($resumeUrl);
+        $draftToken = basename(parse_url($resumeUrl, PHP_URL_PATH));
+        $this->assertSame(route('opportunities.interest.resume', ['draft' => $draftToken]), $resumeUrl);
+
+        $this->post('/register', [
+            'name' => 'New Applicant',
+            'email' => 'new-applicant@example.test',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertRedirect(route('login'));
+
+        $applicant = User::where('email', 'new-applicant@example.test')->firstOrFail();
+        $this->assertNull($applicant->customer_id);
+        $this->assertDatabaseCount('opportunity_interests', 0);
+
+        // Simulate completion of the signed email-verification link. Phone setup
+        // remains required until the applicant completes the phone step.
+        $applicant->forceFill(['email_verified_at' => now()])->save();
+        $this->post('/login', [
+            'email' => 'new-applicant@example.test',
+            'password' => 'Strong-password-123!',
+        ])->assertRedirect($resumeUrl);
+
+        $this->get($resumeUrl)->assertRedirect(route('phone.verification.notice'));
+
+        // Simulate successful phone-code verification before opening company setup.
+        $applicant->forceFill([
+            'phone' => '+971500001111',
+            'phone_verified_at' => now(),
+            'phone_verification_required' => false,
+        ])->save();
+
+        // Refresh the authenticated applicant so the next request sees the persisted phone state.
+        $this->actingAs($applicant->fresh());
+
+        $this->get($resumeUrl)->assertRedirect(route('company.onboarding.show'));
+        $this->post(route('company.onboarding.store'), [
+            'company_name' => 'New Applicant Trading',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+        ])->assertRedirect($resumeUrl);
+
+        // A new HTTP request reloads this user from the database; refresh the test guard too.
+        $this->actingAs($applicant->fresh());
+
+        $this->get($resumeUrl)
+            ->assertOk()
+            ->assertSee($opportunity->title)
+            ->assertSee($application['message']);
+
+        $this->post(route('opportunities.interest.resume.submit', ['draft' => $draftToken]))
+            ->assertRedirect(route('company.marketplace'));
+
+        $workspaceId = CompanyMember::where('user_id', $applicant->id)->value('company_workspace_id');
+        $this->assertDatabaseCount('opportunity_interests', 1);
+        $this->assertDatabaseHas('opportunity_interests', [
+            'opportunity_id' => $opportunity->id,
+            'user_id' => $applicant->id,
+            'company_workspace_id' => $workspaceId,
+        ]);
+        $workspace = CompanyWorkspace::findOrFail($workspaceId);
+        $this->assertSame(1, app(CompanyMarketplaceService::class)->usage($workspace)['applications']);
+        $this->assertNull(session('pending_opportunity_applications.'.$draftToken));
+    }
+
     public function test_manager_can_publish(): void
     {
         [$u,$w] = $this->company('manager');
@@ -216,15 +295,24 @@ return [$u, $w];
         [$u] = $this->company();
         $u->forceFill(['email_verified_at' => null])->save();
         $this->actingAs($u)->get(route('opportunities.create'))->assertRedirect(route('verification.notice'));
-        $this->postJson(route('opportunities.store'), $this->payload())->assertForbidden();
+        $this->postJson(route('opportunities.store'), $this->payload())->assertRedirect(route('verification.notice'));
         $this->assertDatabaseCount('opportunities', 0);
     }
 
     public function test_nonmembers_and_platform_admins_cannot_publish(): void
     {
-        foreach ([User::factory()->create(), $this->admin()] as $u) {
-            $this->actingAs($u)->postJson(route('opportunities.store'), $this->payload())->assertForbidden();
-        }$this->assertDatabaseCount('opportunities', 0);
+        $personal = User::factory()->create(['email_verified_at' => now(), 'phone_verification_required' => false]);
+        $this->actingAs($personal)->post(route('opportunities.store'), $this->payload())
+            ->assertRedirect(route('company.onboarding.show'));
+        $legacyCustomer = \App\Models\Customer::create(['company_name' => 'Legacy publisher without workspace', 'is_active' => true]);
+        $legacy = User::factory()->create([
+            'customer_id' => $legacyCustomer->id,
+            'email_verified_at' => now(),
+            'phone_verification_required' => false,
+        ]);
+        $this->actingAs($legacy)->postJson(route('opportunities.store'), $this->payload())->assertForbidden();
+        $this->actingAs($this->admin())->postJson(route('opportunities.store'), $this->payload())->assertForbidden();
+        $this->assertDatabaseCount('opportunities', 0);
     }
 
     public function test_suspension_hides_listings_and_blocks_company_actions(): void
@@ -438,4 +526,78 @@ return [$u, $w];
             ->assertDontSee('Fresh Food Supply Opportunity');
     }
 
+    public function test_guest_can_publish_opportunity_after_personal_signup_phone_setup_and_company_onboarding(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        \Illuminate\Support\Facades\Storage::fake('local');
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $this->artisan('platform:install-plans');
+
+        $this->get(route('opportunities.create'))->assertOk();
+        $payload = $this->payload([
+            'title' => 'Guest deferred commercial vessel opportunity',
+            'opportunity_type' => 'vessel_brokerage',
+            'category' => 'marine',
+            'commercial_details' => ['subcategory' => 'commercial_vessels'],
+            'vessel' => [
+                'listing_type' => 'sale',
+                'vessel_category' => 'commercial_vessel',
+                'vessel_name' => 'HAG Guest Test Vessel',
+                'imo_number' => '9876543',
+            ],
+            'media' => [\Illuminate\Http\UploadedFile::fake()->image('commercial-vessel.jpg')],
+        ]);
+        $this->post(route('opportunities.store'), $payload)->assertRedirect(route('login'));
+        $this->assertDatabaseCount('opportunities', 0);
+        $drafts = session('pending_opportunity_publications', []);
+        $token = array_key_first($drafts);
+        $this->assertNotNull($token);
+        $this->assertCount(1, $drafts[$token]['media']);
+
+        $this->post('/register', [
+            'name' => 'Deferred Publisher',
+            'email' => 'deferred-publisher@example.test',
+            'password' => 'Strong-password-123!',
+            'password_confirmation' => 'Strong-password-123!',
+        ])->assertRedirect(route('login'));
+        $owner = \App\Models\User::where('email', 'deferred-publisher@example.test')->firstOrFail();
+        $owner->forceFill([
+            'email_verified_at' => now(),
+            'phone' => '+971500000071',
+            'phone_verified_at' => null,
+            'phone_verification_required' => true,
+        ])->save();
+
+        $resumeUrl = route('opportunities.create.resume', ['draft' => $token]);
+        $this->actingAs($owner)->get($resumeUrl)->assertRedirect(route('phone.verification.notice'));
+        $other = \App\Models\User::factory()->create(['email_verified_at' => now(), 'phone_verification_required' => false]);
+        $this->actingAs($other)->get($resumeUrl)->assertForbidden();
+        $owner = \App\Models\User::findOrFail($owner->id);
+        $owner->forceFill(['phone_verified_at' => now(), 'phone_verification_required' => false])->save();
+        $owner = \App\Models\User::findOrFail($owner->id);
+        $this->actingAs($owner)->get($resumeUrl)->assertRedirect(route('company.onboarding.show'));
+        $this->post(route('company.onboarding.store'), [
+            'company_name' => 'Deferred Opportunity Publisher LLC',
+            'country_code' => 'AE',
+            'city' => 'Dubai',
+        ])->assertRedirect($resumeUrl);
+
+        $owner = \App\Models\User::findOrFail($owner->id);
+        $this->actingAs($owner)->get($resumeUrl)->assertOk()
+            ->assertSee('Guest deferred commercial vessel opportunity')
+            ->assertSee('HAG Guest Test Vessel')
+            ->assertSee('commercial-vessel.jpg');
+        $this->post(route('opportunities.create.resume.submit', ['draft' => $token]))
+            ->assertRedirect(route('company.marketplace'));
+
+        $opportunity = \App\Models\Opportunity::where('title', 'Guest deferred commercial vessel opportunity')->firstOrFail();
+        $workspace = \App\Models\CompanyWorkspace::where('customer_id', $owner->fresh()->customer_id)->firstOrFail();
+        $this->assertSame($workspace->id, $opportunity->company_workspace_id);
+        $this->assertSame('HAG Guest Test Vessel', $opportunity->vessel()->firstOrFail()->vessel_name);
+        $this->assertSame('9876543', (string) $opportunity->vessel()->firstOrFail()->imo_number);
+        $this->assertDatabaseCount('opportunity_media', 1);
+        $this->assertCount(1, \Illuminate\Support\Facades\Storage::disk('public')->allFiles('opportunities/company'));
+        $this->assertSame([], session('pending_opportunity_publications', []));
+        $this->assertSame([], \Illuminate\Support\Facades\Storage::disk('local')->allFiles('pending-opportunity-publications'));
+    }
 }

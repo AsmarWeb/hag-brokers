@@ -62,7 +62,7 @@
 
         <div class="flex items-center gap-3">
 
-            <a href="{{ route('quotations.index') }}"
+            <a href="{{ route('freight.rates') }}"
                 class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-cyan-400 hover:text-cyan-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
 
                 <svg class="h-5 w-5 {{ $isAr ? 'rotate-180' : '' }}" fill="none" stroke="currentColor"
@@ -149,10 +149,10 @@
                 dir="{{ $dir }}">
 
                 @csrf
+                <input type="hidden" name="request_key" value="{{ old('request_key', $requestKey) }}">
                 @if($sailing)
                     <input type="hidden" name="freight_sailing_id" value="{{ $sailing->id }}">
                     <input type="hidden" name="sailing_revision" value="{{ app(\App\Services\Freight\SailingCatalog::class)->revision($sailing) }}">
-                    <input type="hidden" name="request_key" value="{{ old('request_key', (string) \Illuminate\Support\Str::uuid()) }}">
                     @include('freight.selection-summary', ['snapshot' => app(\App\Services\Freight\SailingCatalog::class)->snapshot($sailing)])
                 @endif
 
@@ -523,7 +523,7 @@
                 {{-- Submit --}}
                 <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
-                    <a href="{{ route('quotations.index') }}"
+                    <a href="{{ route('freight.rates') }}"
                         class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
 
                         {{ $t['cancel'] }}

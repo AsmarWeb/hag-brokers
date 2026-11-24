@@ -66,7 +66,7 @@ class CompanyWorkspaceController extends Controller
             ]], 201);
         }
 
-        return redirect()->route('company.workspace')->with('status', __('platform.workspace_activated'));
+        return redirect()->intended(route('company.workspace'))->with('status', __('platform.workspace_activated'));
     }
 
     public function show(Request $request, CompanyWorkspaceService $service)
