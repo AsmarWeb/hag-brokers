@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\FreightRate;
 use App\Models\FreightRateSource;
 use App\Models\Port;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -61,12 +62,62 @@ final class AdminFreightRateBookingManagementTest extends TestCase
         return [$user, \App\Models\FreightRateBooking::query()->firstOrFail()];
     }
 
-    public function test_admin_can_record_carrier_handoff_without_marking_booking_confirmed(): void
+    private function administrator(): User
+    {
+        $admin = User::factory()->create(['email_verified_at' => now()]);
+        $admin->addRole(Role::firstOrCreate(
+            ['name' => 'admin'],
+            ['display_name' => 'Administrator']
+        ));
+
+        return $admin;
+    }
+
+    public function test_regular_user_cannot_access_admin_booking_pages_or_change_a_booking(): void
     {
         [$user, $booking] = $this->submittedRequest();
-        $this->withoutMiddleware(\Laratrust\Middleware\Role::class);
 
-        $this->actingAs($user)->patch(route('admin.freight-bookings.status', $booking), [
+        $this->actingAs($user)
+            ->get(route('admin.freight-bookings.index'))
+            ->assertForbidden();
+
+        $this->get(route('admin.freight-bookings.show', $booking))
+            ->assertForbidden();
+
+        $this->patch(route('admin.freight-bookings.status', $booking), [
+            'action' => 'mark_sent',
+            'note' => 'Unauthorized attempt to forward the request.',
+        ])->assertForbidden();
+
+        $this->assertDatabaseHas('freight_rate_bookings', [
+            'id' => $booking->id,
+            'status' => 'request_pending',
+        ]);
+        $this->assertDatabaseMissing('freight_rate_booking_events', [
+            'freight_rate_booking_id' => $booking->id,
+            'event_key' => 'marked_sent_to_carrier',
+        ]);
+    }
+
+    public function test_administrator_can_open_booking_management_pages(): void
+    {
+        [, $booking] = $this->submittedRequest();
+        $admin = $this->administrator();
+
+        $this->actingAs($admin)
+            ->get(route('admin.freight-bookings.index'))
+            ->assertOk();
+
+        $this->get(route('admin.freight-bookings.show', $booking))
+            ->assertOk();
+    }
+
+    public function test_admin_can_record_carrier_handoff_without_marking_booking_confirmed(): void
+    {
+        [, $booking] = $this->submittedRequest();
+        $admin = $this->administrator();
+
+        $this->actingAs($admin)->patch(route('admin.freight-bookings.status', $booking), [
             'action' => 'mark_sent',
             'note' => 'Sent by email to carrier booking desk; reference EMAIL-55.',
         ])->assertRedirect(route('admin.freight-bookings.show', $booking));
@@ -86,20 +137,20 @@ final class AdminFreightRateBookingManagementTest extends TestCase
 
     public function test_admin_cannot_mark_request_confirmed_and_cannot_send_twice(): void
     {
-        [$user, $booking] = $this->submittedRequest();
-        $this->withoutMiddleware(\Laratrust\Middleware\Role::class);
+        [, $booking] = $this->submittedRequest();
+        $admin = $this->administrator();
 
-        $this->actingAs($user)->patch(route('admin.freight-bookings.status', $booking), [
+        $this->actingAs($admin)->patch(route('admin.freight-bookings.status', $booking), [
             'action' => 'mark_sent',
             'note' => 'Sent to carrier by email.',
         ])->assertRedirect();
 
-        $this->actingAs($user)->patch(route('admin.freight-bookings.status', $booking), [
+        $this->actingAs($admin)->patch(route('admin.freight-bookings.status', $booking), [
             'action' => 'mark_sent',
             'note' => 'Duplicate handoff.',
         ])->assertSessionHasErrors('action');
 
-        $this->actingAs($user)->patch(route('admin.freight-bookings.status', $booking), [
+        $this->actingAs($admin)->patch(route('admin.freight-bookings.status', $booking), [
             'action' => 'confirm',
             'note' => 'Attempt to confirm without carrier evidence.',
         ])->assertSessionHasErrors('action');
@@ -112,10 +163,10 @@ final class AdminFreightRateBookingManagementTest extends TestCase
 
     public function test_admin_rejection_requires_a_reason_and_is_audited(): void
     {
-        [$user, $booking] = $this->submittedRequest();
-        $this->withoutMiddleware(\Laratrust\Middleware\Role::class);
+        [, $booking] = $this->submittedRequest();
+        $admin = $this->administrator();
 
-        $this->actingAs($user)->patch(route('admin.freight-bookings.status', $booking), [
+        $this->actingAs($admin)->patch(route('admin.freight-bookings.status', $booking), [
             'action' => 'reject',
             'note' => 'The carrier rate expired before review.',
         ])->assertRedirect();
