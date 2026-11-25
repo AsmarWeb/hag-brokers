@@ -1,4 +1,4 @@
-    <div class="market-header">
+    <div class="hag-public-header">
         <header id="navbar"
             class="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#07111f]/85 backdrop-blur-xl">
 
@@ -21,7 +21,7 @@
                     </div>
                 </a>
 
-                <nav class="hidden items-center gap-7 lg:flex">
+                <nav class="hidden items-center gap-7 xl:flex">
                     <a href="{{ url('/#tracking') }}" class="text-sm text-slate-300 transition hover:text-cyan-300">
                         {{ app()->getLocale() === 'ar' ? 'تتبع الشحنات' : 'Tracking' }}
                     </a>
@@ -31,12 +31,17 @@
                     <a href="{{ url('/#ports') }}" class="text-sm text-slate-300 transition hover:text-cyan-300">
                         {{ app()->getLocale() === 'ar' ? 'الموانئ' : 'Ports' }}
                     </a>
+
+                    <a href="{{ route('maritime-board.index') }}" class="text-sm text-slate-300 transition hover:text-cyan-300">
+                        {{ __('maritime_board.title') }}
+                    </a>
+
                     <a href="{{ url('/#partners') }}" class="text-sm text-slate-300 transition hover:text-cyan-300">
                         {{ app()->getLocale() === 'ar' ? 'الشركاء' : 'Partners' }}
                     </a>
                 </nav>
 
-                <div class="hidden items-center gap-3 lg:flex">
+                <div class="hidden items-center gap-3 xl:flex">
 
                     <button id="theme-toggle" type="button" class="hag-theme-toggle"
                         aria-label="{{ app()->getLocale() === 'ar' ? 'تغيير المظهر' : 'Toggle color theme' }}"
@@ -112,7 +117,7 @@
                 </div>
 
                 <button id="mobile-menu-button" type="button"
-                    class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 lg:hidden"
+                    class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 xl:hidden"
                     aria-controls="mobile-menu" aria-expanded="false"
                     aria-label="{{ app()->getLocale() === 'ar' ? 'القائمة الرئيسية' : 'Main menu' }}">
 
@@ -150,6 +155,11 @@
                     <a href="{{ url('/#ports') }}"
                         class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
                         {{ app()->getLocale() === 'ar' ? 'الموانئ' : 'Ports' }}
+                    </a>
+
+                    <a href="{{ route('maritime-board.index') }}"
+                        class="mobile-link block rounded-xl px-4 py-3 text-slate-200 hover:bg-white/5">
+                        {{ __('maritime_board.title') }}
                     </a>
 
                     <a href="{{ url('/#partners') }}"

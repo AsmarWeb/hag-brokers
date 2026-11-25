@@ -42,8 +42,8 @@ class CompanyPublicProfileTest extends TestCase
         [$u] = $this->company();
         $this->save($u)->assertRedirect();
         $p = CompanyPublicProfile::firstOrFail();
-        $editor = $this->get(route('company.profile.edit'))->assertOk()->assertSee('cp-studio')->assertSee(route('dashboard'), false)->assertDontSee('class="market-header"', false);
-        $public = $this->get(route('companies.show', $p->slug))->assertOk()->assertSee('cp-public-hero')->assertSee('class="market-header"', false)->assertDontSee('name="version"', false);
+        $editor = $this->get(route('company.profile.edit'))->assertOk()->assertSee('cp-studio')->assertSee(route('dashboard'), false)->assertDontSee('class="hag-public-header"', false);
+        $public = $this->get(route('companies.show', $p->slug))->assertOk()->assertSee('cp-public-hero')->assertSee('class="hag-public-header"', false)->assertDontSee('name="version"', false);
 
     }
 

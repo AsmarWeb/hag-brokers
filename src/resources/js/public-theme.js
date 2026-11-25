@@ -12,6 +12,19 @@
         if (root.classList.contains('theme-light') !== light) root.classList.toggle('theme-light', light);
         if (root.classList.contains('dark') === light) root.classList.toggle('dark', !light);
         root.style.colorScheme = light ? 'light' : 'dark';
+
+        const themeColor = light ? '#f3f7fb' : '#07111f';
+        let themeMeta = document.querySelector('meta[name="theme-color"]');
+
+        if (!themeMeta && document.head) {
+            themeMeta = document.createElement('meta');
+            themeMeta.setAttribute('name', 'theme-color');
+            document.head.appendChild(themeMeta);
+        }
+
+        if (themeMeta && themeMeta.getAttribute('content') !== themeColor) {
+            themeMeta.setAttribute('content', themeColor);
+        }
     }
     function announce() { window.dispatchEvent(new window.Event('hag-public-theme-change')); }
     function refresh() {
