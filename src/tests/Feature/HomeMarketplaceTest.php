@@ -60,7 +60,8 @@ class HomeMarketplaceTest extends TestCase
             'title' => 'Automatically published company offer', 'opportunity_type' => 'buy', 'category' => 'food',
             'description' => 'Company seeks food supply for its retail outlets.', 'currency' => 'AED', 'expires_at' => now()->addDay(),
         ], (string) Str::uuid())['opportunity'];
-        $this->get('/')->assertOk()->assertViewHas('opportunities', fn ($items) => $items->contains('id', $listing->id))->assertSee($listing->title);
+        $this->get(route('opportunities.index'))->assertOk()->assertSee($listing->title);
+        $this->get('/')->assertOk()->assertViewMissing('opportunities')->assertDontSee($listing->title);
         $this->assertSame('auto_eligible', $listing->fresh()->verification_status);
     }
 
@@ -71,7 +72,11 @@ class HomeMarketplaceTest extends TestCase
             $hidden = $this->listing($extra);
             $this->assertFalse(app(CompanyMarketplaceService::class)->isPublic($hidden));
         }
-        $this->get('/')->assertOk()->assertViewHas('opportunities', fn ($items) => $items->pluck('id')->all() === [$visible->id]);
+        $this->assertSame(
+            [$visible->id],
+            app(CompanyMarketplaceService::class)->publicQuery()->pluck('id')->all()
+        );
+        $this->get(route('opportunities.index'))->assertOk()->assertSee($visible->title);
     }
 
     public function test_suspended_workspace_and_inactive_company_are_hidden(): void
@@ -80,13 +85,20 @@ class HomeMarketplaceTest extends TestCase
         CompanyWorkspace::findOrFail($suspended->company_workspace_id)->update(['status' => 'suspended']);
         $inactive = $this->listing();
         Customer::findOrFail($inactive->customer_id)->update(['is_active' => false]);
-        $this->get('/')->assertOk()->assertViewHas('opportunities', fn ($items) => $items->isEmpty());
+        $this->assertSame(
+            [],
+            app(CompanyMarketplaceService::class)->publicQuery()->pluck('id')->all()
+        );
+        $this->get(route('opportunities.index'))
+            ->assertOk()
+            ->assertDontSee($suspended->title)
+            ->assertDontSee($inactive->title);
     }
 
     public function test_verified_legacy_listing_remains_visible_without_workspace(): void
     {
         $listing = $this->listing(['company_workspace_id' => null, 'marketplace_state' => null, 'verification_status' => 'verified', 'expires_at' => null]);
-        $this->get('/')->assertOk()->assertViewHas('opportunities', fn ($items) => $items->contains('id', $listing->id));
+        $this->get(route('opportunities.index'))->assertOk()->assertSee($listing->title);
     }
 
     public function test_only_latest_six_are_shown_with_stable_order_and_links_to_browse(): void
@@ -95,16 +107,35 @@ class HomeMarketplaceTest extends TestCase
         for ($i = 0; $i < 8; $i++) {
             $listings->push($this->listing(['published_at' => now()->subMinutes(8 - $i)]));
         }
-        $expected = $listings->reverse()->take(6)->pluck('id')->values()->all();
-        $this->get('/')->assertOk()->assertViewHas('opportunities', fn ($items) => $items->pluck('id')->all() === $expected)->assertSee(route('opportunities.index'));
+        $expectedTitles = $listings->reverse()->pluck('title')->values()->all();
+        $this->get(route('opportunities.index'))
+            ->assertOk()
+            ->assertSeeInOrder($expectedTitles);
     }
 
     public function test_new_types_categories_and_filters_render_in_both_languages(): void
     {
         $listing = $this->listing(['notes' => 'PRIVATE-HOME-NOTE']);
+        $other = $this->listing([
+            'title' => 'Filtered out food offer',
+            'opportunity_type' => 'buy',
+            'category' => 'food',
+        ]);
+
         foreach (['ar', 'en'] as $locale) {
-            $this->withSession(['locale' => $locale])->get('/')->assertOk()->assertSee('data-type="sell"', false)->assertSee('data-filter="sell"', false)->assertSee('data-filter="machinery"', false)->assertDontSee('PRIVATE-HOME-NOTE')->assertDontSee('trade.types.');
+            $this->withSession(['locale' => $locale])
+                ->get(route('opportunities.index', [
+                    'lang' => $locale,
+                    'category' => 'machinery',
+                    'type' => 'sell',
+                ]))
+                ->assertOk()
+                ->assertSee($listing->title)
+                ->assertDontSee($other->title)
+                ->assertDontSee('PRIVATE-HOME-NOTE')
+                ->assertDontSee('trade.types.');
         }
+
         $this->assertSame('sell', $listing->fresh()->opportunity_type);
     }
 
@@ -121,19 +152,70 @@ class HomeMarketplaceTest extends TestCase
 
     public function test_auto_eligible_listing_does_not_receive_a_reviewed_badge(): void
     {
-        $this->listing();
-        $html = $this->withSession(['locale' => 'en'])->get('/')->assertOk()->getContent();
-        preg_match_all('/<article\\s+class="opportunity-card.*?<\\/article>/s', $html, $cards);
-        $this->assertCount(1, $cards[0]);
-        $this->assertStringNotContainsString('Reviewed', $cards[0][0]);
+        $listing = $this->listing();
+        $html = $this->withSession(['locale' => 'en'])
+            ->get(route('opportunities.index'))
+            ->assertOk()
+            ->assertSee($listing->title)
+            ->getContent();
+
+        $this->assertSame('auto_eligible', $listing->fresh()->verification_status);
+        $this->assertStringNotContainsString('Reviewed', $html);
     }
 
     public function test_reviewed_listing_receives_badge_and_dynamic_text_is_escaped(): void
     {
-        $this->listing(['verification_status' => 'verified', 'title' => '<script>HOME-XSS</script>']);
-        $html = $this->withSession(['locale' => 'en'])->get('/')->assertOk()->assertDontSee('<script>HOME-XSS</script>', false)->getContent();
-        preg_match_all('/<article\\s+class="opportunity-card.*?<\\/article>/s', $html, $cards);
-        $this->assertCount(1, $cards[0]);
-        $this->assertStringContainsString('Reviewed', $cards[0][0]);
+        $listing = $this->listing([
+            'verification_status' => 'verified',
+            'title' => '<script>HOME-XSS</script>',
+        ]);
+
+        $html = $this->withSession(['locale' => 'en'])
+            ->get(route('opportunities.index'))
+            ->assertOk()
+            ->assertDontSee('<script>HOME-XSS</script>', false)
+            ->getContent();
+
+        $this->assertStringContainsString(
+            '&lt;script&gt;HOME-XSS&lt;/script&gt;',
+            $html
+        );
+        $this->assertSame('verified', $listing->fresh()->verification_status);
+    }
+
+    public function test_homepage_is_maritime_focused_and_hides_the_general_opportunities_market_in_both_locales(): void
+    {
+        foreach (['ar', 'en'] as $locale) {
+            $response = $this->get('/?lang='.$locale)->assertOk()->assertViewMissing('opportunities');
+            $html = $response->getContent();
+
+            $this->assertStringNotContainsString('Discover Opportunities', $html);
+            $this->assertStringNotContainsString('Have a Business Opportunity?', $html);
+            $this->assertStringNotContainsString('Add Opportunity', $html);
+            $this->assertStringNotContainsString(route('opportunities.index'), $html);
+            $this->assertStringNotContainsString(route('opportunities.create'), $html);
+
+            $this->assertStringContainsString('id="tracking"', $html);
+            $this->assertStringContainsString('id="services"', $html);
+            $this->assertStringContainsString('id="ports"', $html);
+            $this->assertStringContainsString('id="gulf-map"', $html);
+            $this->assertStringContainsString('id="marine-map-status"', $html);
+            $this->assertStringContainsString('data-marine-filter="commercial_vessel"', $html);
+            $this->assertStringContainsString(route('quotations.create'), $html);
+
+            $document = new \DOMDocument;
+            $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new \DOMXPath($document);
+            $sailingLink = 'a[@href="'.route('freight.sailings').'"]';
+            $this->assertSame(1, $xpath->query('//footer//'.$sailingLink)->length);
+            $this->assertSame(
+                1,
+                $xpath->query('//*[@id="quote-request"]//a[@href="'.route('quotations.create').'"]')->length
+            );
+        }
+
+        // The legacy route remains registered during this staged retirement; only public homepage/navigation exposure is removed.
+        $this->assertTrue(\Illuminate\Support\Facades\Route::has('opportunities.index'));
+        $this->assertTrue(\Illuminate\Support\Facades\Route::has('opportunities.create'));
     }
 }
