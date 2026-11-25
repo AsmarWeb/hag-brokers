@@ -62,7 +62,7 @@ final class AdminMarineBoardController extends Controller
 
     public function updateInquiry(Request $request, MarineBoardInquiry $inquiry): RedirectResponse
     {
-        $data = $request->validate(['status' => ['required', 'in=new,contacted,closed']]);
+        $data = $request->validate(['status' => ['required', 'in:new,contacted,closed']]);
         $inquiry->update(['status' => $data['status']]);
 
         return back()->with('status', __('maritime_board.inquiry_updated'));
