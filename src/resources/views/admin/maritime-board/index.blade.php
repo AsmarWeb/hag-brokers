@@ -44,7 +44,7 @@
                                 <p class="{{ $ref }}">{{ $item->public_reference }} ·
                                     {{ __('maritime_board.' . $item->status) }}</p>
                                 <h4 class="mt-2 font-black text-gray-900 dark:text-white">
-                                    {{ $group['kind'] === 'cargo' ? $item->cargo_type : $item->vessel_type }} —
+                                    {{ __('maritime_board.'.($group['kind'] === 'cargo' ? 'cargo_types' : 'vessel_types').'.'.($group['kind'] === 'cargo' ? $item->cargo_type : $item->vessel_type)) }} —
                                     {{ $item->company_name }}
                                 </h4>
                                 <p class="mt-1 {{ $muted }}">{{ $item->contact_name }} · {{ $item->email }} ·
@@ -90,7 +90,7 @@
                                 <select name="status" class="{{ $input }}">
                                     <option value="published" @selected($item->status === 'published')>
                                         {{ __('maritime_board.published') }}</option>
-                                    <option value="pending_review" disabled>{{ __('maritime_board.pending') }}</option>
+                                    <option value="pending_review" disabled @selected($item->status === 'pending_review')>{{ __('maritime_board.pending') }}</option>
                                     <option value="rejected" @selected($item->status === 'rejected')>
                                         {{ __('maritime_board.rejected') }}</option>
                                     <option value="closed" @selected($item->status === 'closed')>
