@@ -15,7 +15,7 @@
 <div id="gulf-map" style="height:480px;min-height:360px;border-radius:24px;overflow:hidden" aria-label="{{ __('public_experience.map_title') }}"></div>
 <p id="marine-map-status" class="hag-map-status" role="status" aria-live="polite">{{ count($maritimeMap['listings']) ? __('public_experience.approximate') : __('public_experience.empty') }}</p>
 @if($maritimeMap['truncated'])<p>{{ __('public_experience.limited') }}</p>@endif
-<a class="trade-link" href="{{ route('opportunities.index',['category'=>'marine','lang'=>$isAr ? 'ar':'en']) }}">{{ __('public_experience.browse') }} ↗</a>
+
 <div class="hag-map-list">
 @foreach($maritimeMap['listings'] as $item)
 <article class="hag-map-item" data-marine-kind="{{ $item['category'] }}">

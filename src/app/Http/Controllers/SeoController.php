@@ -48,7 +48,7 @@ class SeoController extends Controller
     public function pages(PublicSeo $seo)
     {
         $entries = [];
-        foreach (['home', 'opportunities.index'] as $route) {
+        foreach (['home', 'maritime-board.index', 'opportunities.index'] as $route) {
             foreach (['ar', 'en'] as $locale) {
                 $entries[] = ['loc' => $seo->url($route, [], $locale)];
             }

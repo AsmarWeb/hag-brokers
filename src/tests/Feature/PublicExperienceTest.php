@@ -199,7 +199,22 @@ return [$u, $w];
         $this->getJson('/api/v1/maritime-map')->assertOk()->assertJsonCount(0, 'data.listings')->assertJsonPath('data.live_tracking', false);
         $this->actingAs($u)->put('/company/map-locations/'.$o->id, $this->loc())->assertRedirect();
         $this->getJson('/api/v1/maritime-map')->assertJsonCount(1, 'data.listings')->assertJsonPath('data.listings.0.latitude', 25.23)->assertJsonPath('data.listings.0.longitude', 55.35)->assertJsonMissingPath('data.listings.0.notes')->assertDontSee('PRIVATE SOURCE NOTES');
-        $this->get('/')->assertOk()->assertDontSee('<script>alert(1)</script>', false)->assertSee('&lt;script&gt;', false);
+        $response = $this->get('/')
+            ->assertOk()
+            ->assertViewHas('mapEnabled', true)
+            ->assertViewHas('maritimeMap', function ($map) use ($o) {
+                return count($map['listings']) === 1
+                    && $map['listings'][0]['title'] === $o->title;
+            });
+
+        $html = $response->getContent();
+
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $html);
+
+        $this->assertStringContainsString(
+            htmlspecialchars($o->title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'),
+            $html
+        );
         $this->assertDatabaseCount('public_experience_audits', 1);
         foreach ([['visibility' => 'private'], ['visibility' => 'public', 'expires_at' => now()->subSecond()], ['expires_at' => now()->addDay(), 'marketplace_state' => 'closed']] as $change) {
             $o->update($change);

@@ -368,6 +368,20 @@ Route::post('/bring-a-deal', [LeadController::class, 'store'])
     ->name('leads.store');
 
 
+// Dedicated HAG maritime cargo and open-vessel board. Legacy opportunities remain separate.
+Route::middleware('maintenance.check')->group(function () {
+    Route::get('/maritime-board', [\App\Http\Controllers\MarineBoardController::class, 'index'])
+        ->middleware('throttle:60,1')->name('maritime-board.index');
+    Route::get('/maritime-board/submit/{kind}', [\App\Http\Controllers\MarineBoardController::class, 'create'])
+        ->where('kind', 'cargo|vessel')->middleware('throttle:30,1')->name('maritime-board.submit.create');
+    Route::post('/maritime-board/submit/{kind}', [\App\Http\Controllers\MarineBoardController::class, 'store'])
+        ->where('kind', 'cargo|vessel')->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:8,1,marine-board-submit:'])->name('maritime-board.submit.store');
+    Route::get('/maritime-board/inquiry/{kind}/{reference}', [\App\Http\Controllers\MarineBoardController::class, 'inquiryForm'])
+        ->where(['kind' => 'cargo|vessel', 'reference' => '[A-Z0-9-]{6,24}'])->middleware('throttle:30,1')->name('maritime-board.inquiry.create');
+    Route::post('/maritime-board/inquiry/{kind}/{reference}', [\App\Http\Controllers\MarineBoardController::class, 'inquire'])
+        ->where(['kind' => 'cargo|vessel', 'reference' => '[A-Z0-9-]{6,24}'])->middleware([\App\Http\Middleware\EnsureUserNotBlocked::class, 'throttle:6,1,marine-board-inquiry:'])->name('maritime-board.inquiry.store');
+});
+
 // ======================================================
 // ADMIN + SUPER ADMIN
 // ======================================================
@@ -376,6 +390,11 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/maritime-board', [\App\Http\Controllers\Admin\AdminMarineBoardController::class, 'index'])->name('maritime-board.index');
+        Route::patch('/maritime-board/{kind}/{listing}/review', [\App\Http\Controllers\Admin\AdminMarineBoardController::class, 'review'])
+            ->where(['kind' => 'cargo|vessel', 'listing' => '[0-9]+'])->middleware('throttle:20,1')->name('maritime-board.review');
+        Route::patch('/maritime-board/inquiries/{inquiry}', [\App\Http\Controllers\Admin\AdminMarineBoardController::class, 'updateInquiry'])
+            ->whereNumber('inquiry')->middleware('throttle:20,1')->name('maritime-board.inquiries.update');
         Route::get('/freight-bookings', [\App\Http\Controllers\Admin\AdminFreightRateBookingController::class, 'index'])->name('freight-bookings.index');
         Route::get('/freight-bookings/{booking}', [\App\Http\Controllers\Admin\AdminFreightRateBookingController::class, 'show'])->whereNumber('booking')->name('freight-bookings.show');
         Route::patch('/freight-bookings/{booking}/status', [\App\Http\Controllers\Admin\AdminFreightRateBookingController::class, 'updateStatus'])->whereNumber('booking')->middleware('throttle:20,1')->name('freight-bookings.status');

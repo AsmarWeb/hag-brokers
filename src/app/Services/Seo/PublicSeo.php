@@ -66,7 +66,7 @@ final class PublicSeo
     {
         $route = $request->route()?->getName();
         $language = app()->getLocale() === 'ar' ? 'ar' : 'en';
-        $public = in_array($route, ['home', 'opportunities.index', 'opportunities.show'], true);
+        $public = in_array($route, ['home', 'maritime-board.index', 'opportunities.index', 'opportunities.show'], true);
         $filtered = $route === 'opportunities.index' && collect(['search', 'type', 'category', 'country', 'subcategory', 'vessel_category', 'currency', 'min_price', 'max_price', 'sort'])->contains(fn ($key) => $request->filled($key));
         $parameters = [];
         $opportunity = $request->route('opportunity');
@@ -77,10 +77,22 @@ final class PublicSeo
             $parameters['page'] = $request->integer('page');
         }
         $canonical = $public ? $this->url($route, $parameters, $language) : $this->base().$request->getPathInfo();
-        $description = $language === 'ar' ? 'HAG Brokers سوق فرص تجارية في الإمارات لربط الشركات بعروض البيع والتوريد وطلبات الشراء والخدمات والشراكات.' : 'HAG Brokers connects businesses through commercial offers, sourcing requests, services and partnerships in the UAE and beyond.';
-        $title = $language === 'ar' ? 'HAG Brokers | فرص تجارية وتوريد وخدمات في الإمارات' : 'HAG Brokers | Business opportunities, sourcing and services in the UAE';
+        $description = $language === 'ar' ? 'HAG Brokers منصة وساطة بحرية متخصصة لربط أصحاب البضائع بأصحاب السفن ومشغليها عبر موانئ الخليج والعراق.' : 'HAG Brokers is a dedicated maritime brokerage connecting cargo owners with shipowners and vessel operators across Gulf and Iraqi ports.';
+        $title = $language === 'ar' ? 'HAG Brokers | الوساطة البحرية والشحن في الخليج والعراق' : 'HAG Brokers | Maritime Brokerage Across the Gulf & Iraq';
+
+        if (in_array($route, ['opportunities.index', 'opportunities.show'], true)) {
+            $description = $language === 'ar'
+                ? 'استعرض الفرص التجارية وطلبات التوريد والخدمات والشراكات المنشورة على منصة HAG Brokers.'
+                : 'Browse published business opportunities, sourcing requests, services and partnerships on HAG Brokers.';
+        }
         if ($route === 'opportunities.index') {
             $title = ($language === 'ar' ? 'سوق الفرص التجارية' : 'Business opportunities marketplace').' | HAG Brokers';
+        }
+        if ($route === 'maritime-board.index') {
+            $title = $language === 'ar' ? 'لوحة الشحنات والسفن المتاحة | HAG Brokers' : 'Available Cargoes & Open Vessels | HAG Brokers';
+            $description = $language === 'ar'
+                ? 'استعرض طلبات الشحن والسفن المتاحة عبر موانئ الخليج والعراق، مع مراجعة HAG وحماية سرية بيانات الأطراف.'
+                : 'Browse reviewed cargo requirements and open vessel positions across Gulf and Iraqi ports, with confidential HAG-mediated inquiries.';
         }
         if ($route === 'leads.create') {
             $title = __('bring_deal.page_title');
@@ -109,7 +121,7 @@ final class PublicSeo
             $image = '';
         }
 
-        $imageAlt = 'HAG Brokers — Business opportunities and maritime services';
+        $imageAlt = 'HAG Brokers — Maritime brokerage, cargo matching and vessel chartering';
         $imageMimeType = $imageIsDefault ? 'image/png' : null;
         $imageWidth = $imageIsDefault ? 1734 : null;
         $imageHeight = $imageIsDefault ? 907 : null;
@@ -132,6 +144,20 @@ final class PublicSeo
                 'name' => 'HAG Brokers',
                 'url' => $this->base().'/',
                 'inLanguage' => ['ar', 'en'],
+                'publisher' => ['@id' => $organization['@id']],
+            ];
+        }
+
+        if ($route === 'maritime-board.index' && $public) {
+            $schemas[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'CollectionPage',
+                '@id' => $canonical.'#collection',
+                'url' => $canonical,
+                'name' => $title,
+                'description' => $description,
+                'inLanguage' => $language,
+                'isPartOf' => ['@id' => $this->base().'/#website'],
                 'publisher' => ['@id' => $organization['@id']],
             ];
         }

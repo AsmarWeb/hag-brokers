@@ -257,7 +257,12 @@ class PublicSeoTest extends TestCase
         $index = $this->xmlUrls('/sitemap.xml');
         $this->assertSame(['https://market.example.test/sitemaps/pages.xml', 'https://market.example.test/sitemaps/opportunities-1.xml'], $index);
         $pages = $this->xmlUrls('/sitemaps/pages.xml');
-        $this->assertCount(4, $pages);
+        $this->assertCount(6, $pages);
+        $marineBoardPages = array_values(array_filter(
+            $pages,
+            static fn (string $url): bool => str_contains($url, '/maritime-board'),
+        ));
+        $this->assertCount(2, $marineBoardPages);
         foreach ($pages as $url) {
             $this->assertStringNotContainsString('/login', $url);
             $this->assertStringContainsString('?lang=', $url);

@@ -39,9 +39,8 @@
 
                     <div class="mt-5 space-y-3 text-sm text-slate-500">
 
-                        <a href="{{ route('opportunities.index', ['category' => 'marine']) }}"
-                            class="block hover:text-cyan-300">
-                            {{ (app()->getLocale() === 'ar') ? 'الخريطة البحرية' : 'Maritime Map' }}
+                        <a href="{{ url('/#quote-request') }}" class="block hover:text-cyan-300">
+                            {{ (app()->getLocale() === 'ar') ? 'طلبات الشحن' : 'Cargo Requests' }}
                         </a>
 
                         <a href="{{ url('/#tracking') }}" class="block hover:text-cyan-300">
@@ -50,6 +49,10 @@
 
                         <a href="{{ url('/#services') }}" class="block hover:text-cyan-300">
                             {{ (app()->getLocale() === 'ar') ? 'الخدمات' : 'Services' }}
+                        </a>
+
+                        <a href="{{ route('maritime-board.index') }}" class="block hover:text-cyan-300">
+                            {{ __('maritime_board.title') }}
                         </a>
 
                     </div>
@@ -68,9 +71,8 @@
                             {{ (app()->getLocale() === 'ar') ? 'الموانئ الخليجية' : 'Gulf Ports' }}
                         </a>
 
-                        <a href="{{ route('opportunities.index', ['category' => 'marine']) }}"
-                            class="block hover:text-cyan-300">
-                            {{ (app()->getLocale() === 'ar') ? 'شبكة السفن' : 'Vessel Network' }}
+                        <a href="{{ route('freight.sailings') }}" class="block hover:text-cyan-300">
+                            {{ (app()->getLocale() === 'ar') ? 'جداول الإبحار' : 'Sailing Schedules' }}
                         </a>
 
                         <a href="{{ url('/#partners') }}" class="block hover:text-cyan-300">
@@ -89,8 +91,6 @@
 
                     <div class="mt-5 space-y-3 text-sm text-slate-500">
 
-                        <a href="{{ route('freight.sailings') }}"
-                            class="block hover:text-cyan-300">{{ __('sailings.title') }}</a>
                         <a href="{{ route('quotations.create') }}" class="block hover:text-cyan-300">
                             {{ (app()->getLocale() === 'ar') ? 'طلب عرض شحن' : 'Request a Quote' }}
                         </a>
