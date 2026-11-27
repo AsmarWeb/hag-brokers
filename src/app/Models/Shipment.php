@@ -8,6 +8,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shipment extends Model
 {
+    protected static function booted(): void
+    {
+        static::updating(function (self $shipment): void {
+            $sourceFields = [
+                'deal_id',
+                'deal_document_id',
+                'freight_rate_booking_id',
+                'freight_booking_offer_id',
+                'freight_sailing_id',
+                'fixture_recap_sha256',
+                'fixture_recap_snapshot',
+                'fixture_recap_snapshot_sha256',
+            ];
+
+            if ($shipment->getRawOriginal('deal_document_id') !== null
+                && $shipment->isDirty($sourceFields)) {
+                throw new \LogicException('Shipment execution source records are immutable.');
+            }
+        });
+    }
+
     protected $fillable = [
         'customer_id', 'quotation_id', 'shipment_no', 'booking_no',
         'origin_port_id', 'destination_port_id', 'carrier_id', 'vessel_id',
@@ -23,6 +44,7 @@ class Shipment extends Model
         'eta' => 'datetime',
         'actual_departure' => 'datetime',
         'actual_arrival' => 'datetime',
+        'fixture_recap_snapshot' => 'array',
     ];
 
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
@@ -33,5 +55,10 @@ class Shipment extends Model
     public function destinationPort(): BelongsTo { return $this->belongsTo(Port::class, 'destination_port_id'); }
     public function containers(): HasMany { return $this->hasMany(Container::class); }
     public function events(): HasMany { return $this->hasMany(ShipmentEvent::class); }
+    public function deal(): BelongsTo { return $this->belongsTo(Deal::class); }
+    public function dealDocument(): BelongsTo { return $this->belongsTo(DealDocument::class); }
+    public function freightRateBooking(): BelongsTo { return $this->belongsTo(FreightRateBooking::class); }
+    public function freightBookingOffer(): BelongsTo { return $this->belongsTo(FreightBookingOffer::class); }
+    public function freightSailing(): BelongsTo { return $this->belongsTo(FreightSailing::class); }
     public function documents(): HasMany { return $this->hasMany(Document::class); }
 }

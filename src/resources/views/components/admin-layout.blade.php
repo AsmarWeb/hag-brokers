@@ -861,6 +861,17 @@
                         </a>
                     @endif
 
+                    @if ($canViewDeals)
+                        <a href="{{ route('admin.deal-execution.index') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                            {{ request()->routeIs('admin.deal-execution.*')
+                                ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                            <span class="text-base">⚓</span>
+                            <span>{{ __('deal_execution.nav') }}</span>
+                        </a>
+                    @endif
+
                     {{-- Notifications --}}
 
                     @if ($canViewNotifications)

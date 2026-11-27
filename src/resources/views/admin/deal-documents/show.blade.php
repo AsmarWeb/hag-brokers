@@ -51,6 +51,19 @@
         </header>
 
         <main class="mx-auto max-w-7xl space-y-7 px-4 py-7 sm:px-6 lg:px-8">
+            @if ($document->type === 'fixture_recap')
+                <section class="flex flex-col justify-between gap-4 rounded-2xl border border-cyan-300/20 bg-cyan-300/5 p-5 md:flex-row md:items-center">
+                    <div>
+                        <p class="font-black text-cyan-100">{{ __('deal_execution.handoff_intro') }}</p>
+                        <p class="mt-1 text-sm text-cyan-100/70">{{ __('deal_execution.handoff_note') }}</p>
+                    </div>
+                    @if ($document->status === 'signed' && $integrity['valid'] && $document->deal?->status === 'approved')
+                        <a href="{{ route('admin.deal-execution.create', $document) }}" class="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-black text-slate-950 hover:bg-cyan-300">{{ __('deal_execution.open_handoff') }} →</a>
+                    @else
+                        <span class="text-xs font-bold text-slate-400">{{ __('deal_execution.handoff_not_ready') }}</span>
+                    @endif
+                </section>
+            @endif
             @if (session('success'))
                 <div class="rounded-xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100">{{ session('success') }}</div>
             @endif
