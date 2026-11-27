@@ -750,6 +750,8 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
 |--------------------------------------------------------------------------
 */
 
+require __DIR__ . '/deal-execution.php';
+
 require __DIR__ . '/auth.php';
 
 // Email ownership verification is separate from the owner's final authenticated confirmation.
