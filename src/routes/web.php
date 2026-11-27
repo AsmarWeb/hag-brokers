@@ -490,6 +490,10 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
         Route::get('/trade-offers/{offer}/attachments/{file}',[\App\Http\Controllers\CompanyTradeOfferController::class,'adminDownload'])->whereNumber('file')->name('trade-offers.download');
         Route::resource('opportunities', \App\Http\Controllers\Admin\AdminOpportunityController::class)->only(['index', 'show']);
 
+        // Maritime Deal Operations Center (read-only workbench and detail view).
+        Route::get('/deals', [\App\Http\Controllers\Admin\AdminDealController::class, 'index'])->name('deals.index');
+        Route::get('/deals/{deal}', [\App\Http\Controllers\Admin\AdminDealController::class, 'show'])->whereNumber('deal')->name('deals.show');
+
 
         // Phase 9B: approve agreement and lock commission.
         Route::patch(
@@ -508,6 +512,19 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureUserNotBlocked
             '/quotations/{quotation}/deals',
             [\App\Http\Controllers\Admin\AdminDealController::class, 'storeFromQuotation']
         )->name('quotations.deals.store');
+
+        // Phase 2: immutable maritime deal document workflow.
+        Route::get('/deal-documents', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'index'])->name('deal-documents.index');
+        Route::get('/deal-documents/create', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'chooseDeal'])->name('deal-documents.choose');
+        Route::get('/deal-documents/start', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'start'])->name('deal-documents.start');
+        Route::get('/deals/{deal}/documents/create', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'create'])->whereNumber('deal')->name('deals.documents.create');
+        Route::post('/deals/{deal}/documents', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'store'])->whereNumber('deal')->name('deals.documents.store');
+        Route::get('/deal-documents/{dealDocument}', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'show'])->whereNumber('dealDocument')->name('deal-documents.show');
+        Route::get('/deal-documents/{dealDocument}/edit', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'edit'])->whereNumber('dealDocument')->name('deal-documents.edit');
+        Route::put('/deal-documents/{dealDocument}', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'update'])->whereNumber('dealDocument')->name('deal-documents.update');
+        Route::post('/deal-documents/{dealDocument}/prepare', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'prepare'])->whereNumber('dealDocument')->name('deal-documents.prepare');
+        Route::post('/deal-documents/{dealDocument}/parties/{party}/signature', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'recordSignature'])->whereNumber('dealDocument')->whereNumber('party')->name('deal-documents.parties.signature');
+        Route::get('/deal-documents/{dealDocument}/parties/{party}/evidence', [\App\Http\Controllers\Admin\AdminDealDocumentController::class, 'downloadEvidence'])->whereNumber('dealDocument')->whereNumber('party')->name('deal-documents.parties.evidence');
 
         // Shipments
         Route::resource(

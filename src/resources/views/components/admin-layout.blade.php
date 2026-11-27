@@ -63,6 +63,7 @@
 
     // Operations
     $canViewDocuments = $can('documents.view');
+    $canViewDeals = $can('deals.view');
     $canViewNotifications = $can('notifications.view');
     $canViewPorts = $can('ports.view');
     $canViewCarriers = $can('carriers.view');
@@ -92,6 +93,7 @@
     $hasOperationsAccess =
         $canViewShipments ||
         $canViewDocuments ||
+        $canViewDeals ||
         $canViewQuotations ||
         $canViewNotifications ||
         $canViewPorts ||
@@ -134,6 +136,8 @@
         'shipments' => $isAr ? 'الشحنات' : 'Shipments',
 
         'quotations' => $isAr ? 'عروض الأسعار' : 'Quotations',
+
+        'deals' => $isAr ? 'الصفقات البحرية' : 'Maritime Deals',
 
         'customers' => $isAr ? 'العملاء' : 'Customers',
 
@@ -823,6 +827,39 @@
                         </a>
                     @endif
 
+
+                    {{-- Maritime Deals --}}
+
+                    @if ($canViewDeals)
+                        <a href="{{ route('admin.deals.index') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                            {{ request()->routeIs('admin.deals.*')
+                                ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+
+                            <span class="text-base">◈</span>
+
+                            <span>{{ $t['deals'] }}</span>
+
+                        </a>
+                    @endif
+
+
+                    @if ($canViewDeals)
+                        <a href="{{ route('admin.deal-documents.index') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-bold transition
+                            {{ request()->routeIs('admin.deal-documents.*')
+                                ? 'bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/10'
+                                : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}">
+                            <svg class="h-5 w-5 shrink-0 {{ request()->routeIs('admin.deal-documents.*') ? 'text-slate-950' : 'text-slate-500 group-hover:text-cyan-400' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                                    d="M7 3.75h7.5L19 8.25v11A1.75 1.75 0 0 1 17.25 21h-10.5A1.75 1.75 0 0 1 5 19.25V5.5A1.75 1.75 0 0 1 6.75 3.75H7Z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M8.5 12h7M8.5 15.25h7M8.5 18.5h4" />
+                            </svg>
+                            <span>{{ __('deal_documents.nav') }}</span>
+                        </a>
+                    @endif
 
                     {{-- Notifications --}}
 
