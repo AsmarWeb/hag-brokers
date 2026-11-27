@@ -601,3 +601,52 @@ html.theme-light {
 }
 
 /* End HAG_PUBLIC_HEADER_THEME_V1 */
+
+
+/* HAG Maritime Board guided form — port selection and field guidance */
+.marine-choice-description{display:block;margin-top:.35rem;color:var(--trade-muted, #64748b);font-size:.78rem;font-weight:400;line-height:1.55}
+.marine-guidance-panel{display:flex;align-items:flex-start;gap:.75rem;margin-top:1rem;padding:1rem 1.1rem;border:1px solid rgba(14,116,144,.18);border-radius:1rem;background:rgba(14,116,144,.055);color:inherit}
+.marine-guidance-panel p{margin:0;line-height:1.7;font-size:.9rem}
+.marine-guidance-panel--stacked{display:block}
+.marine-guidance-panel--stacked>strong{display:block;margin-bottom:.45rem}
+.marine-guidance-icon{flex:0 0 auto;font-size:1.1rem;line-height:1.4}
+.marine-guidance-list{display:grid;gap:.35rem;margin:.5rem 0 0;padding-inline-start:1.15rem;font-size:.88rem;line-height:1.65}
+.marine-example{font-size:.82rem!important;color:#0e7490!important}
+.marine-optional-label{display:inline-flex;margin-inline-start:.35rem;padding:.15rem .5rem;border-radius:999px;background:rgba(100,116,139,.1);font-size:.72rem;font-weight:500;color:#64748b}
+.marine-port-picker{min-width:0;margin:0;padding:1rem;border:1px solid var(--trade-border, #e2e8f0);border-radius:1rem;background:var(--trade-card, #fff)}
+.marine-port-legend{float:none;width:auto;margin:0 0 .25rem;padding:0;font-weight:700;font-size:.97rem}
+.marine-port-help,.marine-port-footnote{margin:.25rem 0 .85rem;color:var(--trade-muted, #64748b);font-size:.82rem;line-height:1.65}
+.marine-port-toolbar{display:grid;gap:.7rem;margin-bottom:.85rem}
+.marine-port-search{display:flex;align-items:center;gap:.55rem;min-height:2.8rem;padding:0 .85rem;border:1px solid var(--trade-border, #cbd5e1);border-radius:.75rem;background:var(--trade-input, #fff)}
+.marine-port-search>span{font-size:1.4rem;color:#64748b}
+.marine-port-search input{width:100%;min-width:0;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;padding:.55rem 0!important}
+.marine-port-filters{display:flex;flex-wrap:wrap;gap:.45rem}
+.marine-port-filters button{padding:.4rem .75rem;border:1px solid var(--trade-border, #cbd5e1);border-radius:999px;background:transparent;font-size:.78rem;color:inherit}
+.marine-port-filters button.is-active{border-color:#0e7490;background:rgba(14,116,144,.1);color:#0e7490;font-weight:700}
+.marine-port-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
+.marine-port-card{position:relative;display:block;min-width:0;cursor:pointer}
+.marine-port-card-input{position:absolute;inset-inline-start:.7rem;top:.7rem;width:1px;height:1px;opacity:0}
+.marine-port-card-content{display:flex;align-items:center;gap:.7rem;height:100%;min-height:5.2rem;padding:.75rem;border:1px solid var(--trade-border, #e2e8f0);border-radius:.85rem;background:var(--trade-card, #fff);transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+.marine-port-card:hover .marine-port-card-content{border-color:#0e7490}
+.marine-port-card.is-selected .marine-port-card-content{border-color:#0e7490;background:rgba(14,116,144,.065);box-shadow:0 0 0 1px #0e7490 inset}
+.marine-port-card:focus-within .marine-port-card-content{outline:3px solid rgba(14,116,144,.25);outline-offset:2px}
+.marine-port-flag{display:grid;place-items:center;flex:0 0 2.5rem;width:2.5rem;height:2.5rem;border-radius:.75rem;background:rgba(148,163,184,.12);font-size:1.25rem}
+.marine-port-card-copy{display:grid;gap:.12rem;min-width:0;flex:1}
+.marine-port-name{font-size:.88rem;line-height:1.35;overflow-wrap:anywhere}
+.marine-port-country{color:var(--trade-muted, #64748b);font-size:.75rem;line-height:1.35}
+.marine-port-code{color:var(--trade-muted, #94a3b8);font-size:.68rem;letter-spacing:.06em}
+.marine-port-check{display:grid;place-items:center;flex:0 0 1.35rem;width:1.35rem;height:1.35rem;border:1px solid var(--trade-border, #cbd5e1);border-radius:50%;color:transparent;font-size:.75rem}
+.marine-port-card.is-selected .marine-port-check{border-color:#0e7490;background:#0e7490;color:#fff}
+.marine-port-empty{margin:.75rem 0;padding:1rem;border:1px dashed var(--trade-border, #cbd5e1);border-radius:.75rem;text-align:center;color:var(--trade-muted, #64748b);font-size:.85rem}
+.marine-port-footnote{margin:.8rem 0 0;font-size:.75rem}
+[dir="rtl"] .marine-guidance-list{padding-inline-start:0;padding-inline-end:1.15rem}
+@media(max-width:640px){.marine-port-grid{grid-template-columns:1fr}.marine-port-picker{padding:.8rem}.marine-port-card-content{min-height:4.7rem}}
+.dark .marine-guidance-panel{background:rgba(34,211,238,.07);border-color:rgba(34,211,238,.18)}
+.dark .marine-example{color:#67e8f9!important}
+.dark .marine-port-picker,.dark .marine-port-card-content{background:#111827;border-color:#334155}
+.dark .marine-port-search{background:#0f172a;border-color:#475569}
+.dark .marine-port-filters button{border-color:#475569}
+.dark .marine-port-filters button.is-active{color:#67e8f9;border-color:#0891b2;background:rgba(8,145,178,.14)}
+.dark .marine-port-card.is-selected .marine-port-card-content{border-color:#0891b2;background:rgba(8,145,178,.12)}
+.dark .marine-port-card.is-selected .marine-port-check{background:#0891b2;border-color:#0891b2}
+.dark .marine-port-card:focus-within .marine-port-card-content{outline-color:rgba(103,232,249,.3)}

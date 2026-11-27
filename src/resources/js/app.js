@@ -6,8 +6,10 @@ import "./public-navigation";
 import Alpine from "alpinejs";
 
 import tradeOpportunity from "./trade-opportunity";
+import maritimeBoardWizard from "./maritime-board-wizard";
 
 Alpine.data("tradeOpportunity", tradeOpportunity);
+Alpine.data("maritimeBoardWizard", maritimeBoardWizard);
 import bringDeal from "./bring-deal";
 Alpine.data("bringDeal", bringDeal);
 window.Alpine = Alpine;
